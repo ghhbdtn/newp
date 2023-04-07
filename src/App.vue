@@ -1,8 +1,7 @@
 <template>
   <div id="app">
     <nav>
-      <router-link to="/">Вход</router-link> |
-      <router-link to="/components">Регистрация</router-link>
+      <router-link to="/">Вход</router-link>
     </nav>
     <router-view/>
   </div>
@@ -25,7 +24,7 @@ nav {
     color: #2c3e50;
 
     &.router-link-exact-active {
-      color: #42b983;
+      color: #279e69;
     }
   }
 }

@@ -1,63 +1,135 @@
 <template>
-  <div
-      class="fixed-top d-flex align-items-center justify-content-center">
-    <form class="login">
-      <h2 style="left: 200px; position: absolute"> Вход</h2>
-      <label style="left: 200px; top: 40px; position: absolute">Имя</label>
-      <input required v-model.trim="first_name" type="text" placeholder="Имя" style="left: 200px; top:60px; position: absolute"/>
-      <label style="left: 200px; top: 90px; position: absolute">Фамилия</label>
-      <input required v-model.trim="last_name" type="text" placeholder="Фамилия" style="left: 200px; top:110px; position: absolute"/>
-      <label style="left: 200px; top: 140px; position: absolute">Отчество</label>
-      <input v-model.trim="middle_name" type="text" placeholder="Отчество" style="left: 200px; top:160px; position: absolute"/>
-      <label style="left: 200px; top: 190px; position: absolute">Логин</label>
-      <input required v-model="log" type="login" placeholder="Логин" style="left: 200px; top:210px; position: absolute"/>
-      <label style="left: 200px; top: 240px; position: absolute">Пароль</label>
-      <input required v-model="password" type="password" placeholder="Пароль" style="left: 200px; top: 260px; position: absolute"/>
-      <button  @submit.prevent="login" @click="login" type="submit" style="background-color: rosybrown; border-radius: 5px; left: 210px; top: 290px; position: absolute">Login</button>
-    </form>
-  </div>
+  <v-app >
+    <v-main>
+      <v-container fluid fill-height>
+        <v-layout align-center justify-center>
+          <v-flex xs12 sm8 md4>
+            <v-card class="elevation-12">
+              <v-toolbar dark color="green">
+                <v-toolbar-title>{{isRegister ? stateObj.register.name : stateObj.login.name}} form</v-toolbar-title>
+              </v-toolbar>
+              <v-card-text>
+                <form ref="form" @submit.prevent="isRegister ? register() : login()">
+                  <v-text-field v-if="isRegister"
+                                v-model="name"
+                                name="name"
+                                label="Фамилия"
+                                type="text"
+                                placeholder="name"
+                                required
+                  ></v-text-field>
+                  <v-text-field v-if="isRegister"
+                                v-model="name"
+                                name="name"
+                                label="Имя"
+                                type="text"
+                                placeholder="name"
+                                required
+                  ></v-text-field>
+                  <v-text-field v-if="isRegister"
+                                v-model="name"
+                                name="name"
+                                label="Отчество"
+                                type="text"
+                                placeholder="name"
+                                required
+                  ></v-text-field>
+                  <v-text-field
+                      v-model="username"
+                      name="username"
+                      label="Имя пользователя"
+                      type="text"
+                      placeholder="username"
+                      required
+                  ></v-text-field>
+
+                  <v-text-field
+                      v-model="password"
+                      name="password"
+                      label="Пароль"
+                      type="password"
+                      placeholder="password"
+                      required
+                  ></v-text-field>
+
+                  <v-text-field v-if="isRegister"
+                                v-model="confirmPassword"
+                                name="confirmPassword"
+                                label="Повторите пароль"
+                                type="password"
+                                placeholder="confirm password"
+                                required
+                  ></v-text-field>
+                  <div class="red--text"> {{errorMessage}}</div>
+                  <v-btn type="submit" class="mt-4" color="green" value="Войти">{{isRegister ? stateObj.register.name : stateObj.login.name}}</v-btn>
+                  <div class="grey--text mt-4" v-on:click="isRegister = !isRegister;">
+                    {{toggleMessage}}
+                  </div>
+                </form>
+              </v-card-text>
+            </v-card>
+
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script lang="ts">
-import {defineComponent} from "vue";
-
-export default defineComponent( {
+import Vue from "vue";
+export default Vue.extend({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Login",
-  data(){
-    return{
-      log: "",
+  data() {
+    return {
+      username: "",
       password: "",
-      first_name: "",
-      last_name: "",
-      middle_name: ""
-    }
+      confirmPassword: "",
+      isRegister : false,
+      errorMessage: "",
+      stateObj: {
+        register :{
+          name: 'Register',
+          message: 'Aleady have an Acoount? login.'
+        },
+        login : {
+          name: 'Login',
+          message: 'Register'
+        }
+      }
+    };
   },
   methods: {
-    login: function() {
-      //this.$router.push('/menu');
+    login() {
+      const { username } = this;
       location.replace("pages/menu/menu.html");
-      //this.$router.push('/menu');
-      // let log = this.log
-      // let password = this.password
-      // this.$store.dispatch('login', {email: log, password})
-      //     .then(() => this.$router.push('/menu'))
-      //     .catch((err:String) => {
-      //       console.log(err);
-      //     })
+      console.log(username + "logged in")
+    },
+
+    register: function () {
+      if (this.password == this.confirmPassword) {
+        this.isRegister = false;
+        this.errorMessage = "";
+        (this.$refs.form as HTMLFormElement).reset();
+        location.replace("pages/menu/menu.html");
+      } else {
+        this.errorMessage = "password did not match"
+      }
+    }
+  },
+  computed: {
+    toggleMessage : function(): string {
+      if (!this.isRegister) {
+        return this.stateObj.login.message
+      } else {
+        return this.stateObj.register.message
+      }
     }
   }
-})
+});
 </script>
 
 <style scoped>
-.login {
-  background-color: mistyrose;
-  position: absolute;
-  border-radius: 10px;
-  width: 500px;
-  height: 400px;
-  top: 200px; left: 500px;
-}
-</style>
 
+</style>

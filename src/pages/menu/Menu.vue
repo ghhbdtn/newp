@@ -1,4 +1,5 @@
 <template>
+  <v-app>
 <div id="menu">
 <v-toolbar>
   <h1>Меню</h1>
@@ -12,6 +13,7 @@
   </v-toolbar>
 <router-view />
 </div>
+  </v-app>
 </template>
 
 <script lang="ts">
