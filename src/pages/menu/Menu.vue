@@ -1,8 +1,8 @@
 <template>
   <v-app>
 <div id="menu">
-<v-toolbar>
-  <h1>Меню</h1>
+<v-toolbar style="background-color: #1565C0">
+  <h1 style="color: white">Меню</h1>
   <nav>
     <router-link tag="a" type="contract" to="/menu/contracts" >
                  <span @click ="contract">Договоры</span></router-link> |
@@ -44,20 +44,20 @@ methods:
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #303234;
+  color: white;
 }
 
 nav a:active {
-  background-color: rgb(210, 123, 137);
+  background-color: rgb(73, 114, 154);
   cursor: pointer;
   font-weight: bold;
-  color: #303234;
+  color: white;
   padding: 5px;}
 nav a {
-  background-color: rgba(217, 178, 182, 0.97);
+
   cursor: pointer;
   font-weight: bold;
-  color: #303234;
+  color: white;
   padding: 5px;
 }
 nav{
