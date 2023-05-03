@@ -7,10 +7,11 @@ import store from "@/store";
 // @ts-ignore
 import { VueMaskDirective } from 'v-mask'
 Vue.directive('mask', VueMaskDirective);
-import VueTableDynamic from 'vue-table-dynamic'
 
 Vue.config.productionTip = false
 //Vue.use(VueTableDynamic)
+
+
  new Vue({
   el: '#menu',
   vuetify,

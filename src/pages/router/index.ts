@@ -4,7 +4,11 @@ import Menu from "@/pages/menu/Menu.vue";
 import Contracts from "@/pages/components/Contracts.vue";
 import CounterpartyOrganizations from "@/pages/components/CounterpartyOrganizations.vue";
 import Reports from "@/pages/components/Reports.vue";
-import Administration from "@/pages/components/Administration.vue"
+import Administration from "@/pages/components/Administration.vue";
+import AdminRoot from "@/pages/components/AdminRoot.vue";
+import UsersPage from "@/pages/components/UsersPage.vue";
+import App from "@/App.vue"
+import Login from "@/components/Login.vue";
 
 
 Vue.use(VueRouter)
@@ -18,24 +22,48 @@ const routes: Array<RouteConfig> = [
   {
     path: '/menu/contracts',
     name: 'contracts',
-    component: Contracts
+    component: Contracts,
+    meta: {
+      breadcrumb: 'Договоры'
+    }
   },
   {
-    path: '/menu/counterparty_organizations',
+    path: '/menu/counterparty-organizations',
     name: 'organizations',
-    component: CounterpartyOrganizations
+    component: CounterpartyOrganizations,
+    meta: {
+      breadcrumb: 'Организации-контрагенты'
+    }
   },
   {
     path: '/menu/reports',
     name: 'reports',
-    component: Reports
+    component: Reports,
+    meta: {
+      breadcrumb: 'Отчеты'
+    }
   },
   {
-    path: '/menu/admin',
-    name: 'admin',
-    component: Administration
+    path: '/menu/admin-root',
+    name: 'admin-root',
+    component: AdminRoot,
+  },
+  {
+    path: "/menu/admin-root/users",
+    name: "allUsers",
+    component: UsersPage,
+    meta: {
+      breadcrumb: 'Пользователи'
+    }
+  },
+  {
+    path: "/menu/admin-root/all-contracts",
+    name: "all-contracts",
+    component: Administration,
+    meta: {
+      breadcrumb: 'Список всех договоров'
+    }
   }
-
 ]
 
 const router = new VueRouter({

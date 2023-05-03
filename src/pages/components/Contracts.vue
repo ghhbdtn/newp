@@ -7,7 +7,7 @@
         :items-per-page="5"
         class="elevation-1"
     >
-      <template v-slot:[`item.actions`]="{ item }">
+      <template v-slot:[`item.actions`]="{ item }" v-if="isAdmin">
         <v-icon small class="mr-2" @click="editItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
         <v-icon small text @click="deleteItem(item)" large style="color: darkred">
           mdi-delete
@@ -18,7 +18,7 @@
 
     <v-dialog v-model="dialogVisible"  @click.prevent persistent>
       <template v-slot:activator="{ on, attrs }">
-        <v-btn
+        <v-btn v-if="isAdmin"
             color="primary"
             dark
             class="mb-2"
@@ -61,7 +61,7 @@
               <v-text-field v-model="EditedItem.amount" label="Сумма"></v-text-field>
             </v-col>
             <v-col cols="12" sm="6" md="4">
-              <v-card-title class="headline">Добавить этап договора</v-card-title>
+              <v-card-text>Добавить этап договора</v-card-text>
               <v-btn @click="stageAct = !stageAct"
                   class="mx-2"
                   fab
@@ -74,7 +74,7 @@
               </v-btn>
             </v-col>
             <v-col cols="12" sm="6" md="4">
-              <v-card-title class="headline">Добавить договор с контрагентом</v-card-title>
+              <v-card-text>Добавить договор с контрагентом</v-card-text>
               <v-btn @click="counterpartyAct = !counterpartyAct"
                      class="mx-2"
                      fab
@@ -89,28 +89,40 @@
           </v-row>
           <v-card-actions>
           <v-btn color="primary" @click="save">Сохранить</v-btn>
-          <v-btn color="primary" @click="close">Отменить</v-btn>
+          <v-btn color="red" @click="close">Отменить</v-btn>
           </v-card-actions>
         </v-container>
-        <v-dialog v-model="stageAct" >
+        <v-dialog v-model="stageAct" @click.prevent persistent>
           <stage-form v-on:addStage="saveStage" v-on:cancel="closeStageForm"/>
         </v-dialog>
-        <v-dialog v-model="counterpartyAct" >
-          <counterparty-form v-on:addStage="saveCounterpartyContract" v-on:cancel="closeCounterpartyForm"/>
+        <v-dialog v-model="counterpartyAct">
+          <counterparty-form  v-on:saveCountercontract="saveCounter" v-on:counterCancel="closeCounterForm"/>
         </v-dialog>
         <v-card-title>Таблица этапов договора</v-card-title>
-        <v-data-table v-if="EditedItem.stages.length > 1"
+        <v-data-table v-if="EditedItem.stages.length > 0"
           :headers="stages_headers"
           :items="EditedItem.stages"
           :items-per-page="5"
           class="elevation-3">
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-icon small class="mr-2" @click="editStageItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
+            <v-icon small text @click="deleteStageItem(item)" large style="color: darkred">
+              mdi-delete
+            </v-icon>
+          </template>
         </v-data-table>
-        <v-card-title>Таблица договоров с контр-агентами</v-card-title>
-        <v-data-table v-if="EditedItem.counterparties.length > 1"
+        <v-card-title>Таблица договоров с контрагентами</v-card-title>
+        <v-data-table v-if="EditedItem.counterparties.length > 0"
             :headers="countercontracts_headers"
             :items="EditedItem.counterparties"
             :items-per-page="5"
             class="elevation-3">
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-icon small class="mr-2" @click="editCounterItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
+            <v-icon small text @click="deleteCounterItem(item)" large style="color: darkred">
+              mdi-delete
+            </v-icon>
+          </template>
         </v-data-table>
       </v-form></v-card-text></v-card>
     </v-dialog>
@@ -125,17 +137,34 @@ import { required, minLength } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import StageForm from "./StageForm.vue";
 import CounterpartyForm from "./CounterpartyForm.vue";
+
+
 // Add validate method to Vue prototype
 Vue.prototype.validate = function () {
   if (this.$refs.form) {
     this.$refs.form.validate();
   }
 };
-
+interface Stage {
+  stageName: string,
+  planDate: string,
+  factDate: string,
+  stageAmount: number,
+  planSum: number,
+  factSum: number,
+}
+interface Countercontract {
+  countercontractName: string,
+  countercontractType: string,
+  counterParty: string,
+  counterPlan: string,
+  counterFact: string,
+  counterAmount: number,
+}
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Contracts",
-  // eslint-disable-next-line vue/no-unused-components
+
   components: {CounterpartyForm, StageForm},
 
   data() {
@@ -153,29 +182,16 @@ export default defineComponent({
           stageAmount: 0,
           planSum: 0,
           factSum: 0},
-        stages: [{
-          stageName:"",
-          planDate: "",
-          factDate: "",
-          stageAmount: 0,
-          planSum: 0,
-          factSum: 0}],
+        stages: [] as Stage[],
         countercontract: {
-          counterName: "",
-          type: "",
-          organization: "",
+          countercontractName: "",
+          countercontractType: "",
+          counterParty: "",
+          counterPlan: "",
+          counterFact: "",
           counterAmount: 0,
-          planCounterDate: "",
-          factCounterDate: "",
         },
-        counterparties: [{
-          counterName: "",
-          type: "",
-          organization: "",
-          counterAmount: 0,
-          planCounterDate: "",
-          factCounterDate: "",
-        }],
+        counterparties: [] as Countercontract[],
       },
       defaultItem: {
         name: "",
@@ -190,34 +206,22 @@ export default defineComponent({
           stageAmount: 0,
           planSum: 0,
           factSum: 0},
-        stages: [{
-          stageName:"",
-          planDate: "",
-          factDate: "",
-          stageAmount: 0,
-          planSum: 0,
-          factSum: 0}],
+        stages: [] as Stage[],
         countercontract: {
-          counterName: "",
-          type: "",
-          organization: "",
+          countercontractName: "",
+          countercontractType: "",
+          counterParty: "",
+          counterPlan: "",
+          counterFact: "",
           counterAmount: 0,
-          planCounterDate: "",
-          factCounterDate: "",
         },
-        counterparties: [{
-          counterName: "",
-          type: "",
-          organization: "",
-          counterAmount: 0,
-          planCounterDate: "",
-          factCounterDate: "",
-        }],
+        counterparties: [] as Countercontract[],
       },
       stageAct: false,
       counterpartyAct: false,
       dialogVisible: false,
       editedIndex: -1,
+      //isAdmin: false,
       nameRules: [
         required,
         minLength(3),
@@ -235,22 +239,16 @@ export default defineComponent({
         { text: "Плановые сроки", align: "start", sortable: false, value: "plan" },
         { text: "Фактические сроки", align: "start", sortable: false, value:  "fact"},
         { text: "Сумма", align: "start", sortable: false, value: "amount"},
-        // { text: "Этап", align: "start", sortable: false, value: "stage" },
-        // {
-        //   text: "Договоры с контр-агентами",
-        //   align: "start",
-        //   sortable: false,
-        //   value: "counterparties",
-        // },
         { text: "Действия", value: "actions", sortable: false},
       ],
       countercontracts_headers: [
-        {text: "Название", value: "counterName"},
-        {text: "Тип договора", value: "type"},
-        {text: "Организация-контрагент", value: "organization"},
+        {text: "Название", value: "countercontractName"},
+        {text: "Тип договора", value: "countercontractType"},
+        {text: "Организация-контрагент", value: "counterParty"},
+        {text: "Плановые сроки начала и окончания", value: "counterPlan"},
+        {text: "Фактические сроки начала и окончания", value: "counterFact"},
         {text: "Сумма договора", value: "counterAmount"},
-        {text: "Плановые сроки начала и окончания", value: "planCounterDate"},
-        {text: "Фактические сроки начала и окончания", value: "factCounterDate"},
+        {text: "Действия", value: "actions", sortable: false},
       ],
       stages_headers: [
         {text: "Название", value: "stageName"},
@@ -269,34 +267,36 @@ export default defineComponent({
           fact: "01.01.2023 - 01.01.2024",
           amount: "1000000",
           stage: {
-            stageName:"",
+            stageName: "",
             planDate: "",
             factDate: "",
             stageAmount: 0,
             planSum: 0,
-            factSum: 0},
+            factSum: 0
+          },
           stages: [{
-            stageName:"",
+            stageName: "",
             planDate: "",
             factDate: "",
             stageAmount: 0,
             planSum: 0,
-            factSum: 0}],
+            factSum: 0
+          }],
           countercontract: {
-            counterName: "",
-            type: "",
-            organization: "",
+            countercontractName: "",
+            countercontractType: "",
+            counterParty: "",
+            counterPlan: "",
+            counterFact: "",
             counterAmount: 0,
-            planCounterDate: "",
-            factCounterDate: "",
           },
           counterparties: [{
-            counterName: "",
-            type: "",
-            organization: "",
+            countercontractName: "",
+            countercontractType: "",
+            counterParty: "",
+            counterPlan: "",
+            counterFact: "",
             counterAmount: 0,
-            planCounterDate: "",
-            factCounterDate: "",
           }],
         },
         {
@@ -320,20 +320,20 @@ export default defineComponent({
             planSum: 0,
             factSum: 0}],
           countercontract: {
-            counterName: "",
-            type: "",
-            organization: "",
+            countercontractName: "",
+            countercontractType: "",
+            counterParty: "",
+            counterPlan: "",
+            counterFact: "",
             counterAmount: 0,
-            planCounterDate: "",
-            factCounterDate: "",
           },
           counterparties: [{
-            counterName: "",
-            type: "",
-            organization: "",
+            countercontractName: "",
+            countercontractType: "",
+            counterParty: "",
+            counterPlan: "",
+            counterFact: "",
             counterAmount: 0,
-            planCounterDate: "",
-            factCounterDate: "",
           }],
         },
         {
@@ -357,21 +357,21 @@ export default defineComponent({
             planSum: 0,
             factSum: 0}],
           countercontract: {
-            counterName: "",
-            type: "",
-            organization: "",
+            countercontractName: "",
+            countercontractType: "",
+            counterParty: "",
+            counterPlan: "",
+            counterFact: "",
             counterAmount: 0,
-            planCounterDate: "",
-            factCounterDate: "",
           },
           counterparties: [{
-            counterName: "",
-            type: "",
-            organization: "",
+            countercontractName: "",
+            countercontractType: "",
+            counterParty: "",
+            counterPlan: "",
+            counterFact: "",
             counterAmount: 0,
-            planCounterDate: "",
-            factCounterDate: "",
-          }],
+          }]
         },
       ],
 
@@ -380,14 +380,20 @@ export default defineComponent({
   watch: {
     dialog (val) {
       val || this.close()
-    },
+    }
   },
   methods: {
-
+    isAdmin() {
+      return  this.$store.state.user.isAdmin;
+    },
     editItem (item: any) {
       this.editedIndex = this.contracts.indexOf(item)
       this.EditedItem = Object.assign({}, item)
       this.dialogVisible = true
+    },
+    editStageItem(item: any) {
+      this.EditedItem.stage = Object.assign({}, item);
+      this.stageAct = true
     },
 
     deleteItem (item: any) {
@@ -414,7 +420,6 @@ export default defineComponent({
       this.close()
     },
     saveStage(stage: any ) { // новый метод для добавления этапа в массив
-      console.log("im here");
       this.EditedItem.stage = stage
       const stg = this.EditedItem.stage;
       this.EditedItem.stages.push(stg);
@@ -422,6 +427,16 @@ export default defineComponent({
     },
     closeStageForm() {
       this.stageAct = false;
+
+    },
+    saveCounter(contract: any) {
+      this.EditedItem.countercontract = contract;
+      const cct = this.EditedItem.countercontract;
+      this.EditedItem.counterparties.push(cct);
+      this.counterpartyAct = false;
+    },
+    closeCounterForm() {
+      this.counterpartyAct = false;
     }
   },
   setup() {

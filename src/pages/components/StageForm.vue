@@ -1,37 +1,58 @@
 <template>
-
   <div>
-    <h2 style="background-color: rgb(255,255,255)">Этап договора</h2>
+    <v-card>
+      <v-card-text>
     <v-form ref="form" style="background-color: rgb(255,255,255)">
-      <div>
-        <label for="name">Название:</label>
-        <input type="text" id="name" v-model="editedStage.stageName">
-      </div>
-      <div>
-        <label for="start-date">Плановая дата начала:</label>
-        <input type="date" id="start-end-date" v-model="editedStage.planDate">
-      </div>
-      <div>
-        <label for="actual-start-date">Фактическая дата начала:</label>
-        <input type="date" id="fact-date" v-model="editedStage.factDate">
-      </div>
-      <div>
-        <label for="amount">Сумма этапа:</label>
-        <input type="number" id="amount" v-model="editedStage.stageAmount">
-      </div>
-      <div>
-        <label for="planned-expenses">Плановые расходы:</label>
-        <input type="number" id="planned-expenses" v-model="editedStage.planSum">
-      </div>
-      <div>
-        <label for="actual-expenses">Фактические расходы:</label>
-        <input type="number" id="actual-expenses" v-model="editedStage.factSum">
-      </div>
-      <button type="submit" @click.prevent="addStage">Сохранить</button>
-      <button type="button" @click="cancel">Отменить</button>
-    </v-form>
-  </div>
+      <v-container>
+        <v-row>
+          <v-col cols="12" sm="6" md="4">
 
+        <v-text-field id="name" v-model="editedStage.stageName"
+                      label="Название этапа"
+                      name="name"
+                      style="text-decoration-color: #303234; text-align: start"
+                      type="input"
+                      required></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6" md="4">
+        <v-text-field type="text"
+                      v-model="editedStage.planDate"
+                      v-mask="'##.##.#### - ##.##.####'"
+                      label="Плановые сроки начала и окончания"
+                      placeholder="дд.мм.гггг - дд.мм.гггг"
+                      required></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6" md="4">
+            <v-text-field type="text"
+                          v-model="editedStage.factDate"
+                          v-mask="'##.##.#### - ##.##.####'"
+                          label="Фактические сроки начала и окончания"
+                          placeholder="дд.мм.гггг - дд.мм.гггг"
+                          required></v-text-field>
+          </v-col>
+      <v-col cols="12" sm="6" md="4">
+        <v-text-field type="number"
+                      v-model="editedStage.stageAmount"
+                      label="Сумма этапа"></v-text-field>
+      </v-col>
+          <v-col cols="12" sm="6" md="4">
+        <v-text-field type="number"
+                      v-model="editedStage.planSum"
+                      label="Плановые расходы"></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6" md="4">
+            <v-text-field type="number"
+                          v-model="editedStage.factSum"
+                          label="Фактические расходы"></v-text-field>
+          </v-col>
+        </v-row>
+      <v-btn color="primary" type="submit" @click.prevent="addStage">Сохранить</v-btn>
+      <v-btn color="red" type="button" @click="cancel">Отменить</v-btn>
+      </v-container>
+    </v-form>
+    </v-card-text>
+    </v-card>
+  </div>
 </template>
 
 <script lang="ts">

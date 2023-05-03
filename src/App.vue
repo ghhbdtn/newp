@@ -1,12 +1,21 @@
 <template>
   <div id="app">
     <nav>
-      <router-link to="/">Вход</router-link>
+      <router-link to="/">Вход в систему</router-link>
     </nav>
     <router-view/>
   </div>
 </template>
+<script lang="ts">
+import {defineComponent} from "vue";
 
+export default  defineComponent({
+  name: 'App',
+  created () {
+    this.$router.push('/')
+  },
+});
+</script>
 <style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
