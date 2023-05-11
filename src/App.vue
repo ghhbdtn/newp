@@ -1,8 +1,5 @@
 <template>
   <div id="app">
-    <nav>
-      <router-link to="/">Вход в систему</router-link>
-    </nav>
     <router-view/>
   </div>
 </template>

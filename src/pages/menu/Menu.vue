@@ -3,21 +3,18 @@
 <div id="menu">
 <v-app-bar color="#6A76AB"
            dark>
-  <v-app-bar-title>Меню</v-app-bar-title>
+  <v-toolbar-bar-title style="font-size: x-large">Меню</v-toolbar-bar-title>
+  <v-spacer></v-spacer>
+  <template v-slot:extension>
   <v-tabs align-with-title>
-    <v-tab>
-    <router-link tag="a" type="contract" to="/menu/contracts" style="color: white">
-                 <span @click ="contract">Договоры</span></router-link> </v-tab>
-    <v-tab>
-    <router-link tag="a" to="/menu/counterparty-organizations" style="color: white">Организации-Контрагенты</router-link></v-tab>
-    <v-tab>
-    <router-link tag="a" to="/menu/reports" style="color: white">Отчеты</router-link></v-tab>
+    <v-tab @click="contracts1"> Договоры</v-tab>
+    <v-tab @click="counterparty">Организации-Контрагенты</v-tab>
+    <v-tab @click="reports">Отчеты</v-tab>
     <v-tab v-if="isAdmin1">
     <v-menu open-on-hover offset-y transition="slide-x-transition" bottom right>
       <template v-slot:activator="{ on, attrs }">
         <v-btn text
             flat v-bind="attrs" v-on="on"
-               style="color: white"
         >
           Администрирование
         </v-btn>
@@ -35,7 +32,9 @@
     </v-menu> </v-tab>
     <v-btn @click="logout" class="right">Выход из системы</v-btn>
   </v-tabs>
+  </template>
   </v-app-bar>
+
 <router-view />
 </div>
   </v-app>
@@ -43,7 +42,7 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
-import { mapState} from "vuex";
+//import {mapGetters} from "vuex";
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -59,10 +58,18 @@ export default defineComponent({
   },
 methods:
     {
-      contract: function () {
-
-        this.$store.dispatch('contract').then(()=>this.$router.push('/menu/contracts'));
-
+      reports: function () {
+        this.$router.push("/menu/reports")
+      },
+      counterparty: function () {
+        this.$router.push('/menu/counterparty-organizations')
+      },
+      contracts1: function () {
+        const data = {};
+        this.$store.dispatch('contractsStore/getAll', data).then(() => {
+            console.log(this.$store.state.contractsStore)
+            this.$router.push('/menu/contracts')});
+        //this.$router.push('/menu/contracts')
         // this.$store.dispatch('register', data)
         //     .then(() => this.$router.push('/menu'))
         //     .catch((err:String) => console.log(err))
@@ -78,10 +85,10 @@ methods:
       // }
    },
   computed: {
-   ...mapState(['users']),
     isAdmin1() {
       let admin = this.$store.getters["users/getUserRole"];
       console.log(admin);
+      console.log(this.$store.getters["users/getUser"])
       return admin
     }
   }
@@ -99,7 +106,6 @@ methods:
 }
 button.right {
   position: absolute;
-  top: 15px;
   right: 20px;
 }
 </style>

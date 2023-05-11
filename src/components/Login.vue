@@ -6,12 +6,12 @@
           <v-flex xs12 sm8 md4>
             <v-card class="elevation-12">
               <v-toolbar dark color="#6A76AB">
-                <v-toolbar-title>{{isRegister ? stateObj.register.name : stateObj.login.name}} form</v-toolbar-title>
+                <v-toolbar-title>{{isRegister ? stateObj.register.name : stateObj.login.name}}</v-toolbar-title>
               </v-toolbar>
               <v-card-text>
                 <form ref="form" @submit.prevent="isRegister ? register() : login()">
                   <v-text-field v-if="isRegister"
-                                v-model="user.fullName"
+                                v-model="fullName"
                                 name="name"
                                 label="ФИО"
                                 type="text"
@@ -19,7 +19,7 @@
                                 required
                   ></v-text-field>
                   <v-text-field
-                      v-model="user.username"
+                      v-model="username"
                       name="username"
                       label="Имя пользователя"
                       type="text"
@@ -28,7 +28,7 @@
                   ></v-text-field>
 
                   <v-text-field
-                      v-model="user.password"
+                      v-model="password"
                       name="password"
                       label="Пароль"
                       type="password"
@@ -61,12 +61,7 @@
 </template>
 
 <script lang="ts">
-interface User {
-  id: number,
-  fullName: string,
-  username: string,
-  password: string,
-}
+import { mapGetters } from 'vuex'
 import Vue from "vue";
 export default Vue.extend({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -74,19 +69,15 @@ export default Vue.extend({
 
 data() {
     return {
-      user: {
-        id: 0,
-        fullName: "",
-        username: "",
-        password: "",
-      } as User,
+      fullName: "",
+      username: "",
+      password: "",
       confirmPassword: "",
       isRegister : false,
       errorMessage: "",
-      //users: [] as User[],
       stateObj: {
         register :{
-          name: 'Зарегестрироваться',
+          name: 'Регистрация',
           message: 'Уже авторизированы? Вход.'
         },
         login : {
@@ -98,27 +89,27 @@ data() {
   },
   methods: {
     login() {
-      let login = this.user.username
-      let password = this.user.password
+      let login = this.username
+      let password = this.password
       let data = {
         login: login,
         password: password
       }
       this.$store.dispatch('users/signIn', data )
-          .then(() =>{console.log(this.$store.state.users.user)
-            //location.replace("pages/menu/menu.html")
-          this.$router.replace("/menu")})
+          .then(() =>{console.log(this.$store.state.users.user.id)
+            location.replace("pages/menu/menu.html")
+          })
           .catch(err => this.stateObj.login.message = err)
     },
 
     register: function () {
-      if (this.user.password == this.confirmPassword) {
+      if (this.password == this.confirmPassword) {
         this.isRegister = false;
         this.errorMessage = "";
         (this.$refs.form as HTMLFormElement).reset();
-        const fullName = this.user.fullName;
-        const login = this.user.username;
-        const password = this.user.password;
+        const fullName = this.fullName;
+        const login = this.username;
+        const password = this.password;
         const data = {
           fullName: fullName,
           login: login,
@@ -139,7 +130,8 @@ data() {
       } else {
         return this.stateObj.register.message
       }
-    }
+    },
+    ...mapGetters('users', ['getUser']),
   }
 });
 </script>

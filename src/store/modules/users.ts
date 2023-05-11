@@ -2,12 +2,6 @@
 import axios from 'axios';
 import _ from "lodash";
 
-interface State {
-    isAdmin: boolean;
-    status: string,
-    user : User,
-    all: User[]
-}
 interface User {
     id: number,
     login: string,
@@ -15,6 +9,14 @@ interface User {
     terminationDate: string,
     isAdmin: boolean
 }
+
+interface State {
+    isAdmin: boolean;
+    status: string,
+    user : User,
+    all: User[]
+}
+
 const state = {
     isAdmin: false,
     status: '',
@@ -26,20 +28,22 @@ const getters =  {
     //isLoggedIn: state => !!state.token
     //isAdmin: state.user.isAdmin
     getUserRole: (state: State) : boolean=> {
-        return state.user.isAdmin == true
+        return state.user.isAdmin
     },
-    getUser: state => state.user
+    getUser:(state: State): User =>{
+        return state.user
+    }
 }
 
 const mutations = {
-    SET_USER:  (state: State, user: User) => {
-        console.log(state, user)
-        state.user.id = user.id;
-        state.user.login = user.login;
-        state.user.fullName = user.fullName;
-        state.user.terminationDate = user.terminationDate;
-        state.user.isAdmin = user.isAdmin;
-        state.isAdmin = user.isAdmin
+    SET_USER:  (state: State, user1: User) => {
+        console.log(state, user1)
+        state.user.id = user1.id
+        state.user.login = user1.fullName
+        state.user.login = user1.login
+        state.user.isAdmin = user1.isAdmin
+        state.user.terminationDate = user1.terminationDate
+        state.isAdmin = user1.isAdmin
         console.log(state.user, state.isAdmin)
     },
     AUTH_ERR(state: State){
@@ -51,12 +55,11 @@ const mutations = {
 };
 
 const actions = {
-    signIn({commit}: any, data){
+    signIn({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            axios({url: 'http://localhost:8080/auth-api/sign-in', data: data, method: 'POST' })
+            axios({url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'post', withCredentials: true})
                 .then(resp => {
                     const user: User = resp.data;
-                    console.log(user)
                     commit('SET_USER', user);
                     resolve(resp)
                 })
@@ -66,9 +69,9 @@ const actions = {
                 })
         })
     },
-    signUp({commit}: any, data){
+    signUp({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            axios({url: 'http://localhost:8080/auth-api/sign-up', data: data, method: 'POST' })
+            axios({url: 'http://localhost:8080/api/auth/sign-up ', data: data, method: 'POST', withCredentials: true })
                 .then(resp => {
                     const user: User = resp.data;
                     commit('SET_USER', user);
