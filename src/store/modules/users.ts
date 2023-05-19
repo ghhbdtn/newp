@@ -51,13 +51,16 @@ const mutations = {
     },
     LOG_OUT(state: State){
         state.user.isAdmin = false;
+    },
+    SET_USERS(state: State, content: User[]) {
+        state.all = content
     }
 };
 
 const actions = {
     signIn({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            axios({url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'post', withCredentials: true})
+            axios({url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
                 .then(resp => {
                     const user: User = resp.data;
                     commit('SET_USER', user);
@@ -86,6 +89,20 @@ const actions = {
     logOut({commit}: any) {
         commit('LOG_OUT')
     },
+    allUsers({commit}: any, data: {}) {
+        return new Promise((resolve, reject) => {
+            axios({url: 'http://localhost:8080/api/admin/users', data: data, method: 'POST', withCredentials: true })
+                .then(resp => {
+                    const content: User[] = resp.data.content;
+                    commit('SET_USERS', content);
+                    resolve(resp)
+                })
+                .catch(err => {
+                    //commit('AUTH_ERR')
+                    reject(err)
+                })
+        })
+    }
 };
 
 export default {

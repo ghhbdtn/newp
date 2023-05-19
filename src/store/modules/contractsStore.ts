@@ -1,6 +1,7 @@
 import axios from 'axios';
 import _ from "lodash";
 import users from "@/store/modules/users";
+import Vue from "vue";
 
 interface User {
     id: number,
@@ -22,73 +23,38 @@ interface Contract {
     userId?: number
 }
 
-interface Stage {
-    id?: number,
-    name: string,
-    amount: number,
-    plannedStartDate: string,
-    plannedEndDate: string,
-    actualStartDate: string,
-    actualEndDate: string,
-    actualMaterialCosts: number,
-    plannedMaterialCosts: number,
-    actualSalaryExpenses: number,
-    plannedSalaryExpenses: number
-}
-
-interface CounterContract {
-    id?: number,
-    name: string,
-    type: string,
-    amount: number,
-    plannedStartDate: string,
-    plannedEndDate: string,
-    actualStartDate: string,
-    actualEndDate: string,
-    counterpartyOrganizationId: number
-}
-
 interface State {
-    all: Contract[],
-    allStages: Stage[],
-    allCounterContracts: CounterContract[]
+    all: Contract[]
 }
 
+export const  contractsStore = {
+    namespaced: true,
+        state: {
+    all: [] as Contract[]
+} as State,
 
-const state = {
-    all: [] as Contract[],
-    allStages: [] as Stage[],
-    allCounterContracts: [] as CounterContract[]
-} as State;
-
-const getters =  {
-
-}
-
-const mutations = {
+    getters: {
+    },
+    mutations: {
     SET: (state: State, content: []) =>{
-        console.log(content, state.all)
+       // console.log(content, state.all)
         //state.all = [];
         state.all = content;
     },
     SET_CONTRACT: (state: State, data: any) => {
         state.all.push(data)
     },
-    SET_STAGES(state: State,content: []) {
-        console.log(content)
-        state.allStages = [];
-        state.allStages = content;
-        console.log(state.all)
-    },
-    SET_STAGE(  state: State,data: Stage) {
-        state.allStages.push(data)
-    },
-    SET_COUNTER_CONTRACT(state: State,content: []) {
-        state.allCounterContracts = content
-    }
-};
+        DELETE_CONTRACT(state: State, data: number){
+            state.all = state.all.filter(ct => ct.id !== data);
+        },
+        PUT_CONTRACT(state: State, data: Contract){
+            const contract = _.find(state.all, {id: data.id})
+            // @ts-ignore
+            Vue.set(state.allCounterContracts, state.allCounterContracts.indexOf(contract), data)
+        },
+},
 
-const actions = {
+ actions: {
     getAll({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
             //const data1 = {};
@@ -138,7 +104,7 @@ const actions = {
                 withCredentials: true, method: "PUT" })
                 .then(resp => {
                     const content = resp.data.content;
-                    commit('SET_CONTRACT', data);
+                    commit('PUT_CONTRACT', data);
                     resolve(resp)
                 })
                 .catch(err => {
@@ -148,69 +114,28 @@ const actions = {
                 })
         })
     },
-    allStages({commit}: any, data: number){
-        return new Promise((resolve, reject) => {
-            console.log(data);
-            const contractId = data;
-            axios( {url: 'http://localhost:8080/api/user/contracts/'+ contractId + '/contract-stages/search', data: {},
-                withCredentials: true, method: "POST" })
-                .then(resp => {
-                    const content = resp.data.content;
-                    console.log(resp.data);
-                    commit('SET_STAGES', content);
-                    resolve(resp)
-                })
-                .catch(err => {
-                    console.log(err)
-                    //commit('ERR')
-                    reject(err)
-                })
-        })
-    },
-    addStage({commit}: any, data: Stage) {
-        return new Promise((resolve, reject) => {
-            console.log(data);
-            // @ts-ignore
-            const contractId = data["contractID"];
-            axios( {url: 'http://localhost:8080/api/admin/contracts/'+ contractId + '/contract-stages', data: data,
-                withCredentials: true, method: "POST" })
-                .then(resp => {
-                    console.log(resp.data);
-                    commit('SET_STAGE', data);
-                    resolve(resp)
-                })
-                .catch(err => {
-                    console.log(err)
-                    //commit('ERR')
-                    reject(err)
-                })
-        })
-    },
-    allCounterpartyContracts({commit}: any, data: number){
-        return new Promise((resolve, reject) => {
-            console.log(data);
-            const contractId = data;
-            axios( {url: 'http://localhost:8080/api/user/contracts/'+ contractId + '/counterparty-contracts/search', data: {},
-                withCredentials: true, method: "POST" })
-                .then(resp => {
-                    const content = resp.data.content;
-                    console.log(resp.data);
-                    commit('SET_COUNTER_CONTRACT', content);
-                    resolve(resp)
-                })
-                .catch(err => {
-                    console.log(err)
-                    //commit('ERR')
-                    reject(err)
-                })
-        })
-    },
-};
+     deleteContract({commit}: any, data: number) {
+         return new Promise((resolve, reject) => {
+             console.log(data);
+             axios( {url: 'http://localhost:8080/api/admin/contracts/' + data, data: {},
+                 withCredentials: true, method: "DELETE" })
+                 .then(resp => {
+                     console.log(resp.data);
+                     commit('DELETE_CONTRACT', data);
+                     resolve(resp)
+                 })
+                 .catch(err => {
+                     console.log(err)
+                     //commit('ERR')
+                     reject(err)
+                 })
+         })
+     },
+},
 
-export default {
-    namespaced: true,
-    state,
-    getters,
-    mutations,
-    actions
+
+    // state,
+    // getters,
+    // mutations,
+    // actions
 }

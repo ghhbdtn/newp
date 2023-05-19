@@ -7,16 +7,16 @@
         <v-row>
           <v-col cols="12" sm="6" md="4">
 
-        <v-text-field id="name" v-model="editedStage.name"
+        <v-text-field id="name" v-model="stage.name"
                       label="Название этапа"
                       name="name"
                       style="text-decoration-color: #303234; text-align: start"
                       type="input"
-                      required></v-text-field>
+                      required>{{stage.name}}</v-text-field>
           </v-col>
           <v-col cols="12" sm="6" md="4">
         <v-text-field type="text"
-                      v-model="editedStage.plannedDate"
+                      v-model="stage.plannedDate"
                       v-mask="'##.##.#### - ##.##.####'"
                       label="Плановые сроки начала и окончания"
                       placeholder="дд.мм.гггг - дд.мм.гггг"
@@ -24,7 +24,7 @@
           </v-col>
           <v-col cols="12" sm="6" md="4">
             <v-text-field type="text"
-                          v-model="editedStage.actualDate"
+                          v-model="stage.actualDate"
                           v-mask="'##.##.#### - ##.##.####'"
                           label="Фактические сроки начала и окончания"
                           placeholder="дд.мм.гггг - дд.мм.гггг"
@@ -32,27 +32,27 @@
           </v-col>
       <v-col cols="12" sm="6" md="4">
         <v-text-field type="number"
-                      v-model="editedStage.amount"
+                      v-model="stage.amount"
                       label="Сумма этапа"></v-text-field>
       </v-col>
           <v-col cols="12" sm="6" md="4">
         <v-text-field type="number"
-                      v-model="editedStage.plannedMaterialCosts"
+                      v-model="stage.plannedMaterialCosts"
                       label="Плановые расходы на материалы"></v-text-field>
           </v-col>
           <v-col cols="12" sm="6" md="4">
             <v-text-field type="number"
-                          v-model="editedStage.actualMaterialCosts"
+                          v-model="stage.actualMaterialCosts"
                           label="Фактические расходы на материалы"></v-text-field>
           </v-col>
           <v-col cols="12" sm="6" md="4">
             <v-text-field type="number"
-                          v-model="editedStage.plannedSalaryExpenses"
+                          v-model="stage.plannedSalaryExpenses"
                           label="Плановые расходы на зарплаты"></v-text-field>
           </v-col>
           <v-col cols="12" sm="6" md="4">
             <v-text-field type="number"
-                          v-model="editedStage.actualSalaryExpenses"
+                          v-model="stage.actualSalaryExpenses"
                           label="Фактические расходы на зарплаты"></v-text-field>
           </v-col>
         </v-row>
@@ -81,11 +81,16 @@ interface Stage {
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "StageForm",
-
+  props: {
+    value: {
+      type: Object,
+      required: true,
+    }
+  },
   data() {
     return {
-
-      stage: {
+      stage: this.value as Stage,
+      defaultStage: {
         name: "",
         amount: 0,
         plannedDate: "",
@@ -95,31 +100,35 @@ export default defineComponent({
         actualSalaryExpenses: 0,
         plannedSalaryExpenses: 0
       } as Stage,
-      editedStage: {
-        name: "",
-        amount: 0,
-        plannedDate: "",
-        actualDate: "",
-        actualMaterialCosts: 0,
-        plannedMaterialCosts: 0,
-        actualSalaryExpenses: 0,
-        plannedSalaryExpenses: 0
-      }
+    //   editedStage: {
+    //     name: "",
+    //     amount: 0,
+    //     plannedDate: "",
+    //     actualDate: "",
+    //     actualMaterialCosts: 0,
+    //     plannedMaterialCosts: 0,
+    //     actualSalaryExpenses: 0,
+    //     plannedSalaryExpenses: 0
+    //   }
     };
   },
+
   methods: {
     // метод для сохранения данных этапа
     addStage() {
-        const stg = this.editedStage;
 
+        const stg = this.stage;
+        console.log(stg)
         this.$emit("addStage", stg); // передаем этап договора в родительский компонент
-        this.editedStage = Object.assign({}, this.stage)
+        //this.stage = Object.assign({}, this.defaultStage)
     },
     // метод для отмены редактирования/добавления
     cancel() {
+      console.log(this.stage)
       this.$emit("cancel");
-      this.editedStage = Object.assign({}, this.stage)
-    }
+      //this.stage = Object.assign({}, this.defaultStage)
+    },
+
   }
 });
 </script>

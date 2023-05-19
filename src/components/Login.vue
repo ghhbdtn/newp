@@ -115,9 +115,7 @@ data() {
           login: login,
           password: password
         }
-        this.$store.dispatch('users/signUp', data )
-            .then(() => location.replace("pages/menu/menu.html"))
-            .catch(err => this.stateObj.login.message = err)
+        this.$store.dispatch('users/signUp', data ).then(() => this.login()).catch(err => this.stateObj.login.message = err)
       } else {
         this.errorMessage = "password did not match"
       }

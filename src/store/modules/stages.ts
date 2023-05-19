@@ -1,6 +1,7 @@
 import axios from 'axios';
 import _ from "lodash";
 import users from "@/store/modules/users";
+import Vue from "vue";
 
 interface User {
     id: number,
@@ -24,35 +25,53 @@ interface Stage {
 }
 
 interface State {
-    //contractID: number,
+    ID: number,
     all: Stage[]
 }
 
 
-export default {
+export const stages =  {
     namespaced: true,
 state: {
-    //contractID: 0,
+    ID: -1,
     all: [] as Stage[]
 } as State,
 
 getters:  {
-
+        getStages(state: State): Stage[]{
+            return state.all
+        }
 },
 
 mutations: {
-    SET_STAGES(  state: State,content: Stage[]) {
+    SET_STAGES(  state: State,content: {}) {
         console.log(content)
         state.all = [];
-        state.all = content;
+        // @ts-ignore
+        state.all = content['content'];
+        // @ts-ignore
+        state.ID = content['contractID']
         console.log(state.all)
     },
-    SET_STAGE: (state: State, data: any) => {
+    SET_STAGE: (state: State, data: Stage) => {
         state.all.push(data)
+    },
+    PUT_STAGE(state: State, data: Stage){
+         const stage = _.find(state.all, {id: data.id})
+        // @ts-ignore
+        Vue.set(state.all, state.all.indexOf(stage), data)
+    },
+    DELETE_STAGE(state: State, data: number){
+        state.all = state.all.filter(stg => stg.id !== data);
+    },
+    CLEAR_AFTER_ADDING(state: State){
+        state.all =[] as Stage[]
     }
+
 },
 
 actions: {
+
     allStages({commit}: any, data: number){
         return new Promise((resolve, reject) => {
             console.log(data);
@@ -62,7 +81,7 @@ actions: {
                 .then(resp => {
                     const content = resp.data.content;
                     console.log(resp.data);
-                    commit('SET_STAGES', content);
+                    commit('SET_STAGES', {content, contractId});
                     resolve(resp)
                 })
                 .catch(err => {
@@ -72,15 +91,15 @@ actions: {
                 })
         })
     },
-    addNewStage({commit}: any, data: {}){
+    addStage({commit}: any, data: Stage) {
         return new Promise((resolve, reject) => {
-            //const data1 = {};
-
             console.log(data);
-            axios( {url: 'http://localhost:8080/api/admin/contracts', data: data,
+            // @ts-ignore
+            const contractId = data["contractID"];
+            axios( {url: 'http://localhost:8080/api/admin/contracts/'+ contractId + '/contract-stages', data: data,
                 withCredentials: true, method: "POST" })
                 .then(resp => {
-                    const content = resp.data.content;
+                    console.log(resp.data);
                     commit('SET_STAGE', data);
                     resolve(resp)
                 })
@@ -90,7 +109,43 @@ actions: {
                     reject(err)
                 })
         })
-    }
+    },
+    putStage({commit}: any, data: Stage) {
+        return new Promise((resolve, reject) => {
+            console.log(data);
+            // @ts-ignore
+            const contractId = data["id"];
+            axios( {url: 'http://localhost:8080/api/admin/contract-stages/' + contractId, data: data,
+                withCredentials: true, method: "PUT" })
+                .then(resp => {
+                    console.log(resp.data);
+                    commit('PUT_STAGE', data);
+                    resolve(resp)
+                })
+                .catch(err => {
+                    console.log(err)
+                    //commit('ERR')
+                    reject(err)
+                })
+        })
+    },
+    deleteStage({commit}: any, data: number) {
+        return new Promise((resolve, reject) => {
+            console.log(data);
+            axios( {url: 'http://localhost:8080/api/admin/contract-stages/' + data, data: {},
+                withCredentials: true, method: "DELETE" })
+                .then(resp => {
+                    console.log(resp.data);
+                    commit('DELETE_STAGE', data);
+                    resolve(resp)
+                })
+                .catch(err => {
+                    console.log(err)
+                    //commit('ERR')
+                    reject(err)
+                })
+        })
+    },
 }
 
 // export default {

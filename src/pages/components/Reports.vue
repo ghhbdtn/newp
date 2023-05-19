@@ -1,42 +1,52 @@
 <template>
   <v-app>
-  <div>
-    <h2>Отчеты</h2>
-    <div>
-      <text-h2>Отчет 1: Вывод всех договоров за задаваемый плановый период</text-h2>
-      <v-row>
-        <v-col cols="12" sm="6" md="4">
-          <label for="start-date">Плановая дата начала:</label>
-      <v-text-field type="date" id="start-date" v-model="startDate" />
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
-      <label for="end-date">Плановая дата конца:</label>
-      <v-text-field type="date" id="end-date" v-model="endDate" />
+    <v-container fluid>
+      <v-row justify="center">
+        <v-col cols="14" sm="12" md="8" lg="6">
+          <v-card class="mt-5">
+            <h3>Сформировать отчеты</h3>
+            <v-divider></v-divider>
+            <h4 class="subtitle-1">Отчет 1: Вывод всех договоров за задаваемый плановый период</h4>
+            <v-row>
+              <v-col cols="10" sm="6">
+                <v-card-text for="start-date" class="subtitle-1">Плановая дата начала:</v-card-text>
+                <v-text-field type="date" id="start-date" v-model="startDate" />
+              </v-col>
+              <v-col cols="10" sm="6">
+                <v-card-text class="subtitle-1" for="end-date">Плановая дата окончания:</v-card-text>
+                <v-text-field type="date" id="end-date" v-model="endDate" />
+              </v-col>
+            </v-row>
+            <v-card-actions>
+              <v-btn color="#6A76AB" @click="downloadContracts" style="color: white">Сформировать отчет</v-btn>
+            </v-card-actions>
+            <v-divider></v-divider>
+            <h4 class="subtitle-1">Отчет 2: Вывод всех этапов для выбранного пользователем договора</h4>
+            <v-row>
+              <v-col cols="10" sm="12">
+                <v-card-text for="selected-contract" class="subtitle-1">Выберите договор:</v-card-text>
+                <v-select
+                    id="selected-contract"
+                    v-model="selectedContract"
+                    :items="contracts"
+                    item-text="number"
+                    item-value="id"
+                    variant="outlined"
+                ></v-select>
+              </v-col>
+            </v-row>
+            <v-card-actions style="align-content: center">
+              <v-btn color="#6A76AB" @click="fetchStages" style="color: white" >Сформировать отчет</v-btn>
+            </v-card-actions>
+          </v-card>
         </v-col>
       </v-row>
-      <v-btn @click="fetchContracts">Сформировать отчет</v-btn>
-    </div>
-    <div>
-      <text-h2>Отчет 2: Вывод всех этапов для выбранного пользователем договора</text-h2>
-      <v-col cols="12" sm="6" md="4">
-      <label for="selected-contract">Выберите договор:</label>
-      <v-select id="selected-contract"
-                v-model="selectedContract"
-                variant="solo">
-        <option v-for="contract in contracts" :key="contract.id" :value="contract.id">
-          {{ contract.number }}
-        </option>
-      </v-select>
-      </v-col>
-      <v-btn @click="fetchStages">Сформировать отчет</v-btn>
-    </div>
-  </div>
+    </v-container>
   </v-app>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import axios from 'axios';
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -47,36 +57,58 @@ export default defineComponent({
       endDate: "",
       selectedContract: "",
       contracts: [] as any[],
-      stages: [] as any[],
     };
   },
   methods: {
-    async fetchContracts() {
-      try {
-        const response = await axios.get("/api/reports/contracts", {
-          params: {
-            startDate: this.startDate,
-            endDate: this.endDate,
-          },
-        });
-        this.contracts = response.data;
-      } catch (error) {
-        console.error(error);
+    downloadContracts() {
+      const data = {
+        plannedStartDate: this.startDate,
+        plannedEndDate: this.endDate
       }
+      this.$store.dispatch('reports/downloadReport', data)
     },
-    async fetchStages() {
-      try {
-        const response = await axios.get(
-            `/api/reports/stages/${this.selectedContract}`
-        );
-        this.stages = response.data;
-      } catch (error) {
-        console.error(error);
-      }
-    },
+
   },
 });
 </script>
+
 <style scoped>
+.v-card {
+  background: rgba(128, 101, 166, 0.22);
+  border-radius: 10px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+.v-divider {
+  margin: 2rem 0;
+}
+
+.v-select {
+  width: 50%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.v-btn {
+  margin-top: 1.5rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.h4{
+
+}
+
 
 </style>
+

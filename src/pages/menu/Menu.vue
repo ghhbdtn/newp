@@ -62,13 +62,15 @@ methods:
         this.$router.push("/menu/reports")
       },
       counterparty: function () {
-        this.$router.push('/menu/counterparty-organizations')
+        this.$store.dispatch('counterparties/allCounterpartyOrganizations', {}).then(()=>
+            this.$router.push('/menu/counterparty-organizations'))
       },
       contracts1: function () {
         const data = {};
         this.$store.dispatch('contractsStore/getAll', data).then(() => {
             console.log(this.$store.state.contractsStore)
             this.$router.push('/menu/contracts')});
+        //TODO прогружать страницу сразу
         //this.$router.push('/menu/contracts')
         // this.$store.dispatch('register', data)
         //     .then(() => this.$router.push('/menu'))

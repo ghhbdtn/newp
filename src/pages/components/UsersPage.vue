@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-content>
-      <v-data-table  @click:row="editedUser"
+      <v-data-table  @click:row="editItem"
                      :headers="user_headers"
                      :items="users"
                      :items-per-page="5"
@@ -41,7 +41,7 @@
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
-                        v-model="editedUser.username"
+                        v-model="editedUser.login"
                         label="Имя пользователя"
                     ></v-text-field>
                   </v-col>
@@ -67,8 +67,9 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 interface User {
+  id?: number,
   fullName: string,
-  username: string,
+  login: string,
   password: string,
   terminationDate: string
 }
@@ -79,30 +80,38 @@ export default defineComponent( {
   data() {
     return{
       user: {
+        id: -1,
         fullName: "",
-        username: "",
+        login: "",
         password: "",
         terminationDate: ""
       } as User,
       editedUser: {
+        id: -1,
         fullName: "",
-        username: "",
+        login: "",
         password: "",
         terminationDate: ""
-      },
+      } as User,
       user_headers: [
         {
           text: "ФИО",
           align: "start",
           value: "fullName",
         },
-        { text: "Имя пользователя", align: "start", value: 'username'},
+        { text: "Имя пользователя", align: "start", value: 'login'},
         { text: "Дата прекращения действия", align: "start", value:  "terminationDate"},
         { text: "Действия", align: "start", value:  "actions"},
       ],
-      users: [] as User[],
+      //users: [] as User[],
       editedIndex: -1,
       dialog: false,
+    }
+  },
+  computed: {
+    users(){
+      const listOfUsers = this.$store.state.users.all
+      return listOfUsers
     }
   },
   methods: {
@@ -131,6 +140,9 @@ export default defineComponent( {
       }
       this.close()
     }
+  },
+  beforeCreate() {
+    this.$store.dispatch('users/allUsers', {})
   }
 });
 </script>
