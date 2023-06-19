@@ -4,7 +4,8 @@
       <v-data-table  @click:row="editItem"
                      :headers="headers"
                      :items="contracts"
-                     :items-per-page="5"
+                     :items-per-page="10"
+                     hide-default-footer
                      class="elevation-1"
       >
         <template v-slot:[`item.actions`]="{ item }">
@@ -13,28 +14,50 @@
             mdi-delete
           </v-icon>
         </template>
-
       </v-data-table>
-
+      <template >
+        <div>
+          <v-pagination
+              v-model="page"
+              :length="totalPages"
+              @input="updatePage"
+          >
+          </v-pagination>
+        </div>
+      </template>
+<!--      <v-select-->
+<!--          dense-->
+<!--          outlined-->
+<!--          hide-details-->
+<!--          :value="itemsPerPage"-->
+<!--          label="Items per page"-->
+<!--          @change="itemsPerPage = parseInt($event, 10)"-->
+<!--          :items="perPageChoices">-->
+<!--      </v-select>-->
       <v-dialog v-model="dialogVisible"  @click.prevent persistent>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
-              color="primary"
-              dark
-              class="mb-2"
-              v-bind="attrs"
-              v-on="on"
+                 color="primary"
+                 dark
+                 class="mb-2"
+                 v-bind="attrs"
+                 v-on="on"
           >Добавить</v-btn>
         </template>
         <v-card>
           <v-card-text>
             <v-form ref="form" v-model="valid" style="background-color: rgb(255,255,255)">
+              <v-card-title>{{this.isEdit ? "Редактировать договор": "Добавить договор"}}</v-card-title>
               <v-container>
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
                     <v-select
-                        v-model="EditedItem.user.fullName"
+                        v-model="EditedItem.user"
                         :items="users"
+                        item-text="fullName"
+                        item-value="id"
+                        persistent-hint
+                        return-object
                         label="Ответственный пользователь"
                     ></v-select>
                   </v-col>
@@ -46,7 +69,7 @@
                         style="text-decoration-color: #303234; text-align: start"
                         type="input"
                         placeholder="Название договора"
-                        required
+                        aria-required="true"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
@@ -54,88 +77,34 @@
                         v-model="EditedItem.type"
                         :items="types"
                         label="Тип договора"
-                    ></v-select>
+                        aria-required="true"></v-select>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="EditedItem.plan" type="text" label="Плановые сроки"
-                                  v-mask="'##.##.#### - ##.##.####'" ></v-text-field>
+                    <v-text-field v-model="EditedItem.plannedDate" type="text" label="Плановые сроки"
+                                  v-mask="'##.##.#### - ##.##.####'"
+                                  placeholder="ГГГГ.ММ.ДД-ГГГГ.ММ.ДД"
+                                  aria-required="true"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field v-model="EditedItem.fact" label="Фактические сроки"
-                                  v-mask="'##.##.#### - ##.##.####'"></v-text-field>
+                    <v-text-field v-model="EditedItem.actualDate" label="Фактические сроки"
+                                  v-mask="'##.##.#### - ##.##.####'"
+                                  placeholder="ГГГГ.ММ.ДД-ГГГГ.ММ.ДД"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field v-model="EditedItem.amount" label="Сумма"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-card-text>Добавить этап договора</v-card-text>
-                    <v-btn @click="stageAct = !stageAct"
-                           class="mx-2"
-                           fab
-                           dark
-                           color="indigo"
-                           x-small>
-                      <v-icon dark>
-                        mdi-plus
-                      </v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-card-text>Добавить договор с контрагентом</v-card-text>
-                    <v-btn @click="counterpartyAct = !counterpartyAct"
-                           class="mx-2"
-                           fab
-                           dark
-                           color="indigo"
-                           x-small>
-                      <v-icon dark>
-                        mdi-plus
-                      </v-icon>
-                    </v-btn>
-                  </v-col>
+
+                  <stg :index="contractID"></stg>
+                  <counterparty-form :index="contractID"></counterparty-form>
                 </v-row>
-                <v-card-actions>
-                  <v-btn color="primary" @click="save">Сохранить</v-btn>
-                  <v-btn color="red" @click="close">Отменить</v-btn>
-                </v-card-actions>
               </v-container>
-              <v-dialog v-model="stageAct" @click.prevent persistent>
-                <stage-form v-on:addStage="saveStage" v-on:cancel="closeStageForm"/>
-              </v-dialog>
-              <v-dialog v-model="counterpartyAct">
-                <counterparty-form  v-on:saveCountercontract="saveCounter" v-on:counterCancel="closeCounterForm"/>
-              </v-dialog>
-              <v-card-title>Таблица этапов договора</v-card-title>
-              <v-data-table v-if="EditedItem.stages.length > 0"
-                            :headers="stages_headers"
-                            :items="EditedItem.stages"
-                            :items-per-page="5"
-                            class="elevation-3">
-                <template v-slot:[`item.actions`]="{ item }">
-                  <v-icon small class="mr-2" @click="editStageItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
-                  <v-icon small text @click="deleteStageItem(item)" large style="color: darkred">
-                    mdi-delete
-                  </v-icon>
-                </template>
-              </v-data-table>
-              <v-card-title>Таблица договоров с контрагентами</v-card-title>
-              <v-data-table v-if="EditedItem.counterparties.length > 0"
-                            :headers="countercontracts_headers"
-                            :items="EditedItem.counterparties"
-                            :items-per-page="5"
-                            class="elevation-3">
-                <template v-slot:[`item.actions`]="{ item }">
-                  <v-icon small class="mr-2" @click="editCounterItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
-                  <v-icon small text @click="deleteCounterItem(item)" large style="color: darkred">
-                    mdi-delete
-                  </v-icon>
-                </template>
-              </v-data-table>
-            </v-form>
-          </v-card-text>
+              <v-card-actions>
+                <v-btn color="primary" @click="save">Сохранить</v-btn>
+                <v-btn color="red" @click="close">Отменить</v-btn>
+              </v-card-actions>
+            </v-form></v-card-text>
         </v-card>
       </v-dialog>
-
     </v-content>
   </v-app>
 </template>
@@ -144,8 +113,11 @@
 import Vue, { defineComponent } from "vue";
 import { required, minLength } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
-import StageForm from "./StageForm.vue";
+
 import CounterpartyForm from "./CounterpartyForm.vue";
+import { mapState } from 'vuex';
+import Stg from "@/pages/components/stg.vue";
+
 
 // Add validate method to Vue prototype
 Vue.prototype.validate = function () {
@@ -153,325 +125,247 @@ Vue.prototype.validate = function () {
     this.$refs.form.validate();
   }
 };
-interface Stage {
-  stageName: string,
-  planDate: string,
-  factDate: string,
-  stageAmount: number,
-  planSum: number,
-  factSum: number,
+interface Contract {
+  id?: number,
+  name: string,
+  type: string,
+  amount: number,
+  plannedDate: string,
+  actualDate: string,
+  user: User
 }
-
 interface User {
+  id: number,
+  login: string,
   fullName: string,
-  username: string,
+  terminationDate: string,
+  isAdmin: boolean
 }
 
-interface Countercontract {
-  countercontractName: string,
-  countercontractType: string,
-  counterParty: string,
-  counterPlan: string,
-  counterFact: string,
-  counterAmount: number,
-}
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Administration",
-
-  components: {CounterpartyForm, StageForm},
-
+  components: {Stg, CounterpartyForm},
   data() {
     return {
       EditedItem: {
-        user: {
-          fullName: "",
-          username: "",
-        } as User,
+        id: -1,
         name: "",
         type: "",
-        plan: "",
-        fact: "",
-        amount: "",
-        stage: {
-          stageName:"",
-          planDate: "",
-          factDate: "",
-          stageAmount: 0,
-          planSum: 0,
-          factSum: 0},
-        stages: [] as Stage[],
-        countercontract: {
-          countercontractName: "",
-          countercontractType: "",
-          counterParty: "",
-          counterPlan: "",
-          counterFact: "",
-          counterAmount: 0,
-        },
-        counterparties: [] as Countercontract[],
+        plannedDate: "",
+        actualDate: "",
+        amount: 0,
+        user: {
+          id: -1,
+          login: "",
+          fullName: "",
+          terminationDate: "",
+          isAdmin: false
+        } as User
       },
       defaultItem: {
-        user: {
-          fullName: "",
-          username: "",
-        } as User,
+        id: -1,
         name: "",
         type: "",
-        plan: "",
-        fact: "",
-        amount: "",
-        stage: {
-          stageName:"",
-          planDate: "",
-          factDate: "",
-          stageAmount: 0,
-          planSum: 0,
-          factSum: 0},
-        stages: [] as Stage[],
-        countercontract: {
-          countercontractName: "",
-          countercontractType: "",
-          counterParty: "",
-          counterPlan: "",
-          counterFact: "",
-          counterAmount: 0,
-        },
-        counterparties: [] as Countercontract[],
+        plannedDate: "",
+        actualDate: "",
+        amount: 0,
+        user: {
+          id: -1,
+          login: "",
+          fullName: "",
+          terminationDate: "",
+          isAdmin: false
+        } as User
       },
-      stageAct: false,
-      counterpartyAct: false,
+      contractID: -1,
       dialogVisible: false,
       editedIndex: -1,
+      isEdit: false,
       nameRules: [
         required,
         minLength(3),
       ],
       valid: true,
+      page: 1,
+      itemsPerPage: 10,
+      // perPageChoices: [
+      //   {text:'10 records/page' , value: 10},
+      //   {text:'20 records/page' , value: 20},
+      // ],
       types: ["Закупка", "Поставка", "Работы"],
       headers: [
-        { text: "Ответственный пользователь", align: "start", sortable: false, value: 'user.fullName'},
-        {text: "Название", align: "start", sortable: false, value: "name",},
+        {text: "Ответственный пользователь", value: "user.fullName"},
+        {text: "Название", align: "start", sortable: false, value: "name"},
         { text: "Тип договора", align: "start", sortable: false, value: 'type'},
-        { text: "Плановые сроки", align: "start", sortable: false, value: "plan" },
-        { text: "Фактические сроки", align: "start", sortable: false, value:  "fact"},
+        { text: "Плановые сроки", align: "start", sortable: false, value: "plannedDate" },
+        { text: "Фактические сроки", align: "start", sortable: false, value:  "actualDate"},
         { text: "Сумма", align: "start", sortable: false, value: "amount"},
         { text: "Действия", value: "actions", sortable: false},
       ],
-      countercontracts_headers: [
-        {text: "Название", value: "countercontractName"},
-        {text: "Тип договора", value: "countercontractType"},
-        {text: "Организация-контрагент", value: "counterParty"},
-        {text: "Плановые сроки начала и окончания", value: "counterPlan"},
-        {text: "Фактические сроки начала и окончания", value: "counterFact"},
-        {text: "Сумма договора", value: "counterAmount"},
-        {text: "Действия", value: "actions", sortable: false},
-      ],
-      stages_headers: [
-        {text: "Название", value: "stageName"},
-        {text: "Плановые сроки", value: "planDate"},
-        {text:  "Фактические сроки", value: "factDate"},
-        {text: "Сумма этапа", value: "stageAmount"},
-        {text: "Плановые расходы", value: "planSum"},
-        {text: "Фактические расходы", value: "factSum"},
-        { text: "Действия", value: "actions", sortable: false}
-      ],
-      users: [] as User[],
-      contracts: [
-        {
-          user: {
-            fullName: "Пупсиков Пупсик Пупсикович",
-            username: "pups1",
-          } as User,
-          name: "Договор 1",
-          type: "Тип 1",
-          plan: "01.01.2023 - 01.01.2024",
-          fact: "01.01.2023 - 01.01.2024",
-          amount: "1000000",
-          stage: {
-            stageName: "",
-            planDate: "",
-            factDate: "",
-            stageAmount: 0,
-            planSum: 0,
-            factSum: 0
-          },
-          stages: [{
-            stageName: "",
-            planDate: "",
-            factDate: "",
-            stageAmount: 0,
-            planSum: 0,
-            factSum: 0
-          }],
-          countercontract: {
-            countercontractName: "",
-            countercontractType: "",
-            counterParty: "",
-            counterPlan: "",
-            counterFact: "",
-            counterAmount: 0,
-          },
-          counterparties: [{
-            countercontractName: "",
-            countercontractType: "",
-            counterParty: "",
-            counterPlan: "",
-            counterFact: "",
-            counterAmount: 0,
-          }],
-        },
-        {
-          user: {
-            fullName: "Пупсиков Пупсик Пупсикович",
-            username: "pups2",
-          } as User,
-          name: "Договор 2",
-          type: "Тип 2",
-          plan: "01.02.2023 - 01.02.2024",
-          fact: "01.02.2023 - 01.02.2024",
-          amount: "2000000",
-          stage: {
-            stageName:"",
-            planDate: "",
-            factDate: "",
-            stageAmount: "",
-            planSum: "",
-            factSum: ""},
-          stages: [{
-            stageName:"",
-            planDate: "",
-            factDate: "",
-            stageAmount: 0,
-            planSum: 0,
-            factSum: 0}],
-          countercontract: {
-            countercontractName: "",
-            countercontractType: "",
-            counterParty: "",
-            counterPlan: "",
-            counterFact: "",
-            counterAmount: 0,
-          },
-          counterparties: [{
-            countercontractName: "",
-            countercontractType: "",
-            counterParty: "",
-            counterPlan: "",
-            counterFact: "",
-            counterAmount: 0,
-          }],
-        },
-        {
-          user: {
-            fullName: "Пупсиков Пупсик Пупсикович",
-            username: "pups3",
-          } as User,
-          name: "Договор 3",
-          type: "Тип 3",
-          plan: "01.03.2023 - 01.03.2024",
-          fact: "01.03.2023 - 01.03.2024",
-          amount: "3000000",
-          stage: {
-            stageName:"",
-            planDate: "",
-            factDate: "",
-            stageAmount: 0,
-            planSum: 0,
-            factSum: 0},
-          stages: [{
-            stageName:"",
-            planDate: "",
-            factDate: "",
-            stageAmount: 0,
-            planSum: 0,
-            factSum: 0}],
-          countercontract: {
-            countercontractName: "",
-            countercontractType: "",
-            counterParty: "",
-            counterPlan: "",
-            counterFact: "",
-            counterAmount: 0,
-          },
-          counterparties: [{
-            countercontractName: "",
-            countercontractType: "",
-            counterParty: "",
-            counterPlan: "",
-            counterFact: "",
-            counterAmount: 0,
-          }]
-        },
-      ],
-
     };
   },
   watch: {
     dialog (val) {
       val || this.close()
+    }
+  },
+  computed: {
+    ...mapState('contractsStore', ['all']),
+    isAdmin1() {
+      return  this.$store.getters["users/getUserRole"];
     },
+    totalPages(){
+      return this.$store.state.contractsStore.totalPages
+    },
+    totalItems(){
+      return this.$store.state.contractsStore.totalElements
+    },
+    users() {
+      let userList = [] as User[]
+      userList = this.$store.state.users.all
+      return userList
+    },
+    contracts() {
+      console.log(this.$store.state.contractsStore.allForAdmin)
+      let contractList = this.$store.state.contractsStore.allForAdmin
+      let contract: Contract = {actualDate: "", amount: 0, id: 0, name: "", plannedDate: "", type: "",  user: {
+          id: -1,
+          login: "",
+          fullName: "",
+          terminationDate: "",
+          isAdmin: false
+        } as User};
+      let contractsAll = [] as Contract[];
+      for (let i=0; i<contractList.length; i++){
+        contract.id = contractList[i].id;
+        contract.name = contractList[i].name;
+        contract.type = contractList[i].type;
+        contract.amount = contractList[i].amount;
+        contract.plannedDate = contractList[i].plannedStartDate + ' - ' + contractList[i].plannedEndDate;
+        contract.actualDate = contractList[i].actualStartDate + ' - ' + contractList[i].actualEndDate;
+        contract.user = contractList[i].user
+        contractsAll.push(contract);
+        contract = {actualDate: "", amount: 0, id: 0, name: "", plannedDate: "", type: "",  user: {
+            id: -1,
+            login: "",
+            fullName: "",
+            terminationDate: "",
+            isAdmin: false
+          } as User};
+      }
+      return contractsAll
+    }
   },
   methods: {
-
     editItem (item: any) {
       this.editedIndex = this.contracts.indexOf(item)
       this.EditedItem = Object.assign({}, item)
-      this.dialogVisible = true
-    },
-    editStageItem(item: any) {
-      this.EditedItem.stage = Object.assign({}, item);
-      this.stageAct = true
+      this.contractID = this.EditedItem.id
+      console.log(this.EditedItem.id)
+      this.isEdit = true
+      let data = this.EditedItem.id
+      this.$store.dispatch('stages/allStages', data).then(()=> {
+        //this.dialogVisible = true
+        //this.contractStages = this.$store.state.stages.all
+      })
+      this.$store.dispatch('counterContracts/allCounterpartyContracts', data).then(()=>{
+        this.dialogVisible = true
+      })
     },
 
     deleteItem (item: any) {
-      const index = this.contracts.indexOf(item)
-      confirm('Are you sure you want to delete this item?') && this.contracts.splice(index, 1)
+      this.EditedItem = Object.assign({}, item)
+      confirm('Are you sure you want to delete this item?') && this.$store.dispatch('contractsStore/deleteContract', this.EditedItem.id).
+      then(()=> this.close())
     },
 
     close () {
       this.dialogVisible = false
+      this.isEdit = false
       this.$nextTick(() => {
         this.EditedItem = Object.assign({}, this.defaultItem)
         this.editedIndex = -1
+        this.contractID = -1
+        this.$store.commit('stages/CLEAR_AFTER_ADDING')
+        this.$store.commit('counterContracts/CLEAR_AFTER_ADDING')
       })
     },
 
     save () {
       if (this.editedIndex > -1 ) {
+        const oldValue = this.contracts[this.editedIndex];
+        const newValue = this.EditedItem;
+        if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
+            oldValue.type !== newValue.type || oldValue.plannedDate !== newValue.plannedDate ||
+            oldValue.actualDate !== newValue.actualDate || oldValue.user.id !== newValue.user.id) {
+          const planDate = newValue.plannedDate.split("-");
+          const factDate = newValue.actualDate.split("-");
+          console.log(planDate, factDate)
+          const data = {
+            name: newValue.name,
+            type: newValue.type,
+            amount: newValue.amount,
+            plannedStartDate: planDate[0].replace(" ", ""),
+            plannedEndDate: planDate[1].replace(" ", ""),
+            actualStartDate: factDate[0].replace(" ", ""),
+            actualEndDate: factDate[1].replace(" ", ""),
+            userId: this.EditedItem.user.id,            //userId: this.$store.state.users.user.id,
+            id: newValue.id
+          }
+          this.$store.dispatch('contractsStore/putContract', data).then(this.reload)
+        }
         Object.assign(this.contracts[this.editedIndex], this.EditedItem)
-      } else {
-        this.contracts.push(this.EditedItem)
+        this.isEdit = false
+      }  else {
+        const planDate = this.EditedItem.plannedDate.split("-");
+        const factDate = this.EditedItem.actualDate.split("-");
+        const data = {
+          name: this.EditedItem.name,
+          type: this.EditedItem.type,
+          amount: this.EditedItem.amount,
+          plannedStartDate: planDate[0].replace(" ", ""),
+          plannedEndDate: planDate[1].replace(" ", ""),
+          actualStartDate: factDate[0].replace(" ", ""),
+          actualEndDate: factDate[1].replace(" ", ""),
+          userId: this.EditedItem.user.id,
+          //user: this.EditedItem.user,
+          contractStages: this.$store.state.stages.all,
+          counterpartyContracts: this.$store.state.counterContracts.allCounterContracts
+        }
+        this.$store.dispatch("contractsStore/addNew", data).then(()=>{this.$store.dispatch('contractsStore/getAll', {})
+          this.$store.commit('stages/CLEAR_AFTER_ADDING')
+          this.$store.commit('counterContracts/CLEAR_AFTER_ADDING')
+        })
       }
 
-      this.stageAct = false;
       this.close()
     },
-    saveStage(stage: any ) { // новый метод для добавления этапа в массив
-      this.EditedItem.stage = stage
-      const stg = this.EditedItem.stage;
-      this.EditedItem.stages.push(stg);
-      this.stageAct = false;
+    reload() {
+      this.$store.dispatch('contractsStore/allAdminContracts', {})
     },
-    closeStageForm() {
-      this.stageAct = false;
-
-    },
-    saveCounter(contract: any) {
-      this.EditedItem.countercontract = contract;
-      const cct = this.EditedItem.countercontract;
-      this.EditedItem.counterparties.push(cct);
-      this.counterpartyAct = false;
-    },
-    closeCounterForm() {
-      this.counterpartyAct = false;
+    updatePage() {
+      const page = this.page - 1;
+      const size = this.itemsPerPage;
+      const data = {
+        page: page,
+        size: size
+      };
+      this.$store.dispatch('contractsStore/allAdminContracts', data)
     }
+
+
   },
   setup() {
     const v$ = useVuelidate();
 
     return { v$ };
 
+  },
+  created(){
+    this.$store.dispatch('counterparties/allCounterpartyOrganizations', {})
+    this.$store.dispatch('contractsStore/allAdminContracts', {})
+    this.$store.dispatch('users/allUsers', {})
   }
 });
 </script>
@@ -479,4 +373,3 @@ export default defineComponent({
 <style>
 
 </style>
-

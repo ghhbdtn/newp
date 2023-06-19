@@ -1,12 +1,37 @@
 <template>
   <v-app>
   <v-content>
+    <v-card>
     <v-data-table  @click:row="editItem"
         :headers="headers"
         :items="contracts"
-        :items-per-page="10"
+        :items-per-page="itemsPerPage"
+        :page.sync="page"
+        hide-default-footer
         class="elevation-1"
     >
+
+
+      <!-- <template v-slot:top="{ pagination, options, updateOptions }">
+         <v-data-footer
+             :pagination="pagination"
+             :options="options"
+             @update:options="updateOptions"
+             items-per-page-text="$vuetify.dataTable.itemsPerPageText"/>
+       </template> -->
+       <!-- <template v-slot:bottom>
+         <div class="text-center pt-2">
+
+           <v-pagination
+               v-model="page"
+               :length="totalPages"
+               :classes="bootstrapPaginationClasses"
+               :page-count="totalPages"
+               color="primary"
+           ></v-pagination>
+
+         </div>
+       </template> -->
       <template v-slot:[`item.actions`]="{ item }" v-if="isAdmin1">
         <v-icon small class="mr-2" @click="editItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
         <v-icon small text @click="deleteItem(item)" large style="color: darkred">
@@ -15,7 +40,26 @@
       </template>
 
     </v-data-table>
-
+      <template v-if="contracts.length> 0">
+        <div>
+          <v-pagination
+              v-model="page"
+              :length="totalPages"
+              @input="updatePage"
+          >
+          </v-pagination>
+        </div>
+      </template>
+      <!-- <v-select
+          dense
+          outlined
+          hide-details
+          :value="itemsPerPage"
+          label="Items per page"
+          @change="itemsPerPage = parseInt($event, 10)"
+          :items="perPageChoices">
+      </v-select>-->
+    </v-card>
     <v-dialog v-model="dialogVisible"  @click.prevent persistent>
       <template v-slot:activator="{ on, attrs }">
         <v-btn v-if="isAdmin1"
@@ -88,6 +132,7 @@ import { useVuelidate } from "@vuelidate/core";
 import CounterpartyForm from "./CounterpartyForm.vue";
 import { mapState } from 'vuex';
 import Stg from "@/pages/components/stg.vue";
+import { VPagination } from 'vuetify/lib';
 
 
 // Add validate method to Vue prototype
@@ -109,7 +154,7 @@ interface Contract {
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Contracts",
-  components: {Stg, CounterpartyForm},
+  components: {Stg, CounterpartyForm, VPagination},
   data() {
     return {
       EditedItem: {
@@ -138,6 +183,12 @@ export default defineComponent({
       ],
       valid: true,
       types: ["Закупка", "Поставка", "Работы"],
+      page: 1,
+      itemsPerPage: 10,
+      // perPageChoices: [
+      //   {text:'10 records/page' , value: 10},
+      //   {text:'20 records/page' , value: 20},
+      // ],
       headers: [
         {text: "Название", align: "start", sortable: false, value: "name"},
         { text: "Тип договора", align: "start", sortable: false, value: 'type'},
@@ -157,6 +208,12 @@ export default defineComponent({
     ...mapState('contractsStore', ['all']),
     isAdmin1() {
       return  this.$store.getters["users/getUserRole"];
+    },
+    totalPages(){
+      return this.$store.state.contractsStore.totalPages
+    },
+    totalItems(){
+      return this.$store.state.contractsStore.totalElements
     },
     contracts() {
       console.log(this.$store.state.contractsStore.all)
@@ -259,6 +316,15 @@ export default defineComponent({
 
       this.close()
     },
+    updatePage() {
+      const page = this.page - 1;
+      const size = this.itemsPerPage;
+      const data = {
+        page: page,
+        size: size
+      };
+      this.$store.dispatch('contractsStore/getAll', data)
+    }
 
 
   },
@@ -270,6 +336,7 @@ export default defineComponent({
   },
   created(){
     this.$store.dispatch('counterparties/allCounterpartyOrganizations', {})
+    this.$store.dispatch('contractsStore/getAll', {})
   }
 });
 </script>

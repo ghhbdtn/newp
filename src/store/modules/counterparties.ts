@@ -9,7 +9,6 @@ interface User {
     terminationDate: string,
     isAdmin: boolean
 }
-//TODO добавить объект внутри договора
 interface Organization{
     id?: number,
     name: string,
@@ -18,20 +17,26 @@ interface Organization{
 }
 
 interface State {
-    allOrganizations: Organization[]
+    allOrganizations: Organization[],
+    totalPages: number,
+    totalElements: number
 }
 
 export const  counterparties = {
     namespaced: true,
     state: {
-        allOrganizations: [] as Organization[]
+        allOrganizations: [] as Organization[],
+        totalPages: 0,
+        totalElements: 0
     } as State,
 
     getters: {
     },
     mutations: {
-        SET_ORGANIZATIONS(state: State,content: []) {
-            state.allOrganizations = content
+        SET_ORGANIZATIONS(state: State,obj: {items: [], numPages: number, numElements: number}) {
+            state.allOrganizations = obj.items
+            state.totalPages = obj.numPages;
+            state.totalElements = obj.numElements;
         },
         SET_ORGANIZATION(state: State,content: Organization) {
             state.allOrganizations.push(content)
@@ -46,8 +51,14 @@ export const  counterparties = {
                     withCredentials: true, method: "POST" })
                     .then(resp => {
                         const content = resp.data.content;
-                        console.log(resp.data);
-                        commit('SET_ORGANIZATIONS', content);
+                        const pages = resp.data.totalPages;
+                        const elements = resp.data.totalElements;
+                        const obj = {
+                            items: content,
+                            numPages: pages,
+                            numElements: elements
+                        }
+                        commit('SET_ORGANIZATIONS', obj);
                         resolve(resp)
                     })
                     .catch(err => {

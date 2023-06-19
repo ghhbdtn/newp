@@ -26,7 +26,9 @@ interface Stage {
 
 interface State {
     ID: number,
-    all: Stage[]
+    all: Stage[],
+    totalPages: number,
+    totalElements: number
 }
 
 
@@ -34,7 +36,9 @@ export const stages =  {
     namespaced: true,
 state: {
     ID: -1,
-    all: [] as Stage[]
+    all: [] as Stage[],
+    totalPages: 0,
+    totalElements: 0
 } as State,
 
 getters:  {
@@ -44,14 +48,13 @@ getters:  {
 },
 
 mutations: {
-    SET_STAGES(  state: State,content: {}) {
-        console.log(content)
+    SET_STAGES(  state: State,data: {content: [], contractId: number, pages: number, elements: number}) {
+        console.log(data)
         state.all = [];
-        // @ts-ignore
-        state.all = content['content'];
-        // @ts-ignore
-        state.ID = content['contractID']
-        console.log(state.all)
+        state.all = data.content;
+        state.ID = data.contractId;
+        state.totalPages = data.pages;
+        state.totalElements = data.elements;
     },
     SET_STAGE: (state: State, data: Stage) => {
         state.all.push(data)
@@ -80,8 +83,10 @@ actions: {
                 withCredentials: true, method: "POST" })
                 .then(resp => {
                     const content = resp.data.content;
+                    const pages = resp.data.totalPages;
+                    const elements = resp.data.totalElements;
                     console.log(resp.data);
-                    commit('SET_STAGES', {content, contractId});
+                    commit('SET_STAGES', {content: content, contractId: contractId, pages: pages, elements: elements});
                     resolve(resp)
                 })
                 .catch(err => {

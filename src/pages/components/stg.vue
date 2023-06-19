@@ -16,6 +16,7 @@
                   :headers="stages_headers"
                   :items="contractStages"
                   :items-per-page="10"
+                   hide-default-footer
                   class="elevation-3">
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon small class="mr-2" @click="editStageItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
@@ -24,6 +25,25 @@
         </v-icon>
       </template>
     </v-data-table>
+    <template v-if="contractStages.length> 0">
+      <div>
+        <v-pagination
+            v-model="page"
+            :length="totalPages"
+            @input="updatePage"
+        >
+        </v-pagination>
+      </div>
+    </template>
+<!--    <v-select-->
+<!--        dense-->
+<!--        outlined-->
+<!--        hide-details-->
+<!--        :value="itemsPerPage"-->
+<!--        label="Items per page"-->
+<!--        @change="itemsPerPage = parseInt($event, 10)"-->
+<!--        :items="perPageChoices">-->
+<!--    </v-select>-->
     <v-dialog v-model="stageAct" @click.prevent persistent>
     <v-card>
       <v-card-text>
@@ -148,6 +168,12 @@ export default defineComponent( {
         actualSalaryExpenses: 0,
         plannedSalaryExpenses: 0
       } as Stage,
+      page: 1,
+      itemsPerPage: 10,
+      // perPageChoices: [
+      //   {text:'10 records/page' , value: 10},
+      //   {text:'20 records/page' , value: 20},
+      // ],
     }
   },
   computed: {
@@ -197,6 +223,12 @@ export default defineComponent( {
         }
       }
       return stagesAll
+    },
+    totalPages(): number{
+      return this.$store.state.stages.totalPages;
+    },
+    totalElements(): number{
+      return this.$store.state.stages.totalElements;
     }
   },
   methods: {

@@ -20,24 +20,36 @@ interface CounterContract {
     plannedEndDate: string,
     actualStartDate: string,
     actualEndDate: string,
+    counterpartyOrganization?: {
+        id: number,
+        name: string,
+        address: string,
+        inn: number
+    },
     counterpartyOrganizationId: number
 }
 
 interface State {
-    allCounterContracts: CounterContract[]
+    allCounterContracts: CounterContract[],
+    totalPages: number,
+    totalElements: number
 }
 
 export const  counterContracts = {
     namespaced: true,
     state: {
-        allCounterContracts: [] as CounterContract[]
+        allCounterContracts: [] as CounterContract[],
+        totalPages: 0,
+        totalElements: 0
     } as State,
 
     getters: {
     },
     mutations: {
-        SET_COUNTER_CONTRACTS(state: State,content: []) {
-            state.allCounterContracts = content
+        SET_COUNTER_CONTRACTS(state: State, data: {content: [], pages: number, elements: number}) {
+            state.allCounterContracts = data.content;
+            state.totalPages = data.pages;
+            state.totalElements = data.elements;
         },
         SET_COUNTER_CONTRACT: (state: State, data: CounterContract) => {
             state.allCounterContracts.push(data)
@@ -66,7 +78,9 @@ export const  counterContracts = {
                     .then(resp => {
                         const content = resp.data.content;
                         console.log(resp.data);
-                        commit('SET_COUNTER_CONTRACTS', content);
+                        const pages = resp.data.totalPages;
+                        const elements = resp.data.totalElements;
+                        commit('SET_COUNTER_CONTRACTS', {content: content, pages: pages, elements: elements});
                         resolve(resp)
                     })
                     .catch(err => {

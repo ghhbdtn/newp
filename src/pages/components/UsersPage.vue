@@ -15,15 +15,6 @@
         </template>
       </v-data-table>
       <v-dialog v-model="dialog">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-              color="primary"
-              dark
-              class="mb-2"
-              v-bind="attrs"
-              v-on="on"
-          >Добавить</v-btn>
-        </template>
         <v-card>
           <v-card-text>
             <v-form ref="form" style="background-color: rgb(255,255,255)">
@@ -71,7 +62,8 @@ interface User {
   fullName: string,
   login: string,
   password: string,
-  terminationDate: string
+  terminationDate: string,
+  newPassword: string
 }
 export default defineComponent( {
   // eslint-disable-next-line vue/multi-word-component-names
@@ -84,14 +76,16 @@ export default defineComponent( {
         fullName: "",
         login: "",
         password: "",
-        terminationDate: ""
+        terminationDate: "",
+        newPassword: ""
       } as User,
       editedUser: {
         id: -1,
         fullName: "",
         login: "",
         password: "",
-        terminationDate: ""
+        terminationDate: "",
+        newPassword: ""
       } as User,
       user_headers: [
         {

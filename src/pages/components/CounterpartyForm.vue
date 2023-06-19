@@ -16,6 +16,7 @@
                   :headers="countercontracts_headers"
                   :items="countercontracts"
                   :items-per-page="10"
+                   hide-default-footer
                   class="elevation-3">
       <template v-slot:[`item.actions`]="{ item }">
         <v-icon small class="mr-2" @click="editCounterItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
@@ -24,6 +25,25 @@
         </v-icon>
       </template>
     </v-data-table>
+    <template v-if="countercontracts.length> 0">
+      <div>
+        <v-pagination
+            v-model="page"
+            :length="totalPages"
+            @input="updatePage"
+        >
+        </v-pagination>
+      </div>
+    </template>
+   <!-- <v-select
+        dense
+        outlined
+        hide-details
+        :value="itemsPerPage"
+        label="Items per page"
+        @change="itemsPerPage = parseInt($event, 10)"
+        :items="perPageChoices">
+    </v-select> -->
     <v-dialog v-model="counterpartyAct" @click.prevent persistent>
 <v-card>
 <v-card-text>
@@ -50,12 +70,15 @@
         </v-col>
         <v-col cols="12" sm="6" md="4">
           <v-select
-              v-model="editedCountercontract.organization.id"
+              v-model="editedCountercontract.organization"
               :items="organizations"
               item-text="name"
               item-value="id"
+              persistent-hint
+              return-object
               label="Организация-Контрагент"
-          ></v-select>
+          >
+          </v-select>
         </v-col>
         <v-col cols="12" sm="6" md="4">
           <v-text-field v-model="editedCountercontract.amount" label="Сумма"></v-text-field>
@@ -93,7 +116,9 @@ interface CounterContract {
   actualDate: string,
   organization: {
     id: number,
-    name: string
+    name: string,
+    address: string,
+    inn: number
   },
   counterpartyOrganizationId: number
 }
@@ -117,7 +142,9 @@ export default defineComponent({
         actualDate: "",
         organization: {
           id: -1,
-          name: ""
+          name: "",
+          address: "",
+          inn: 0
         },
         counterpartyOrganizationId: -1
       } as CounterContract,
@@ -130,13 +157,21 @@ export default defineComponent({
         actualDate: "",
         organization: {
           id: -1,
-          name: ""
+          name: "",
+          address: "",
+          inn: 0
         },
         counterpartyOrganizationId: -1
-      },
+      } as CounterContract,
       countercontractTypes: ["Закупка", "Поставка", "Работы"],
       counterpartyAct: false,
       editedCounterIndex: -1,
+      page: 1,
+      itemsPerPage: 10,
+      // perPageChoices: [
+      //   {text:'10 records/page' , value: 10},
+      //   {text:'20 records/page' , value: 20},
+      // ],
       countercontracts_headers: [
         {text: "Название", value: "name"},
         {text: "Тип договора", value: "type"},
@@ -159,7 +194,9 @@ export default defineComponent({
         actualDate: "",
         organization: {
           id: -1,
-          name: ""
+          name: "",
+          address: "",
+          inn: 0
         },
         counterpartyOrganizationId: -1
       };
@@ -174,6 +211,8 @@ export default defineComponent({
           //console.log(this.organizations,  countercontractList[i].counterpartyOrganization.id)
           countercontract.organization.id = countercontractList[i].counterpartyOrganization.id;
           countercontract.organization.name = countercontractList[i].counterpartyOrganization.name;
+          countercontract.organization.address = countercontractList[i].counterpartyOrganization.address;
+          countercontract.organization.inn = countercontractList[i].counterpartyOrganization.inn;
           countercontract.amount = countercontractList[i].amount;
           countercontract.plannedDate = countercontractList[i].plannedStartDate + ' - ' + countercontractList[i].plannedEndDate;
           countercontract.actualDate = countercontractList[i].actualStartDate + ' - ' + countercontractList[i].actualEndDate;
@@ -187,7 +226,9 @@ export default defineComponent({
             actualDate: "",
             organization: {
               id: -1,
-              name: ""
+              name: "",
+              address: "",
+              inn: 0
             },
             counterpartyOrganizationId: -1
           };
@@ -220,6 +261,12 @@ export default defineComponent({
         }
         }
       return organizations
+    },
+    totalPages(): number{
+      return this.$store.state.counterparties.totalPages;
+    },
+    totalElements(): number{
+      return this.$store.state.counterparties.totalElements;
     }
   },
   methods: {
@@ -243,6 +290,7 @@ export default defineComponent({
           actualStartDate: factDate[0].replace(" ", ""),
           actualEndDate: factDate[1].replace(" ", ""),
           counterpartyOrganizationId: cct.organization.id,
+          counterpartyOrganization: cct.organization,
           contractID: this.index
         }
         console.log(this.index)
@@ -252,6 +300,7 @@ export default defineComponent({
       } else if (this.editedCounterIndex > -1) {
         const oldValue = this.countercontracts[this.editedCounterIndex];
         const newValue = this.editedCountercontract;
+        console.log(oldValue, newValue)
         if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
             oldValue.type !== newValue.type ||
             oldValue.organization.id !== newValue.organization.id ||
@@ -269,7 +318,8 @@ export default defineComponent({
             plannedEndDate: planDate[1].replace(" ", ""),
             actualStartDate: factDate[0].replace(" ", ""),
             actualEndDate: factDate[1].replace(" ", ""),
-            contractID: newValue.id
+            counterpartyOrganization: newValue.organization,
+            id: newValue.id
           }
           console.log(this.$store.state.stages.ID)
           this.$store.dispatch('counterContracts/putCounterContract', data).then(
@@ -293,18 +343,23 @@ export default defineComponent({
           actualStartDate: factDate[0].replace(" ", ""),
           actualEndDate: factDate[1].replace(" ", ""),
           counterpartyOrganizationId: cct.organization.id,
+          counterpartyOrganization: cct.organization,
           contractID: this.index
         }
         console.log(this.index)
-        this.$store.dispatch('counterContracts/addCounterpartyContract', data)
+        this.$store.dispatch('counterContracts/addCounterpartyContract', data).then(this.reload)
       }
       //this.counterparties.push(cct);
       this.closeCounterForm();
       this.counterpartyAct = false;
     },
+    reload() {
+      this.$store.dispatch('counterContracts/allCounterpartyContracts')
+    },
     closeCounterForm() {
       this.editedCountercontract = Object.assign({}, this.defaultCounterContract)
       this.counterpartyAct = false;
+      this.editedCounterIndex = -1;
     },
     deleteCounterItem(item: CounterContract){
       //const index = this.contractStages.indexOf(item)

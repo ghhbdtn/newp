@@ -10,13 +10,18 @@
     <v-tab @click="contracts1"> Договоры</v-tab>
     <v-tab @click="counterparty">Организации-Контрагенты</v-tab>
     <v-tab @click="reports">Отчеты</v-tab>
-    <v-tab v-if="isAdmin1">
-    <v-menu open-on-hover offset-y transition="slide-x-transition" bottom right>
+
+    <v-menu open-on-hover offset-y transition="slide-x-transition" bottom right v-if="isAdmin1">
       <template v-slot:activator="{ on, attrs }">
         <v-btn text
+               height="100%"
+               variant="plain"
             flat v-bind="attrs" v-on="on"
         >
           Администрирование
+          <v-icon end>
+            mdi-menu-down
+          </v-icon>
         </v-btn>
       </template>
       <v-list>
@@ -29,10 +34,14 @@
         </v-list-item-action>
       </v-list-item>
       </v-list>
-    </v-menu> </v-tab>
-    <v-btn @click="logout" class="right">Выход из системы</v-btn>
+    </v-menu>
+<!--    <v-btn @click="logout" class="right">Выход из системы</v-btn>-->
   </v-tabs>
+
   </template>
+  <v-btn icon @click="logout">
+    <v-icon>mdi-exit-to-app</v-icon>
+  </v-btn>
   </v-app-bar>
 
 <router-view />
@@ -93,6 +102,9 @@ methods:
       console.log(this.$store.getters["users/getUser"])
       return admin
     }
+  },
+  created() {
+    this.$router.push('/menu/contracts')
   }
 })
 

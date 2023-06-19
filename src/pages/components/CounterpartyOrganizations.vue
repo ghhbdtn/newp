@@ -5,6 +5,7 @@
                      :headers="organization_headers"
                      :items="organizations"
                      :items-per-page="5"
+                     hide-default-footer
                      class="elevation-1"
       >
         <template v-slot:[`item.actions`]="{ item }">
@@ -14,6 +15,25 @@
           </v-icon>
         </template>
       </v-data-table>
+      <template v-if="organizations.length > 0">
+        <div>
+          <v-pagination
+              v-model="page"
+              :length="totalPages"
+              @input="updatePage"
+          >
+          </v-pagination>
+        </div>
+      </template>
+<!--      <v-select-->
+<!--          dense-->
+<!--          outlined-->
+<!--          hide-details-->
+<!--          :value="itemsPerPage"-->
+<!--          label="Items per page"-->
+<!--          @change="itemsPerPage = parseInt($event, 10)"-->
+<!--          :items="perPageChoices">-->
+<!--      </v-select>-->
         <v-dialog v-model="dialog">
           <template v-slot:activator="{ on, attrs }">
             <v-btn v-if="isAdmin"
@@ -90,6 +110,12 @@ export default defineComponent({
         address: "",
         inn: 0,
       } as Organization,
+      page: 1,
+      itemsPerPage: 10,
+      // perPageChoices: [
+      //   {text:'10 records/page' , value: 10},
+      //   {text:'20 records/page' , value: 20},
+      // ],
       organization_headers: [
         {text: "Название организации", value: "name"},
         {text: "Адресс", value: "address"},
@@ -108,6 +134,12 @@ export default defineComponent({
     },
     isAdmin() {
       return this.$store.state.users.user.isAdmin
+    },
+    totalPages(){
+      return this.$store.state.counterparties.totalPages;
+    },
+    totalElements(){
+      return this.$store.state.counterparties.totalElements;
     }
   },
   methods: {
@@ -155,6 +187,18 @@ export default defineComponent({
           this.$store.dispatch('counterparties/deleteOrganization', this.editedOrganization.id)
       //&& this.organizations.splice(index, 1)
     },
+    updatePage() {
+      const page = this.page - 1;
+      const size = this.itemsPerPage;
+      const data = {
+        page: page,
+        size: size
+      };
+      this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
+    }
+  },
+  created() {
+    this.$store.dispatch('counterparties/allCounterpartyOrganizations', {})
   }
 });
 </script>
