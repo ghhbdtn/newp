@@ -2,38 +2,96 @@
   <v-app>
   <v-content>
     <v-card>
-    <v-data-table  @click:row="editItem"
+      <template>
+        <v-col cols="10" sm="4" md="3">
+          <label class="filter-label">Отфильтровать договоры:</label>
+        </v-col>
+        <v-row align="center" justify="center">
+          <v-col cols="12" sm="3" md="3">
+            <v-text-field outlined
+                          color="#6A76AB"
+                v-model="filterValues.name"
+                label="По названию"
+                clearable
+                class="filter-input"
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" sm="3" md="3">
+            <v-select outlined
+                clearable
+                color="#6A76AB"
+                v-model="filterValues.type"
+                :items="types"
+                item-text="text"
+                item-value="value"
+                label="По типу договора"
+                class="filter-input"
+            ></v-select>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" sm="4" md="3">
+            <label class="filter-label">По плановым срокам:</label>
+          </v-col>
+
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined color="#6A76AB" type="date" label="Плановая дата начала" v-model="filterValues.plannedStartDate" class="filter-input" />
+          </v-col>
+
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined color="#6A76AB" type="date" label="Плановая дата конца" v-model="filterValues.plannedEndDate" class="filter-input" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" sm="4" md="3">
+            <label class="filter-label">По фактическим срокам:</label>
+          </v-col>
+
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined type="date" color="#6A76AB" label="Фактическая дата начала" v-model="filterValues.actualStartDate" class="filter-input" />
+          </v-col>
+
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined type="date" color="#6A76AB" label="Фактическая дата конца" v-model="filterValues.actualEndDate" class="filter-input" />
+          </v-col>
+          </v-row>
+
+          <v-row>
+          <v-col cols="12" sm="4" md="3">
+            <label class="filter-label">По сумме договора:</label>
+          </v-col>
+
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined type="number" color="#6A76AB" label="Минимальная сумма" v-model="filterValues.minAmount" class="filter-input" />
+          </v-col>
+
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined type="number" color="#6A76AB" label="Максимальная сумма" v-model="filterValues.maxAmount" class="filter-input" />
+          </v-col>
+          </v-row>
+        <v-row align="center" justify="center">
+          <v-col cols="12" sm="4" md="3">
+            <v-btn @click="updatePage" class="filter-button" color="#6A76AB" dark>
+              Найти
+              <v-icon>mdi-magnify</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </template>
+
+          <v-data-table  @click:row="editItem"
         :headers="headers"
         :items="contracts"
         :items-per-page="itemsPerPage"
+
+        :total-items="totalItems"
         :page.sync="page"
         hide-default-footer
         class="elevation-1"
     >
-
-
-      <!-- <template v-slot:top="{ pagination, options, updateOptions }">
-         <v-data-footer
-             :pagination="pagination"
-             :options="options"
-             @update:options="updateOptions"
-             items-per-page-text="$vuetify.dataTable.itemsPerPageText"/>
-       </template> -->
-       <!-- <template v-slot:bottom>
-         <div class="text-center pt-2">
-
-           <v-pagination
-               v-model="page"
-               :length="totalPages"
-               :classes="bootstrapPaginationClasses"
-               :page-count="totalPages"
-               color="primary"
-           ></v-pagination>
-
-         </div>
-       </template> -->
       <template v-slot:[`item.actions`]="{ item }" v-if="isAdmin1">
-        <v-icon small class="mr-2" @click="editItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
+        <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
         <v-icon small text @click="deleteItem(item)" large style="color: darkred">
           mdi-delete
         </v-icon>
@@ -43,27 +101,19 @@
       <template v-if="contracts.length> 0">
         <div>
           <v-pagination
+              color="#6A76AB"
               v-model="page"
-              :length="totalPages"
+              :length="Math.ceil(totalItems / itemsPerPage)"
               @input="updatePage"
           >
           </v-pagination>
         </div>
       </template>
-      <!-- <v-select
-          dense
-          outlined
-          hide-details
-          :value="itemsPerPage"
-          label="Items per page"
-          @change="itemsPerPage = parseInt($event, 10)"
-          :items="perPageChoices">
-      </v-select>-->
     </v-card>
     <v-dialog v-model="dialogVisible"  @click.prevent persistent>
       <template v-slot:activator="{ on, attrs }">
         <v-btn v-if="isAdmin1"
-            color="primary"
+            color="#6A76AB"
             dark
             class="mb-2"
             v-bind="attrs"
@@ -114,7 +164,7 @@
           </v-row>
         </v-container>
         <v-card-actions>
-          <v-btn color="primary" @click="save" v-if="isAdmin1">Сохранить</v-btn>
+          <v-btn color="#6A76AB" @click="save" v-if="isAdmin1">Сохранить</v-btn>
           <v-btn color="red" @click="close">{{isAdmin1 ? `Отменить` : `Закрыть`}}</v-btn>
         </v-card-actions>
       </v-form></v-card-text>
@@ -185,17 +235,34 @@ export default defineComponent({
       types: ["Закупка", "Поставка", "Работы"],
       page: 1,
       itemsPerPage: 10,
-      // perPageChoices: [
-      //   {text:'10 records/page' , value: 10},
-      //   {text:'20 records/page' , value: 20},
-      // ],
+      filterValue: "",
+      filterField: "",
       headers: [
-        {text: "Название", align: "start", sortable: false, value: "name"},
-        { text: "Тип договора", align: "start", sortable: false, value: 'type'},
-        { text: "Плановые сроки", align: "start", sortable: false, value: "plannedDate" },
-        { text: "Фактические сроки", align: "start", sortable: false, value:  "actualDate"},
-        { text: "Сумма", align: "start", sortable: false, value: "amount"},
+        {text: "Название", align: "start", sortable: true, value: "name"},
+        { text: "Тип договора", align: "start", sortable: true, value: 'type'},
+        { text: "Плановые сроки", align: "start", sortable: true, value: "plannedDate" },
+        { text: "Фактические сроки", align: "start", sortable: true, value:  "actualDate"},
+        { text: "Сумма", align: "start", sortable: true, value: "amount"},
         { text: "Действия", value: "actions", sortable: false},
+      ],
+      filterValues: {
+        name: "",
+        type: "",
+        plannedStartDate: "",
+        plannedEndDate: "",
+        actualStartDate: "",
+        actualEndDate: "",
+        maxAmount: 0,
+        minAmount: 0
+      },
+      filters: [
+        {text: "Название", align: "start", value: "NAME"},
+        { text: "Тип договора", align: "start",  value: 'TYPE'},
+        { text: "Плановые сроки начала", align: "start",  value: "PLANNED_START_DATE" },
+        { text: "Плановые сроки конца", align: "start",  value: "PLANNED_END_DATE" },
+        { text: "Фактические сроки начала", align: "start",  value:  "ACTUAL_START_DATE"},
+        { text: "Фактические сроки конца", align: "start",  value:  "ACTUAL_END_DATE"},
+        { text: "Сумма", align: "start",  value: "AMOUNT"}
       ],
     };
   },
@@ -214,6 +281,9 @@ export default defineComponent({
     },
     totalItems(){
       return this.$store.state.contractsStore.totalElements
+    },
+    isLast() {
+      return this.$store.state.contractsStore.last
     },
     contracts() {
       console.log(this.$store.state.contractsStore.all)
@@ -240,7 +310,7 @@ export default defineComponent({
       this.contractID = this.EditedItem.id
       console.log(this.EditedItem.id)
       this.isEdit = true
-      let data = this.EditedItem.id
+      let data = {contractId: this.EditedItem.id}
       this.$store.dispatch('stages/allStages', data).then(()=> {
         //this.dialogVisible = true
         //this.contractStages = this.$store.state.stages.all
@@ -252,8 +322,14 @@ export default defineComponent({
 
     deleteItem (item: any) {
       this.EditedItem = Object.assign({}, item)
-      confirm('Are you sure you want to delete this item?') && this.$store.dispatch('contractsStore/deleteContract', this.EditedItem.id).
-          then(()=> this.close())
+      confirm('Вы действительно хотите удалить договор, вместе с ним удалятся вся связанные стадии договора и договоры с контрагентами?')
+      && this.$store.dispatch('contractsStore/deleteContract', this.EditedItem.id).
+          then(()=> {this.close()
+          if (this.page == this.totalPages && this.totalItems == (this.page - 1) * this.itemsPerPage + 1) {
+            this.page--
+            this.updatePage()
+          }
+          })
     },
 
     close () {
@@ -319,11 +395,122 @@ export default defineComponent({
     updatePage() {
       const page = this.page - 1;
       const size = this.itemsPerPage;
-      const data = {
-        page: page,
-        size: size
-      };
-      this.$store.dispatch('contractsStore/getAll', data)
+      if(this.filterValues.name == null && this.filterValues.type == null && this.filterValues.type == "" || this.filterValues.name == "") {
+        const data = {
+          page: page,
+          size: size
+        };
+        this.$store.dispatch('contractsStore/getAll', data)
+      }
+      else {
+        const arr = [] as {}[];
+        // name: "",
+        //     type: "",
+        //     plannedStartDate: "",
+        //     plannedEndDate: "",
+        //     actualStartDate: "",
+        //     actualEndDate: "",
+        //     maxAmount: 0,
+        //     minAmount: 0
+        for (var filter in this.filterValues) {
+          switch (filter) {
+            case 'name':
+              if (this.filterValues.name !== null && this.filterValues.name !== "") {
+                const nameFilter = {
+                  key: 'NAME',
+                  targetEntity: "CONTRACT",
+                  operator: "LIKE",
+                  value: this.filterValues.name
+                }
+                arr.push(nameFilter)
+              }
+            break;
+            case 'type':
+              if (this.filterValues.type != null || this.filterValues.type !== "") {
+                const typeFilter = {
+                  key: 'TYPE',
+                  targetEntity: "CONTRACT",
+                  operator: "EQUAL",
+                  value: this.filterValues.type
+                }
+                arr.push(typeFilter)
+              }
+              break;
+            case 'plannedStartDate':
+              if (this.filterValues.plannedStartDate != null || this.filterValues.plannedStartDate !== "дд.мм.гггг") {
+                const plannedDateFilter = {
+                  key: 'PLANNED_START_DATE',
+                  targetEntity: "CONTRACT",
+                  operator: "GREATER",
+                  value: this.filterValues.plannedStartDate
+                }
+                arr.push(plannedDateFilter)
+              }
+              break;
+            case 'plannedEndDate':
+              if (this.filterValues.plannedEndDate != null || this.filterValues.plannedEndDate !== "дд.мм.гггг") {
+                const plannedDateFilter = {
+                  key: 'PLANNED_START_DATE',
+                  targetEntity: "CONTRACT",
+                  operator: "LESS",
+                  value: this.filterValues.plannedEndDate
+                }
+                arr.push(plannedDateFilter)
+              }
+              break;
+            case 'actualStartDate':
+              if (this.filterValues.actualStartDate != null || this.filterValues.actualStartDate !== "дд.мм.гггг") {
+                const actualDateFilter = {
+                  key: 'ACTUAL_START_DATE',
+                  targetEntity: "CONTRACT",
+                  operator: "GREATER",
+                  value: this.filterValues.actualStartDate
+                }
+                arr.push(actualDateFilter)
+              }
+              break;
+            case 'actualEndDate':
+              if (this.filterValues.actualEndDate != null || this.filterValues.actualEndDate !== "дд.мм.гггг") {
+                const actualDateFilter = {
+                  key: 'ACTUAL_END_DATE',
+                  targetEntity: "CONTRACT",
+                  operator: "LESS",
+                  value: this.filterValues.actualEndDate
+                }
+                arr.push(actualDateFilter)
+              }
+              break;
+            case 'maxAmount':
+              if (this.filterValues.maxAmount != null || this.filterValues.maxAmount !== 0) {
+                const amountFilter = {
+                  key: 'AMOUNT',
+                  targetEntity: "CONTRACT",
+                  operator: "LESS",
+                  value: this.filterValues.maxAmount
+                }
+                arr.push(amountFilter)
+              }
+              break;
+            case 'minAmount':
+              if (this.filterValues.minAmount != null || this.filterValues.minAmount !== 0) {
+                const amountFilter = {
+                  key: 'AMOUNT',
+                  targetEntity: "CONTRACT",
+                  operator: "GREATER",
+                  value: this.filterValues.minAmount
+                }
+                arr.push(amountFilter)
+              }
+              break;
+          }
+        }
+        const data = {
+          filters: arr,
+          page: page,
+          size: size
+        };
+        this.$store.dispatch('contractsStore/getAll', data)
+      }
     }
 
 
@@ -342,5 +529,25 @@ export default defineComponent({
 </script>
 
 <style>
+.filter-label {
+  font-weight: bold;
+}
 
+.filter-input {
+  width: 100%;
+}
+
+.col-12 {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.col-6 {
+  padding-top: 0;
+  padding-bottom: 0;
+  color: #6A76AB;
+}
+
+.v-text-field{
+  color: #6A76AB;
+}
 </style>

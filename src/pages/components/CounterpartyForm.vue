@@ -1,12 +1,10 @@
 <template>
   <div>
-  <v-card-text>Добавить договор с контрагентом</v-card-text>
   <v-btn @click="counterpartyAct = !counterpartyAct"
-         class="mx-2"
-         fab
+         text
          dark
-         color="indigo"
-         x-small>
+         color="indigo">
+    Добавить договор с контрагентом
     <v-icon dark>
       mdi-plus
     </v-icon>
@@ -15,7 +13,7 @@
     <v-data-table  @click:row="editCounterItem" v-if="countercontracts.length > 0"
                   :headers="countercontracts_headers"
                   :items="countercontracts"
-                  :items-per-page="10"
+                  :items-per-page="itemsPerPage"
                    hide-default-footer
                   class="elevation-3">
       <template v-slot:[`item.actions`]="{ item }">
@@ -27,7 +25,7 @@
     </v-data-table>
     <template v-if="countercontracts.length> 0">
       <div>
-        <v-pagination
+        <v-pagination v-if="this.index !== -1"
             v-model="page"
             :length="totalPages"
             @input="updatePage"
@@ -35,15 +33,6 @@
         </v-pagination>
       </div>
     </template>
-   <!-- <v-select
-        dense
-        outlined
-        hide-details
-        :value="itemsPerPage"
-        label="Items per page"
-        @change="itemsPerPage = parseInt($event, 10)"
-        :items="perPageChoices">
-    </v-select> -->
     <v-dialog v-model="counterpartyAct" @click.prevent persistent>
 <v-card>
 <v-card-text>
@@ -168,10 +157,7 @@ export default defineComponent({
       editedCounterIndex: -1,
       page: 1,
       itemsPerPage: 10,
-      // perPageChoices: [
-      //   {text:'10 records/page' , value: 10},
-      //   {text:'20 records/page' , value: 20},
-      // ],
+      itemsPerPageForAdding: 0,
       countercontracts_headers: [
         {text: "Название", value: "name"},
         {text: "Тип договора", value: "type"},
@@ -278,6 +264,8 @@ export default defineComponent({
     },
     saveCounter() {
       if(this.index === -1){
+        this.itemsPerPageForAdding++;
+        this.itemsPerPage = this.itemsPerPageForAdding;
         const cct = this.editedCountercontract;
         const planDate = cct.plannedDate.split("-");
         const factDate = cct.actualDate.split("-");
@@ -363,8 +351,28 @@ export default defineComponent({
     },
     deleteCounterItem(item: CounterContract){
       //const index = this.contractStages.indexOf(item)
-      this.editedCountercontract = Object.assign({}, item)
-      confirm('Are you sure you want to delete this item?') && this.$store.dispatch('counterContracts/deleteCounterContract', this.editedCountercontract.id)
+      if(this.index == -1) {
+        confirm('Are you sure you want to delete this item?') && this.$store.commit('counterContracts/DELETE_UNSAVED_COUNTER_CONTRACT', item)
+        this.closeCounterForm();
+      }else {
+        this.editedCountercontract = Object.assign({}, item)
+        confirm('Are you sure you want to delete this item?') &&
+        this.$store.dispatch('counterContracts/deleteCounterContract', this.editedCountercontract.id)
+        if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
+          this.page--;
+        }
+        this.updatePage();
+        this.closeCounterForm();
+      }
+    },
+    updatePage() {
+      const page = this.page - 1;
+      const size = this.itemsPerPage;
+      const data = {
+        page: page,
+        size: size
+      };
+      this.$store.dispatch('counterContracts/allCounterpartyContracts', data)
     }
   }
 });

@@ -26,17 +26,23 @@
               <v-col cols="10" sm="12">
                 <v-card-text for="selected-contract" class="subtitle-1">Выберите договор:</v-card-text>
                 <v-select
+                    :items="contracts"
                     id="selected-contract"
                     v-model="selectedContract"
-                    :items="contracts"
-                    item-text="number"
+                    item-text="name"
                     item-value="id"
                     variant="outlined"
-                ></v-select>
+                    persistent-hint
+                    return-object
+                >
+                  <template>
+                  <v-btn v-if="!last">Загрузить еще</v-btn>
+                  </template>
+                </v-select>
               </v-col>
             </v-row>
             <v-card-actions style="align-content: center">
-              <v-btn color="#6A76AB" @click="fetchStages" style="color: white" >Сформировать отчет</v-btn>
+              <v-btn color="#6A76AB" @click="downloadStagesReport" style="color: white" >Сформировать отчет</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -55,8 +61,10 @@ export default defineComponent({
     return {
       startDate: "",
       endDate: "",
-      selectedContract: "",
-      contracts: [] as any[],
+      selectedContract: {
+        name: "",
+        id: -1
+      }
     };
   },
   methods: {
@@ -67,8 +75,23 @@ export default defineComponent({
       }
       this.$store.dispatch('reports/downloadReport', data)
     },
+    downloadStagesReport() {
+      const data = this.selectedContract.id
+      this.$store.dispatch('reports/downloadStageReport', data)
+    }
 
   },
+  computed: {
+    last(){
+      return this.$store.state.contractsStore.last
+    },
+    contracts() {
+      return this.$store.state.contractsStore.all
+    }
+  },
+  created() {
+    this.$store.dispatch('contractsStore/getAll', {page: 0, size: 2147483647})
+  }
 });
 </script>
 

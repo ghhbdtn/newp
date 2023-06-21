@@ -1,12 +1,10 @@
 <template>
   <div>
-    <v-card-text>Добавить этап договора</v-card-text>
     <v-btn @click="stageAct = !stageAct"
-           class="mx-2"
-           fab
+           text
            dark
-           color="indigo"
-           x-small>
+           color="indigo">
+      Добавить этап договора
       <v-icon dark>
         mdi-plus
       </v-icon>
@@ -15,7 +13,7 @@
     <v-data-table  v-if="contractStages.length> 0"
                   :headers="stages_headers"
                   :items="contractStages"
-                  :items-per-page="10"
+                  :items-per-page="itemsPerPage"
                    hide-default-footer
                   class="elevation-3">
       <template v-slot:[`item.actions`]="{ item }">
@@ -27,7 +25,7 @@
     </v-data-table>
     <template v-if="contractStages.length> 0">
       <div>
-        <v-pagination
+        <v-pagination v-if="this.index !== -1"
             v-model="page"
             :length="totalPages"
             @input="updatePage"
@@ -35,15 +33,6 @@
         </v-pagination>
       </div>
     </template>
-<!--    <v-select-->
-<!--        dense-->
-<!--        outlined-->
-<!--        hide-details-->
-<!--        :value="itemsPerPage"-->
-<!--        label="Items per page"-->
-<!--        @change="itemsPerPage = parseInt($event, 10)"-->
-<!--        :items="perPageChoices">-->
-<!--    </v-select>-->
     <v-dialog v-model="stageAct" @click.prevent persistent>
     <v-card>
       <v-card-text>
@@ -170,10 +159,7 @@ export default defineComponent( {
       } as Stage,
       page: 1,
       itemsPerPage: 10,
-      // perPageChoices: [
-      //   {text:'10 records/page' , value: 10},
-      //   {text:'20 records/page' , value: 20},
-      // ],
+      itemsPerPageForAdding: 0
     }
   },
   computed: {
@@ -242,6 +228,8 @@ export default defineComponent( {
     },
     saveStage( ) { // новый метод для добавления этапа в массив
       if(this.index == -1){
+        this.itemsPerPageForAdding++;
+        this.itemsPerPage = this.itemsPerPageForAdding;
         const stg = this.editedStage;
         const planDate = stg.plannedDate.split("-");
         const factDate = stg.actualDate.split("-");
@@ -332,13 +320,37 @@ export default defineComponent( {
     },
     deleteStageItem(item: Stage){
       if (this.index === -1) {
-        this.$store.commit('stages/DELETE_STAGE')
-        this.stageAct = false;
+        confirm('Are you sure you want to delete this item?') && this.$store.commit('stages/DELETE_UNSAVED_CONTRACT_STAGE', item)
+        this.closeStageForm();
       } else {
         //const index = this.contractStages.indexOf(item)
         this.editedStage = Object.assign({}, item)
         confirm('Are you sure you want to delete this item?') && this.$store.dispatch('stages/deleteStage', this.editedStage.id)
+        if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
+          this.page--;
+        }
+        this.updatePage();
+        this.closeStageForm();
       }
+    },
+    updatePage() {
+      const page = this.page - 1;
+      const size = this.itemsPerPage;
+      const data = {
+        contractId: this.index,
+        page: page,
+        size: size
+      };
+      if (this.index !== -1) {
+        this.$store.dispatch('stages/allStages', data)
+      }
+      // else{
+      //   const data = {
+      //     page: page + 1,
+      //     size: size
+      //   };
+      //   this.$store.commit('stages/STAGES_PER_PAGE', data)
+      // }
     }
 
   }

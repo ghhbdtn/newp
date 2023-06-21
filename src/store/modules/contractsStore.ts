@@ -27,7 +27,8 @@ interface State {
     all: Contract[],
     allForAdmin: Contract[],
     totalPages: number,
-    totalElements: number
+    totalElements: number,
+    last: boolean
 
 }
 
@@ -37,18 +38,20 @@ export const  contractsStore = {
         all: [] as Contract[],
         allForAdmin: [] as Contract[],
         totalPages: -1,
-        totalElements: -1
+        totalElements: -1,
+        last: false
     } as State,
 
     getters: {
     },
     mutations: {
-    SET: (state: State, obj: {items: [], numPages: number, numElements: number}) =>{
+    SET: (state: State, obj: {items: [], numPages: number, numElements: number, last: boolean}) =>{
        // console.log(content, state.all)
         //state.all = [];
         state.all = obj.items;
         state.totalPages = obj.numPages;
         state.totalElements = obj.numElements;
+        state.last = obj.last
         console.log(state.totalPages)
     },
     SET_CONTRACT: (state: State, data: any) => {
@@ -84,10 +87,12 @@ export const  contractsStore = {
                     const content = resp.data.content;
                     const pages = resp.data.totalPages;
                     const elements = resp.data.totalElements;
+                    const isLast = resp.data.last;
                     const obj = {
                         items: content,
                         numPages: pages,
-                        numElements: elements
+                        numElements: elements,
+                        last: isLast
                     }
                     console.log(resp.data);
                     commit('SET', obj);

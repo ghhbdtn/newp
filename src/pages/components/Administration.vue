@@ -25,15 +25,6 @@
           </v-pagination>
         </div>
       </template>
-<!--      <v-select-->
-<!--          dense-->
-<!--          outlined-->
-<!--          hide-details-->
-<!--          :value="itemsPerPage"-->
-<!--          label="Items per page"-->
-<!--          @change="itemsPerPage = parseInt($event, 10)"-->
-<!--          :items="perPageChoices">-->
-<!--      </v-select>-->
       <v-dialog v-model="dialogVisible"  @click.prevent persistent>
         <template v-slot:activator="{ on, attrs }">
           <v-btn
@@ -189,10 +180,6 @@ export default defineComponent({
       valid: true,
       page: 1,
       itemsPerPage: 10,
-      // perPageChoices: [
-      //   {text:'10 records/page' , value: 10},
-      //   {text:'20 records/page' , value: 20},
-      // ],
       types: ["Закупка", "Поставка", "Работы"],
       headers: [
         {text: "Ответственный пользователь", value: "user.fullName"},
@@ -264,7 +251,7 @@ export default defineComponent({
       this.contractID = this.EditedItem.id
       console.log(this.EditedItem.id)
       this.isEdit = true
-      let data = this.EditedItem.id
+      let data = {contractId: this.EditedItem.id}
       this.$store.dispatch('stages/allStages', data).then(()=> {
         //this.dialogVisible = true
         //this.contractStages = this.$store.state.stages.all
@@ -329,7 +316,6 @@ export default defineComponent({
           actualStartDate: factDate[0].replace(" ", ""),
           actualEndDate: factDate[1].replace(" ", ""),
           userId: this.EditedItem.user.id,
-          //user: this.EditedItem.user,
           contractStages: this.$store.state.stages.all,
           counterpartyContracts: this.$store.state.counterContracts.allCounterContracts
         }

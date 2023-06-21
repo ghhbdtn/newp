@@ -69,17 +69,21 @@ mutations: {
     },
     CLEAR_AFTER_ADDING(state: State){
         state.all =[] as Stage[]
+    },
+    DELETE_UNSAVED_CONTRACT_STAGE(state: State, item: Stage){
+        state.all = state.all.filter(stg => stg.name !== item.name);
     }
 
 },
 
 actions: {
 
-    allStages({commit}: any, data: number){
+    allStages({commit}: any, data: {contractId: number, page?: number, size?: number}){
         return new Promise((resolve, reject) => {
             console.log(data);
-            const contractId = data;
-            axios( {url: 'http://localhost:8080/api/user/contracts/'+ contractId + '/contract-stages/search', data: {},
+            const contractId = data.contractId;
+            const data1 = (data.page==null && data.size==null)? {} : {page: data.page, size: data.size}
+            axios( {url: 'http://localhost:8080/api/user/contracts/'+ contractId + '/contract-stages/search', data: data1,
                 withCredentials: true, method: "POST" })
                 .then(resp => {
                     const content = resp.data.content;
