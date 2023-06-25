@@ -151,6 +151,28 @@ export const  counterContracts = {
                     })
             })
         },
+        allAdminCounterpartyContracts({commit}: any, data: {contractId: number, page?: number, size?: number}){
+            return new Promise((resolve, reject) => {
+                console.log(data);
+                const contractId = data.contractId;
+                const data1 = (data.page==null && data.size==null)? {} : {page: data.page, size: data.size}
+                axios( {url: 'http://localhost:8080/api/admin/contracts/'+ contractId + '/counterparty-contracts/search', data: data1,
+                    withCredentials: true, method: "POST" })
+                    .then(resp => {
+                        const content = resp.data.content;
+                        console.log(resp.data);
+                        const pages = resp.data.totalPages;
+                        const elements = resp.data.totalElements;
+                        commit('SET_COUNTER_CONTRACTS', {content: content, pages: pages, elements: elements});
+                        resolve(resp)
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        //commit('ERR')
+                        reject(err)
+                    })
+            })
+        },
 
 
 },

@@ -3,21 +3,22 @@
     <v-btn @click="stageAct = !stageAct"
            text
            dark
-           color="indigo">
+           color="indigo"
+           v-if="isAdmin">
       Добавить этап договора
       <v-icon dark>
         mdi-plus
       </v-icon>
     </v-btn>
-    <v-card-title>Таблица этапов договора</v-card-title>
+    <v-card-title v-if="contractStages.length> 0">Таблица этапов договора</v-card-title>
     <v-data-table  v-if="contractStages.length> 0"
                   :headers="stages_headers"
                   :items="contractStages"
                   :items-per-page="itemsPerPage"
                    hide-default-footer
                   class="elevation-3">
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="editStageItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
+      <template v-slot:[`item.actions`]="{ item }" v-if="isAdmin">
+        <v-icon small class="mr-2" @click="editStageItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
         <v-icon small text @click="deleteStageItem(item)" large style="color: darkred">
           mdi-delete
         </v-icon>
@@ -27,6 +28,7 @@
       <div>
         <v-pagination v-if="this.index !== -1"
             v-model="page"
+            color="#6A76AB"
             :length="totalPages"
             @input="updatePage"
         >
@@ -38,10 +40,14 @@
       <v-card-text>
         <v-form ref="form" style="background-color: rgb(255,255,255)">
           <v-container>
+            <v-card-title>Добавить стадию договора</v-card-title>
             <v-row>
               <v-col cols="12" sm="6" md="4">
 
                 <v-text-field id="name" v-model="editedStage.name"
+                              color="#6A76AB"
+                              clearable
+                              outlined
                               label="Название этапа"
                               name="name"
                               style="text-decoration-color: #303234; text-align: start"
@@ -51,6 +57,9 @@
               <v-col cols="12" sm="6" md="4">
                 <v-text-field type="text"
                               v-model="editedStage.plannedDate"
+                              color="#6A76AB"
+                              clearable
+                              outlined
                               v-mask="'##.##.#### - ##.##.####'"
                               label="Плановые сроки начала и окончания"
                               placeholder="дд.мм.гггг - дд.мм.гггг"
@@ -59,6 +68,9 @@
               <v-col cols="12" sm="6" md="4">
                 <v-text-field type="text"
                               v-model="editedStage.actualDate"
+                              color="#6A76AB"
+                              clearable
+                              outlined
                               v-mask="'##.##.#### - ##.##.####'"
                               label="Фактические сроки начала и окончания"
                               placeholder="дд.мм.гггг - дд.мм.гггг"
@@ -67,31 +79,46 @@
               <v-col cols="12" sm="6" md="4">
                 <v-text-field type="number"
                               v-model="editedStage.amount"
+                              color="#6A76AB"
+                              clearable
+                              outlined
                               label="Сумма этапа"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field type="number"
                               v-model="editedStage.plannedMaterialCosts"
+                              color="#6A76AB"
+                              clearable
+                              outlined
                               label="Плановые расходы на материалы"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field type="number"
                               v-model="editedStage.actualMaterialCosts"
+                              color="#6A76AB"
+                              clearable
+                              outlined
                               label="Фактические расходы на материалы"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field type="number"
                               v-model="editedStage.plannedSalaryExpenses"
+                              color="#6A76AB"
+                              clearable
+                              outlined
                               label="Плановые расходы на зарплаты"></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field type="number"
                               v-model="editedStage.actualSalaryExpenses"
+                              color="#6A76AB"
+                              clearable
+                              outlined
                               label="Фактические расходы на зарплаты"></v-text-field>
               </v-col>
             </v-row>
-            <v-btn color="primary" type="submit" @click.prevent="saveStage">Сохранить</v-btn>
-            <v-btn color="red" type="button" @click="closeStageForm">Отменить</v-btn>
+            <v-btn color="#6A76AB" dark type="submit" @click.prevent="saveStage" v-if="isAdmin">Сохранить</v-btn>
+            <v-btn color="red" dark type="button" @click="closeStageForm">Отменить</v-btn>
           </v-container>
         </v-form>
       </v-card-text>
@@ -215,6 +242,9 @@ export default defineComponent( {
     },
     totalElements(): number{
       return this.$store.state.stages.totalElements;
+    },
+    isAdmin(): boolean {
+      return this.$store.state.users.user.isAdmin
     }
   },
   methods: {

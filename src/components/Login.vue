@@ -35,7 +35,6 @@
                       placeholder="password"
                       required
                   ></v-text-field>
-
                   <v-text-field v-if="isRegister"
                                 v-model="confirmPassword"
                                 name="confirmPassword"
@@ -52,7 +51,6 @@
                 </form>
               </v-card-text>
             </v-card>
-
           </v-flex>
         </v-layout>
       </v-container>

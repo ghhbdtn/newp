@@ -155,6 +155,28 @@ actions: {
                 })
         })
     },
+    allStagesAdmin({commit}: any, data: {contractId: number, page?: number, size?: number}){
+        return new Promise((resolve, reject) => {
+            console.log(data);
+            const contractId = data.contractId;
+            const data1 = (data.page==null && data.size==null)? {} : {page: data.page, size: data.size}
+            axios( {url: 'http://localhost:8080/api/admin/contracts/'+ contractId + '/contract-stages/search', data: data1,
+                withCredentials: true, method: "POST" })
+                .then(resp => {
+                    const content = resp.data.content;
+                    const pages = resp.data.totalPages;
+                    const elements = resp.data.totalElements;
+                    console.log(resp.data);
+                    commit('SET_STAGES', {content: content, contractId: contractId, pages: pages, elements: elements});
+                    resolve(resp)
+                })
+                .catch(err => {
+                    console.log(err)
+                    //commit('ERR')
+                    reject(err)
+                })
+        })
+    },
 }
 
 // export default {

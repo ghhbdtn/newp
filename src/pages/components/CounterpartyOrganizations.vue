@@ -1,15 +1,58 @@
 <template>
   <v-app>
     <v-content>
-      <v-data-table  @click:row="editItem"
+      <template>
+        <v-col cols="10" sm="4" md="3">
+          <label class="filter-label">Отфильтровать организации:</label>
+        </v-col>
+        <v-row align="center" justify="center">
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined
+                          color="#6A76AB"
+                          v-model="filterValues.name"
+                          label="По названию"
+                          clearable
+                          class="filter-input"
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined
+                          color="#6A76AB"
+                          v-model="filterValues.address"
+                          label="По адресу организации"
+                          clearable
+                          class="filter-input"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6" sm="3" md="3">
+            <v-text-field outlined
+                          clearable
+                          color="#6A76AB"
+                          label="По ИНН"
+                          v-mask="'##########'"
+                          v-model="filterValues.inn"
+                          class="filter-input" />
+          </v-col>
+        </v-row>
+        <v-row align="center" justify="center">
+          <v-col cols="12" sm="4" md="3">
+            <v-btn @click="updatePage" class="filter-button" color="#6A76AB" dark>
+              Найти
+              <v-icon>mdi-magnify</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </template>
+      <v-data-table
                      :headers="organization_headers"
                      :items="organizations"
-                     :items-per-page="5"
+                     :items-per-page="itemsPerPage"
                      hide-default-footer
                      class="elevation-1"
       >
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
+        <template v-slot:[`item.actions`]="{ item }" v-if="isAdmin">
+          <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
           <v-icon small text @click="deleteItem(item)" large style="color: darkred">
             mdi-delete
           </v-icon>
@@ -18,6 +61,7 @@
       <template v-if="organizations.length > 0">
         <div>
           <v-pagination
+              color="#6A76AB"
               v-model="page"
               :length="totalPages"
               @input="updatePage"
@@ -25,19 +69,10 @@
           </v-pagination>
         </div>
       </template>
-<!--      <v-select-->
-<!--          dense-->
-<!--          outlined-->
-<!--          hide-details-->
-<!--          :value="itemsPerPage"-->
-<!--          label="Items per page"-->
-<!--          @change="itemsPerPage = parseInt($event, 10)"-->
-<!--          :items="perPageChoices">-->
-<!--      </v-select>-->
         <v-dialog v-model="dialog">
           <template v-slot:activator="{ on, attrs }">
             <v-btn v-if="isAdmin"
-                color="primary"
+                color="#6A76AB"
                 dark
                 class="mb-2"
                 v-bind="attrs"
@@ -48,9 +83,13 @@
             <v-card-text>
               <v-form ref="form"  style="background-color: rgb(255,255,255)">
                 <v-container>
+                  <v-card-title>Добавить организацию-контрагента</v-card-title>
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
+                          color="#6A76AB"
+                          clearable
+                          outlined
                           v-model="editedOrganization.name"
                           label="Название организации"
                           name="name"
@@ -61,18 +100,24 @@
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
+                          color="#6A76AB"
+                          clearable
+                          outlined
                           v-model="editedOrganization.address"
                           label="Адрес"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedOrganization.inn" type="text" label="ИНН"
+                      <v-text-field color="#6A76AB"
+                          clearable
+                          outlined
+                          v-model="editedOrganization.inn" type="text" label="ИНН"
                                     v-mask="'##########'" ></v-text-field>
                     </v-col>
                   </v-row>
                   <v-card-actions>
-                    <v-btn color="primary" @click="saveOrganization" v-if="isAdmin">Сохранить</v-btn>
-                    <v-btn color="red" @click="closeForm">{{isAdmin ? `Отменить` : `Закрыть`}}</v-btn>
+                    <v-btn color="#6A76AB" dark @click="saveOrganization" v-if="isAdmin">Сохранить</v-btn>
+                    <v-btn color="red" dark @click="closeForm">{{isAdmin ? `Отменить` : `Закрыть`}}</v-btn>
                   </v-card-actions>
                 </v-container>
               </v-form>
@@ -112,17 +157,17 @@ export default defineComponent({
       } as Organization,
       page: 1,
       itemsPerPage: 10,
-      // perPageChoices: [
-      //   {text:'10 records/page' , value: 10},
-      //   {text:'20 records/page' , value: 20},
-      // ],
+      filterValues: {
+        name: "",
+        address: "",
+        inn: 0,
+      },
       organization_headers: [
         {text: "Название организации", value: "name"},
         {text: "Адресс", value: "address"},
         {text:  "ИНН", value: "inn"},
         { text: "Действия", value: "actions", sortable: false}
       ],
-      //organizations: [{organizationName: "sdfds;", address:"dssdfcds", INN:1231232135}] as Organization[],
       dialog: false,
       editedIndex: -1,
     };
@@ -184,17 +229,76 @@ export default defineComponent({
       //const index = this.organizations.indexOf(item)
       this.editedOrganization = Object.assign({}, item)
       confirm('Are you sure you want to delete this item?') &&
-          this.$store.dispatch('counterparties/deleteOrganization', this.editedOrganization.id)
-      //&& this.organizations.splice(index, 1)
+          this.$store.dispatch('counterparties/deleteOrganization', this.editedOrganization.id).then(()=>{
+            this.closeForm();
+            if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
+              this.page--
+            }
+            this.updatePage()
+          })
     },
     updatePage() {
       const page = this.page - 1;
       const size = this.itemsPerPage;
-      const data = {
-        page: page,
-        size: size
-      };
-      this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
+      if ((this.filterValues.name == null || this.filterValues.name === "") &&
+          (this.filterValues.address == null || this.filterValues.address === "") &&
+          (this.filterValues.inn == null || this.filterValues.inn === 0) ) {
+        const data = {
+          page: page,
+          size: size
+        };
+        this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
+      } else {
+        const arr = [] as {}[];
+        for (var filter in this.filterValues) {
+          switch (filter) {
+            case 'name':
+              if (this.filterValues.name != null && this.filterValues.name !== "") {
+                const nameFilter = {
+                  key: 'NAME',
+                  targetEntity: "COUNTERPARTY_ORGANIZATION",
+                  operator: "LIKE",
+                  value: this.filterValues.name
+                }
+                arr.push(nameFilter)
+              }
+              break;
+            case 'address':
+              if (this.filterValues.address != null && this.filterValues.address !== "") {
+                const addressFilter = {
+                  key: 'ADDRESS',
+                  targetEntity: "COUNTERPARTY_ORGANIZATION",
+                  operator: "LIKE",
+                  value: this.filterValues.address
+                }
+                arr.push(addressFilter)
+              }
+              break;
+            case 'inn':
+              if (this.filterValues.inn != null && this.filterValues.inn != 0 && this.filterValues.inn.toString() !== "") {
+                const innFilter = {
+                  key: 'INN',
+                  targetEntity: "COUNTERPARTY_ORGANIZATION",
+                  operator: "EQUAL",
+                  value: this.filterValues.inn
+                }
+                arr.push(innFilter)
+              }
+              break;
+          }
+        }
+        let page1 = this.page - 1
+        if (this.totalPages == 1)  {
+          page1 = 0
+          this.page = 1;
+        }
+        const data = {
+          filters: arr,
+          page: page1,
+          size: size
+        };
+        this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
+      }
     }
   },
   created() {

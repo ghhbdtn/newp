@@ -2,47 +2,44 @@
   <v-app>
     <v-container fluid>
       <v-row justify="center">
-        <v-col cols="14" sm="12" md="8" lg="6">
+        <v-col cols="12" sm="10" md="8" lg="6">
           <v-card class="mt-5">
-            <h3>Сформировать отчеты</h3>
+            <h3 class="text-center">Сформировать отчеты</h3>
             <v-divider></v-divider>
             <h4 class="subtitle-1">Отчет 1: Вывод всех договоров за задаваемый плановый период</h4>
-            <v-row>
-              <v-col cols="10" sm="6">
-                <v-card-text for="start-date" class="subtitle-1">Плановая дата начала:</v-card-text>
-                <v-text-field type="date" id="start-date" v-model="startDate" />
+            <v-row class="mb-4">
+              <v-col cols="12" sm="6">
+                <v-card-text class="subtitle-1">Плановая дата начала:</v-card-text>
+                <v-text-field type="date" color="#6A76AB" v-model="startDate" outlined dense />
               </v-col>
-              <v-col cols="10" sm="6">
-                <v-card-text class="subtitle-1" for="end-date">Плановая дата окончания:</v-card-text>
-                <v-text-field type="date" id="end-date" v-model="endDate" />
+              <v-col cols="12" sm="6">
+                <v-card-text class="subtitle-1">Плановая дата окончания:</v-card-text>
+                <v-text-field type="date" color="#6A76AB" v-model="endDate" outlined dense />
               </v-col>
             </v-row>
-            <v-card-actions>
-              <v-btn color="#6A76AB" @click="downloadContracts" style="color: white">Сформировать отчет</v-btn>
+            <v-card-actions class="justify-center">
+              <v-btn color="#6A76AB" dark @click="downloadContracts">Сформировать отчет</v-btn>
             </v-card-actions>
             <v-divider></v-divider>
             <h4 class="subtitle-1">Отчет 2: Вывод всех этапов для выбранного пользователем договора</h4>
-            <v-row>
-              <v-col cols="10" sm="12">
-                <v-card-text for="selected-contract" class="subtitle-1">Выберите договор:</v-card-text>
+            <v-row class="mb-4">
+              <v-col cols="12">
+                <v-card-text class="subtitle-1">Выберите договор:</v-card-text>
                 <v-select
-                    :items="contracts"
-                    id="selected-contract"
                     v-model="selectedContract"
+                    :items="contracts"
                     item-text="name"
                     item-value="id"
-                    variant="outlined"
-                    persistent-hint
+                    color="#6A76AB"
+                    outlined
+                    dense
                     return-object
                 >
-                  <template>
-                  <v-btn v-if="!last">Загрузить еще</v-btn>
-                  </template>
                 </v-select>
               </v-col>
             </v-row>
-            <v-card-actions style="align-content: center">
-              <v-btn color="#6A76AB" @click="downloadStagesReport" style="color: white" >Сформировать отчет</v-btn>
+            <v-card-actions class="justify-center">
+              <v-btn color="#6A76AB" dark @click="downloadStagesReport">Сформировать отчет</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -50,6 +47,8 @@
     </v-container>
   </v-app>
 </template>
+
+
 
 <script lang="ts">
 import { defineComponent } from "vue";
@@ -128,8 +127,14 @@ export default defineComponent({
   margin-right: auto;
 }
 
-.h4{
-
+.col-12 {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.col-6 {
+  padding-top: 0;
+  padding-bottom: 0;
+  color: #6A76AB;
 }
 
 

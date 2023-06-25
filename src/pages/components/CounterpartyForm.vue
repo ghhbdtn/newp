@@ -3,21 +3,22 @@
   <v-btn @click="counterpartyAct = !counterpartyAct"
          text
          dark
-         color="indigo">
+         color="indigo"
+         v-if="isAdmin">
     Добавить договор с контрагентом
     <v-icon dark>
       mdi-plus
     </v-icon>
   </v-btn>
-    <v-card-title>Таблица договоров с контрагентами</v-card-title>
+    <v-card-title v-if="countercontracts.length> 0">Таблица договоров с контрагентами</v-card-title>
     <v-data-table  @click:row="editCounterItem" v-if="countercontracts.length > 0"
                   :headers="countercontracts_headers"
                   :items="countercontracts"
                   :items-per-page="itemsPerPage"
                    hide-default-footer
                   class="elevation-3">
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="editCounterItem(item);" style="color: darkcyan">mdi-pencil</v-icon>
+      <template v-slot:[`item.actions`]="{ item }" v-if="isAdmin">
+        <v-icon small class="mr-2" @click="editCounterItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
         <v-icon small text @click="deleteCounterItem(item)" large style="color: darkred">
           mdi-delete
         </v-icon>
@@ -27,6 +28,7 @@
       <div>
         <v-pagination v-if="this.index !== -1"
             v-model="page"
+            color="#6A76AB"
             :length="totalPages"
             @input="updatePage"
         >
@@ -38,10 +40,14 @@
 <v-card-text>
   <v-form ref="form" style="background-color: rgb(255,255,255)">
     <v-container>
+      <v-card-title>Добавить договор с контрагентом</v-card-title>
       <v-row>
         <v-col cols="12" sm="6" md="4">
           <v-text-field
               v-model="editedCountercontract.name"
+              color="#6A76AB"
+              clearable
+              outlined
               label="Название"
               name="name"
               style="text-decoration-color: #303234; text-align: start"
@@ -53,6 +59,9 @@
         <v-col cols="12" sm="6" md="4">
           <v-select
               v-model="editedCountercontract.type"
+              color="#6A76AB"
+              clearable
+              outlined
               :items="countercontractTypes"
               label="Тип договора"
           ></v-select>
@@ -60,6 +69,9 @@
         <v-col cols="12" sm="6" md="4">
           <v-select
               v-model="editedCountercontract.organization"
+              color="#6A76AB"
+              clearable
+              outlined
               :items="organizations"
               item-text="name"
               item-value="id"
@@ -70,20 +82,32 @@
           </v-select>
         </v-col>
         <v-col cols="12" sm="6" md="4">
-          <v-text-field v-model="editedCountercontract.amount" label="Сумма"></v-text-field>
+          <v-text-field v-model="editedCountercontract.amount"
+                        color="#6A76AB"
+                        clearable
+                        outlined
+                        label="Сумма"></v-text-field>
         </v-col>
         <v-col cols="12" sm="6" md="4">
-          <v-text-field v-model="editedCountercontract.plannedDate" type="text" label="Плановые сроки"
+          <v-text-field v-model="editedCountercontract.plannedDate"
+                        color="#6A76AB"
+                        clearable
+                        outlined
+                        type="text" label="Плановые сроки"
                         v-mask="'##.##.#### - ##.##.####'" ></v-text-field>
         </v-col>
         <v-col cols="12" sm="6" md="4">
-          <v-text-field v-model="editedCountercontract.actualDate" label="Фактические сроки"
+          <v-text-field v-model="editedCountercontract.actualDate"
+                        color="#6A76AB"
+                        clearable
+                        outlined
+                        label="Фактические сроки"
                         v-mask="'##.##.#### - ##.##.####'"></v-text-field>
         </v-col>
       </v-row>
       <v-card-actions>
-        <v-btn color="primary" @click="saveCounter">Сохранить</v-btn>
-        <v-btn color="red" @click="closeCounterForm">Отменить</v-btn>
+        <v-btn color="#6A76AB" dark @click="saveCounter">Сохранить</v-btn>
+        <v-btn color="red" dark @click="closeCounterForm">Отменить</v-btn>
       </v-card-actions>
     </v-container>
   </v-form>
@@ -247,6 +271,9 @@ export default defineComponent({
         }
         }
       return organizations
+    },
+    isAdmin(): boolean {
+      return this.$store.state.users.user.isAdmin
     },
     totalPages(): number{
       return this.$store.state.counterparties.totalPages;
