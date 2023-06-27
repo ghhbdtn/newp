@@ -1,16 +1,6 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Login from '../components/Login.vue'
-import Contracts from "@/pages/components/Contracts.vue";
-import CounterpartyOrganizations from "@/pages/components/CounterpartyOrganizations.vue";
-import Reports from "@/pages/components/Reports.vue";
-import Administration from "@/pages/components/Administration.vue";
-import AdminRoot from "@/pages/components/AdminRoot.vue";
-import UsersPage from "@/pages/components/UsersPage.vue";
-import App from "@/App.vue"
-import Register from '../components/Register.vue'
-import Menu from '../pages/menu/Menu.vue'
-
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [

@@ -2,103 +2,147 @@
   <v-app>
   <v-content>
     <v-card>
-      <template>
-        <v-card >
-        <v-col cols="10" sm="4" md="3">
-          <label class="filter-label">Отфильтровать договоры:</label>
-        </v-col>
-        <v-row align="center" justify="center">
-          <v-col cols="12" sm="3" md="3">
-            <v-text-field outlined
-                          color="#6A76AB"
-                v-model="filterValues.name"
-                label="По названию"
-                clearable
-                class="filter-input"
-            ></v-text-field>
-          </v-col>
-
-          <v-col cols="12" sm="3" md="3">
-            <v-select outlined
-                clearable
-                color="#6A76AB"
-                v-model="filterValues.type"
-                :items="types"
-                item-text="text"
-                item-value="value"
-                label="По типу договора"
-                class="filter-input"
-            ></v-select>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" sm="4" md="3">
-            <label class="filter-label">По плановым срокам:</label>
-          </v-col>
-
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined color="#6A76AB" type="date" label="Плановая дата начала" v-model="filterValues.plannedStartDate" class="filter-input" />
-          </v-col>
-
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined color="#6A76AB" type="date" label="Плановая дата конца" v-model="filterValues.plannedEndDate" class="filter-input" />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" sm="4" md="3">
-            <label class="filter-label">По фактическим срокам:</label>
-          </v-col>
-
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined type="date" color="#6A76AB" label="Фактическая дата начала" v-model="filterValues.actualStartDate" class="filter-input" />
-          </v-col>
-
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined type="date" color="#6A76AB" label="Фактическая дата конца" v-model="filterValues.actualEndDate" class="filter-input" />
-          </v-col>
-          </v-row>
-
-          <v-row>
-          <v-col cols="12" sm="4" md="3">
-            <label class="filter-label">По сумме договора:</label>
-          </v-col>
-
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined type="number" color="#6A76AB" label="Минимальная сумма" v-model="filterValues.minAmount" class="filter-input" />
-          </v-col>
-
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined type="number" color="#6A76AB" label="Максимальная сумма" v-model="filterValues.maxAmount" class="filter-input" />
-          </v-col>
-          </v-row>
-        <v-row align="center" justify="center">
-          <v-col cols="12" sm="4" md="3">
-            <v-btn @click="updatePage" class="filter-button" color="#6A76AB" dark>
-              Найти
-              <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
-        </v-card>
-      </template>
-
           <v-data-table  @click:row="editItem"
         :headers="headers"
         :items="contracts"
         :items-per-page="itemsPerPage"
-
         :total-items="totalItems"
         :page.sync="page"
         hide-default-footer
-        class="elevation-1"
+        class="elevation-1 grey lighten-5"
     >
-      <template v-slot:[`item.actions`]="{ item }" v-if="isAdmin1">
-        <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
-        <v-icon small text @click="deleteItem(item)" large style="color: darkred">
-          mdi-delete
-        </v-icon>
-      </template>
-
+            <template v-slot:top>
+              <v-toolbar
+                  flat
+              >
+                <v-toolbar-title>Таблица договоров</v-toolbar-title>
+                <v-divider
+                    class="mx-4"
+                    inset
+                    vertical
+                ></v-divider>
+                <v-text-field
+                    v-model="itemsPerPage"
+                    color="#6A76AB"
+                    label="Количество элементов на странице"
+                    type="number"
+                    hide-details
+                    class="items-per-page-field"
+                    @input="updatePage"
+                ></v-text-field>
+                <v-spacer></v-spacer>
+              </v-toolbar>
+              <v-divider></v-divider>
+            </template>
+            <template v-slot:[`header.name`]="{ header }">
+              {{ header.text }}
+                <template>
+                    <v-text-field outlined
+                                  color="#6A76AB"
+                                  v-model="filterValues.name"
+                                  label="По названию"
+                                  clearable
+                                  dense
+                                  class="filter-input"
+                                  @input="updatePage"
+                    ></v-text-field>
+                    </template>
+            </template>
+            <template v-slot:[`header.type`]="{ header }">
+              {{ header.text }}
+              <template>
+                <v-select outlined
+                          clearable
+                          color="#6A76AB"
+                          v-model="filterValues.type"
+                          :items="types"
+                          item-text="text"
+                          item-value="value"
+                          label="По типу договора"
+                          dense
+                          class="filter-input"
+                          @change="updatePage"
+                ></v-select>
+              </template>
+            </template>
+            <template v-slot:[`header.plannedDate`]="{ header }">
+              {{ header.text }}
+              <v-spacer></v-spacer>
+              <template>
+                <v-text-field
+                    outlined
+                    color="#6A76AB"
+                    type="date"
+                    label="Дата начала"
+                    v-model="filterValues.plannedStartDate"
+                    class="filter-input"
+                    clearable
+                    dense
+                    @change="updatePage"/>
+                <v-text-field
+                    outlined
+                    color="#6A76AB"
+                    type="date"
+                    label="Дата окончания"
+                    v-model="filterValues.plannedEndDate"
+                    class="filter-input"
+                    dense
+                    clearable
+                    @change="updatePage"/>
+              </template>
+            </template>
+            <template v-slot:[`header.actualDate`]="{ header }">
+              {{ header.text }}
+              <v-spacer></v-spacer>
+              <template>
+                <v-text-field
+                    outlined
+                    color="#6A76AB"
+                    type="date"
+                    label="Дата начала"
+                    v-model="filterValues.actualStartDate"
+                    class="filter-input"
+                    clearable
+                    dense
+                    @change="updatePage"/>
+                <v-text-field
+                    outlined
+                    color="#6A76AB"
+                    type="date"
+                    label="Дата окончания"
+                    v-model="filterValues.actualEndDate"
+                    class="filter-input"
+                    dense
+                    clearable
+                    @change="updatePage"/>
+              </template>
+            </template>
+            <template v-slot:[`header.amount`]="{ header }">
+              {{ header.text }}
+              <v-spacer></v-spacer>
+              <template>
+                <v-text-field
+                    outlined
+                    type="number"
+                    color="#6A76AB"
+                    label="Минимальная сумма"
+                    v-model="filterValues.minAmount"
+                    class="filter-input"
+                    dense
+                    clearable
+                    @change="updatePage"/>
+                <v-text-field
+                    outlined
+                    type="number"
+                    color="#6A76AB"
+                    label="Максимальная сумма"
+                    v-model="filterValues.maxAmount"
+                    class="filter-input"
+                    dense
+                    clearable
+                    @change="updatePage"/>
+              </template>
+            </template>
     </v-data-table>
       <template v-if="contracts.length> 0">
         <div>
@@ -113,25 +157,15 @@
       </template>
     </v-card>
     <v-dialog v-model="dialogVisible"  @click.prevent persistent>
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn v-if="isAdmin1"
-            color="#6A76AB"
-            dark
-            class="mb-2"
-            v-bind="attrs"
-            v-on="on"
-        >Добавить</v-btn>
-      </template>
       <v-card>
       <v-card-text>
       <v-form ref="form" v-model="valid" style="background-color: rgb(255,255,255)">
-        <v-card-title>{{this.isEdit ? "Редактировать договор": "Добавить договор"}}</v-card-title>
+        <v-card-title>Карточка договора</v-card-title>
         <v-container>
           <v-row>
             <v-col cols="12" sm="6" md="4">
               <v-text-field
                   color="#6A76AB"
-                  clearable
                   outlined
                   v-model="EditedItem.name"
                   label="Название"
@@ -139,53 +173,52 @@
                   style="text-decoration-color: #303234; text-align: start"
                   type="input"
                   placeholder="Название договора"
+                  readonly
                   aria-required="true"
               ></v-text-field>
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-select
                   color="#6A76AB"
-                  clearable
                   outlined
                   v-model="EditedItem.type"
                   :items="types"
                   label="Тип договора"
+                  readonly
                   aria-required="true"></v-select>
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field v-model="EditedItem.plannedDate"
                             color="#6A76AB"
-                            clearable
                             outlined
                             type="text" label="Плановые сроки"
                             v-mask="'##.##.#### - ##.##.####'"
               placeholder="ГГГГ.ММ.ДД-ГГГГ.ММ.ДД"
+                            readonly
                             aria-required="true"></v-text-field>
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field v-model="EditedItem.actualDate"
                             color="#6A76AB"
-                            clearable
                             outlined
                             label="Фактические сроки"
+                            readonly
                             v-mask="'##.##.#### - ##.##.####'"
                             placeholder="ГГГГ.ММ.ДД-ГГГГ.ММ.ДД"></v-text-field>
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field v-model="EditedItem.amount"
                             color="#6A76AB"
-                            clearable
                             outlined
+                            readonly
                             label="Сумма договора"></v-text-field>
             </v-col>
-
-              <stg :index="contractID"></stg>
-            <counterparty-form :index="contractID"></counterparty-form>
+              <stg :index="contractID" :isUsersData="true" ></stg>
+            <counterparty-form :index="contractID" :isUsersData ="true"></counterparty-form>
           </v-row>
         </v-container>
         <v-card-actions>
-          <v-btn color="#6A76AB" dark @click="save" v-if="isAdmin1">Сохранить</v-btn>
-          <v-btn color="red" dark @click="close">{{isAdmin1 ? `Отменить` : `Закрыть`}}</v-btn>
+          <v-btn color="red" dark @click="close">Закрыть</v-btn>
         </v-card-actions>
       </v-form></v-card-text>
       </v-card>
@@ -197,7 +230,6 @@
 <script lang="ts">
 import Vue, { defineComponent } from "vue";
 import { required, minLength } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
 
 import CounterpartyForm from "./CounterpartyForm.vue";
 import { mapState } from 'vuex';
@@ -220,7 +252,6 @@ interface Contract {
   plannedDate: string,
   actualDate: string
 }
-
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -259,12 +290,11 @@ export default defineComponent({
       filterValue: "",
       filterField: "",
       headers: [
-        {text: "Название", align: "start", sortable: true, value: "name"},
-        { text: "Тип договора", align: "start", sortable: true, value: 'type'},
-        { text: "Плановые сроки", align: "start", sortable: true, value: "plannedDate" },
-        { text: "Фактические сроки", align: "start", sortable: true, value:  "actualDate"},
-        { text: "Сумма", align: "start", sortable: true, value: "amount"},
-        { text: "Действия", value: "actions", sortable: false},
+        {text: "Название", align: "start", sortable: false, value: "name",  class: "with-divider", cellClass: 'with-divider'},
+        { text: "Тип договора", align: "start", sortable: false, value: 'type', class: "with-divider", cellClass: 'with-divider'},
+        { text: "Плановые сроки", align: "start", sortable: false, value: "plannedDate", class: "with-divider", cellClass: 'with-divider'},
+        { text: "Фактические сроки", align: "start", sortable: false, value:  "actualDate", class: "with-divider", cellClass: 'with-divider'},
+        { text: "Сумма", align: "start", sortable: false, value: "amount", class: "with-divider", cellClass: 'with-divider'},
       ],
       filterValues: {
         name: "",
@@ -331,19 +361,6 @@ export default defineComponent({
         this.dialogVisible = true
       })
     },
-
-    deleteItem (item: any) {
-      this.EditedItem = Object.assign({}, item)
-      confirm('Вы действительно хотите удалить договор, вместе с ним удалятся вся связанные стадии договора и договоры с контрагентами?')
-      && this.$store.dispatch('contractsStore/deleteContract', this.EditedItem.id).
-          then(()=> {this.close()
-          if (this.page == this.totalPages && this.totalItems == (this.page - 1) * this.itemsPerPage + 1) {
-            this.page--
-          }
-        this.updatePage()
-          })
-    },
-
     close () {
       this.dialogVisible = false
       this.isEdit = false
@@ -354,55 +371,6 @@ export default defineComponent({
         this.$store.commit('stages/CLEAR_AFTER_ADDING')
         this.$store.commit('counterContracts/CLEAR_AFTER_ADDING')
       })
-    },
-
-    save () {
-      if (this.editedIndex > -1 ) {
-        const oldValue = this.contracts[this.editedIndex];
-        const newValue = this.EditedItem;
-        if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
-            oldValue.type !== newValue.type || oldValue.plannedDate !== newValue.plannedDate ||
-            oldValue.actualDate !== newValue.actualDate) {
-          const planDate = newValue.plannedDate.split("-");
-          const factDate = newValue.actualDate.split("-");
-          console.log(planDate, factDate)
-          const data = {
-            name: newValue.name,
-            type: newValue.type,
-            amount: newValue.amount,
-            plannedStartDate: planDate[0].replace(" ", ""),
-            plannedEndDate: planDate[1].replace(" ", ""),
-            actualStartDate: factDate[0].replace(" ", ""),
-            actualEndDate: factDate[1].replace(" ", ""),
-            userId: this.$store.state.users.user.id,
-            id: newValue.id
-          }
-          this.$store.dispatch('contractsStore/putContract', data)
-        }
-        Object.assign(this.contracts[this.editedIndex], this.EditedItem)
-        this.isEdit = false
-      }  else {
-          const planDate = this.EditedItem.plannedDate.split("-");
-          const factDate = this.EditedItem.actualDate.split("-");
-          const data = {
-            name: this.EditedItem.name,
-            type: this.EditedItem.type,
-            amount: this.EditedItem.amount,
-            plannedStartDate: planDate[0].replace(" ", ""),
-            plannedEndDate: planDate[1].replace(" ", ""),
-            actualStartDate: factDate[0].replace(" ", ""),
-            actualEndDate: factDate[1].replace(" ", ""),
-            userId: this.$store.state.users.user.id,
-            contractStages: this.$store.state.stages.all,
-            counterpartyContracts: this.$store.state.counterContracts.allCounterContracts
-          }
-          this.$store.dispatch("contractsStore/addNew", data).then(()=>{this.$store.dispatch('contractsStore/getAll', {})
-          this.$store.commit('stages/CLEAR_AFTER_ADDING')
-            this.$store.commit('counterContracts/CLEAR_AFTER_ADDING')
-          })
-        }
-      this.updatePage()
-      this.close()
     },
     updatePage() {
       const page = this.page - 1;
@@ -485,7 +453,7 @@ export default defineComponent({
               }
               break;
             case 'maxAmount':
-              if (this.filterValues.maxAmount.toString() !== "" && this.filterValues.maxAmount !== 0) {
+              if (this.filterValues.maxAmount != null && this.filterValues.maxAmount.toString() !== "" && this.filterValues.maxAmount !== 0) {
                 const amountFilter = {
                   key: 'AMOUNT',
                   targetEntity: "CONTRACT",
@@ -496,7 +464,7 @@ export default defineComponent({
               }
               break;
             case 'minAmount':
-              if (this.filterValues.minAmount.toString() !== "" && this.filterValues.minAmount !== 0) {
+              if (this.filterValues.minAmount != null && this.filterValues.minAmount.toString() !== "" && this.filterValues.minAmount !== 0) {
                 const amountFilter = {
                   key: 'AMOUNT',
                   targetEntity: "CONTRACT",
@@ -524,12 +492,6 @@ export default defineComponent({
 
 
   },
-  setup() {
-    const v$ = useVuelidate();
-
-    return { v$ };
-
-  },
   created(){
     this.$store.dispatch('counterparties/allCounterpartyOrganizations', {})
     this.$store.dispatch('contractsStore/getAll', {})
@@ -537,13 +499,10 @@ export default defineComponent({
 });
 </script>
 
-<style >
-.filter-label {
-  font-weight: bold;
-}
+<style scoped>
 
 .filter-input {
-  width: 100%;
+  width: 70%;
 }
 
 .col-12 {
@@ -554,5 +513,16 @@ export default defineComponent({
   padding-top: 0;
   padding-bottom: 0;
   color: #6A76AB;
+}
+.v-data-table > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table > .v-data-table__wrapper > table > thead > tr > th, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > th
+
+{
+
+  font-size: 1.0rem;
+
+  height: 48px;
+}
+.with-divider {
+  border-right: 1px solid grey;
 }
 </style>

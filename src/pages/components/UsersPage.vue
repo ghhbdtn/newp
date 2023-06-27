@@ -5,7 +5,7 @@
         <v-col cols="10" sm="4" md="3">
           <label class="filter-label">Найти пользователя:</label>
         </v-col>
-        <v-row align="center" justify="center">
+        <v-row align="center" justify="left">
           <v-col cols="6" sm="3" md="3">
             <v-text-field outlined
                           color="#6A76AB"
@@ -13,6 +13,8 @@
                           label="По ФИО"
                           clearable
                           class="filter-input"
+                          dense
+                          @input="updatePage"
             ></v-text-field>
           </v-col>
 
@@ -23,25 +25,43 @@
                           label="По логину"
                           clearable
                           class="filter-input"
+                          dense
+                          @input="updatePage"
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row align="center" justify="center">
-          <v-col cols="12" sm="4" md="3">
-            <v-btn @click="updatePage" class="filter-button" color="#6A76AB" dark>
-              Найти
-              <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
       </template>
-      <v-data-table  @click:row="editItem"
+      <v-data-table  @dblclick:row="($event, {item})=>editItem(item)"
                      :headers="user_headers"
                      :items="users"
                      :items-per-page="itemsPerPage"
                      hide-default-footer
-                     class="elevation-1"
+                     class="elevation-1 grey lighten-5"
       >
+        <template v-slot:top>
+          <v-divider></v-divider>
+          <v-toolbar
+              flat
+          >
+            <v-toolbar-title>Список всех пользователей</v-toolbar-title>
+            <v-divider
+                class="mx-4"
+                inset
+                vertical
+            ></v-divider>
+            <v-text-field
+                v-model="itemsPerPage"
+                color="#6A76AB"
+                label="Количество элементов на странице"
+                type="number"
+                hide-details
+                class="items-per-page-field"
+                @input="updatePage"
+            ></v-text-field>
+            <v-spacer></v-spacer>
+          </v-toolbar>
+          <v-divider></v-divider>
+        </template>
         <template v-slot:[`item.isAdmin`]="{ item }">
           <v-simple-checkbox
               v-model="item.isAdmin"
@@ -84,6 +104,7 @@
                         name="name"
                         style="text-decoration-color: #303234; text-align: start"
                         type="input"
+                        :rules="[rules.required]"
                         required
                     ></v-text-field>
                   </v-col>
@@ -93,6 +114,8 @@
                         clearable
                         outlined
                         v-model="editedUser.login"
+                        :rules="[rules.required, rules.minLength]"
+                        required
                         label="Имя пользователя"
                     ></v-text-field>
                   </v-col>
@@ -104,6 +127,7 @@
                         v-model="editedUser.terminationDate"
                         v-mask="'##.##.####'"
                         placeholder="ДД.ММ.ГГГГ"
+                        :rules="[rules.data]"
                         label="Дата прекращения действия"
                                   ></v-text-field>
                   </v-col>
@@ -113,10 +137,11 @@
                       label="Сменить пароль"
                       @click:append="() => (value = !value)"
                       :type="value ? 'password' : 'text'"
-                      :append-icon="value ? 'mdi-eye' : 'mdi-eye-off'"
+                      :append-icon="value ? 'mdi-eye-off' : 'mdi-eye'"
                       color="#6A76AB"
                       clearable
                       outlined
+                      :rules="[rules.password]"
                       placeholder="password"
                   ></v-text-field>
                   </v-col>
@@ -144,7 +169,9 @@
 </template>
 
 <script lang="ts">
+
 import {defineComponent} from "vue";
+
 interface User {
   id?: number,
   fullName: string,
@@ -154,12 +181,13 @@ interface User {
   newPassword: string,
   isAdmin: boolean
 }
-export default defineComponent( {
+
+export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "UsersPage",
 
   data() {
-    return{
+    return {
       user: {
         id: -1,
         fullName: "",
@@ -183,11 +211,18 @@ export default defineComponent( {
           text: "ФИО",
           align: "start",
           value: "fullName",
+          class: "with-divider", cellClass: 'with-divider'
         },
-        { text: "Имя пользователя", align: "start", value: 'login'},
-        { text: "Дата прекращения действия", align: "start", value:  "terminationDate"},
-        { text: "Администратор", align: "start", value: "isAdmin" },
-        { text: "Действия", align: "start", value:  "actions"},
+        {text: "Имя пользователя", align: "start", value: 'login', class: "with-divider", cellClass: 'with-divider'},
+        {
+          text: "Дата прекращения действия",
+          align: "start",
+          value: "terminationDate",
+          class: "with-divider",
+          cellClass: 'with-divider'
+        },
+        {text: "Администратор", align: "start", value: "isAdmin", class: "with-divider", cellClass: 'with-divider'},
+        {text: "Действия", align: "start", value: "actions", class: "with-divider", cellClass: 'with-divider'},
       ],
       page: 1,
       itemsPerPage: 10,
@@ -197,38 +232,47 @@ export default defineComponent( {
       },
       editedIndex: -1,
       dialog: false,
-      value: false
+      value: true,
+      rules: {
+        required: (value: String|Number) => !!value || "Обязательное поле",
+        minLength: (value: String) =>
+            value.length >= 6 || "Минимальная длина логина - 6",
+        password: (v: string) => !v || /^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!#$%&? "]).*$/.test(v) ||
+                              "Пароль должен быть не менее 6 символов, включать хотя бы одну прописную букву, цифру и хотя бы один специальный символ (!,#,$,%,&,?)",
+        data: (v: string) => !v || /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4}$/.test(v)
+            || "Формат: ДД.ММ.ГГГ",
+      },
     }
   },
   computed: {
-    users(){
+    users() {
       return this.$store.state.users.all
     },
-    totalPages(){
+    totalPages() {
       return this.$store.state.users.totalPages;
     },
-    totalElements(){
+    totalElements() {
       return this.$store.state.users.totalElements;
     }
   },
   methods: {
-    editItem (item: any) {
+    editItem(item: any) {
       this.editedIndex = this.users.indexOf(item)
       this.editedUser = Object.assign({}, item)
       this.dialog = true
     },
-    deleteItem (item: any) {
+    deleteItem(item: any) {
       this.editedUser = Object.assign({}, item);
-      confirm('Are you sure you want to delete this item?') &&
+      this.$confirm('Вы действительно хотите удалить этого пользователя?', '', 'warning').then(()=>
       this.$store.dispatch('users/deleteUser', this.editedUser.id).then(() => {
         this.close();
         if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
           this.page--
         }
         this.updatePage()
-      })
+      }).catch(()=>this.$alert('Не удалось удалить пользователя', '', 'error')))
     },
-    close () {
+    close() {
       this.dialog = false
       this.$nextTick(() => {
         this.editedUser = Object.assign({}, this.user)
@@ -236,38 +280,39 @@ export default defineComponent( {
       })
     },
 
-    save () {
-      const oldValue = this.users[this.editedIndex];
-      const newValue = this.editedUser;
-      if(oldValue.fullName !== newValue.fullName ||
-          oldValue.login !== newValue.login ||
-          oldValue.terminationDate !== newValue.terminationDate ||
-          oldValue.isAdmin !== newValue.isAdmin){
-        let data = {};
-        if (newValue.newPassword !== '' && newValue.newPassword !== null) {
-          data = {
-            fullName: newValue.fullName,
-            login: newValue.login,
-            terminationDate: newValue.terminationDate,
-            id: newValue.id,
-            isAdmin: newValue.isAdmin,
-            newPassword: newValue.newPassword
+    save() {
+      let form: any = this.$refs.form
+      if(form.validate) {
+        const oldValue = this.users[this.editedIndex];
+        const newValue = this.editedUser;
+        if (oldValue.fullName !== newValue.fullName ||
+            oldValue.login !== newValue.login ||
+            oldValue.terminationDate !== newValue.terminationDate ||
+            oldValue.isAdmin !== newValue.isAdmin || oldValue.newPassword !== newValue.newPassword) {
+          let data = {};
+          if (newValue.newPassword !== '' && newValue.newPassword !== null) {
+            data = {
+              fullName: newValue.fullName,
+              login: newValue.login,
+              terminationDate: newValue.terminationDate,
+              id: newValue.id,
+              isAdmin: newValue.isAdmin,
+              newPassword: newValue.newPassword
+            }
+          } else {
+            data = {
+              fullName: newValue.fullName,
+              login: newValue.login,
+              terminationDate: newValue.terminationDate,
+              id: newValue.id,
+              isAdmin: newValue.isAdmin
+            }
           }
+          this.$store.dispatch('users/putUser', data)
         }
-        else {
-          data = {
-            fullName: newValue.fullName,
-            login: newValue.login,
-            terminationDate: newValue.terminationDate,
-            id: newValue.id,
-            isAdmin: newValue.isAdmin
-          }
-        }
-        this.$store.dispatch('users/putUser',data)
+        this.close()
+        this.updatePage()
       }
-      //Object.assign(this.users[this.editedIndex], this.editedUser)
-      this.close()
-      this.updatePage()
     },
     updatePage() {
       const page = this.page - 1;
@@ -308,7 +353,7 @@ export default defineComponent( {
           }
         }
         let page1 = this.page - 1
-        if (this.totalPages == 1)  {
+        if (this.totalPages == 1) {
           page1 = 0
           this.page = 1;
         }

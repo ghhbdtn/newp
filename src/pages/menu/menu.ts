@@ -15,9 +15,12 @@ import {reports} from "@/store/modules/reports";
 Vue.directive('mask', VueMaskDirective);
 
 Vue.config.productionTip = false
-//Vue.use(VueTableDynamic)
+// @ts-ignore
+import VueSimpleAlert from "vue-simple-alert";
 
-store.registerModule('contractsStore', {})
+// @ts-ignore
+Vue.use(VueSimpleAlert);
+
 
  new Vue({
   el: '#menu',
