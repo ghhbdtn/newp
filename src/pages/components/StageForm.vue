@@ -10,13 +10,40 @@
         mdi-plus
       </v-icon>
     </v-btn>
-    <v-card-title v-if="contractStages.length> 0">Таблица этапов договора</v-card-title>
     <v-data-table  v-if="contractStages.length> 0"
                   :headers="_stages_headers"
                   :items="contractStages"
                   :items-per-page="itemsPerPage"
                    hide-default-footer
                   class="elevation-3">
+      <template v-slot:top>
+        <v-divider></v-divider>
+        <v-toolbar
+            text
+            color="rgba(128, 101, 166, 0.22)"
+        >
+          <v-toolbar-title>Таблица этапов договора</v-toolbar-title>
+          <v-divider
+              class="mx-4"
+              inset
+              vertical
+          ></v-divider>
+          <v-text-field
+              v-if="index !== -1"
+              v-model="itemsPerPage"
+              color="#6A76AB"
+              label="Число отображаемых элементов"
+              type="number"
+              outlined
+              dense
+              hide-details
+              class="shrink"
+              @input="beforeUpdatePage"
+          ></v-text-field>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+        <v-divider></v-divider>
+      </template>
       <template v-slot:[`item.actions`]="{ item }" v-if="!isUsersData">
         <v-icon small class="mr-2" @click="editStageItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
         <v-icon small text @click="deleteStageItem(item)" large style="color: darkred">
@@ -40,7 +67,7 @@
       <v-card-text>
         <v-form ref="form" style="background-color: rgb(255,255,255)">
           <v-container>
-            <v-card-title>Добавить стадию договора</v-card-title>
+            <v-card-title>{{editedStageIndex != -1 ? "Редактировать этап договора": "Добавить этап договора"}}</v-card-title>
             <v-row>
               <v-col cols="12" sm="6" md="4">
 
@@ -139,20 +166,13 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
-interface Stage {
-  id?: number,
-  name: string,
-  amount: number,
-  plannedDate: string,
-  actualDate: string,
-  actualMaterialCosts: number,
-  plannedMaterialCosts: number,
-  actualSalaryExpenses: number,
-  plannedSalaryExpenses: number
-}
+import {dateToString, stringToDate} from "@/pages/source/dateConverters";
+import {rules} from "@/pages/source/rules";
+import {Stage} from "@/pages/source/interfaces";
+
 export default defineComponent( {
   // eslint-disable-next-line vue/multi-word-component-names
-  name: "stg",
+  name: "StageForm",
   props: {
     index: {
       type: Number
@@ -177,6 +197,7 @@ export default defineComponent( {
         { text: "Действия", value: "actions", sortable: false, show: this.isUsersData == false}
       ],
       defaultStage: {
+        id: -1,
         name: "",
         amount: 0,
         plannedDate: "",
@@ -187,6 +208,7 @@ export default defineComponent( {
         plannedSalaryExpenses: 0
       } as Stage,
       editedStage: {
+        id: -1,
         name: "",
         amount: 0,
         plannedDate: "",
@@ -199,21 +221,13 @@ export default defineComponent( {
       page: 1,
       itemsPerPage: 10,
       itemsPerPageForAdding: 0,
-      rules: {
-        required: (value: String|Number) => !!value || "Обязательное поле",
-        number: (v: string) => !v ||/^\d+$/.test(v) || 'Должно быть числом',
-        planData: (v: string) => /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] (0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4}$/.test(v)
-            || "Формат: ДД.ММ.ГГГ - ДД.ММ.ГГ",
-        factData: (v: string) => !v || "" || /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] (0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4}$/.test(v)
-            || /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] $/.test(v) ||
-            "Формат: 'ДД.ММ.ГГГ - ДД.ММ.ГГ', или 'ДД.ММ.ГГГГ - ', или пустое поле",
-      },
+      rules
     }
   },
   computed: {
 
     contractStages() {
-      console.log(this.$store.state.contractsStore.all)
+      let dates: {plannedDate: string, actualDate: string} = {plannedDate: "", actualDate: ""}
       let stage: Stage = {
         id: 0,
         actualDate: "",
@@ -237,9 +251,12 @@ export default defineComponent( {
           stage.actualSalaryExpenses = stageList[i].actualSalaryExpenses;
           stage.plannedSalaryExpenses = stageList[i].plannedSalaryExpenses;
           stage.amount = stageList[i].amount;
-          stage.plannedDate = stageList[i].plannedStartDate + ' - ' + stageList[i].plannedEndDate;
-          stage.actualDate = stageList[i].actualStartDate + ' - ' + stageList[i].actualEndDate;
+          dates = dateToString(stageList[i].plannedStartDate, stageList[i].plannedEndDate,
+              stageList[i].actualStartDate, stageList[i].actualEndDate)
+          stage.plannedDate = dates.plannedDate;
+          stage.actualDate = dates.actualDate ;
           stagesAll.push(stage);
+          dates = {plannedDate: "", actualDate: ""};
           stage = {
             id: 0,
             actualDate: "",
@@ -277,85 +294,114 @@ export default defineComponent( {
     },
     saveStage( ) {
       let form: any = this.$refs.form
-      if(form.validate) {
-        if (this.index == -1 && this.editedStageIndex == -1) {// новый метод для добавления этапа в массив
-          this.itemsPerPageForAdding++;
-          this.itemsPerPage = this.itemsPerPageForAdding;
-          const stg = this.editedStage;
-          const planDate = stg.plannedDate.split("-");
-          const factDate = stg.actualDate.split("-");
-          let data = {
-            name: stg.name,
-            amount: stg.amount,
-            plannedStartDate: planDate[0].replace(" ", ""),
-            plannedEndDate: planDate[1].replace(" ", ""),
-            actualStartDate: factDate[0].replace(" ", ""),
-            actualEndDate: factDate[1].replace(" ", ""),
-            actualMaterialCosts: stg.actualMaterialCosts,
-            plannedMaterialCosts: stg.plannedMaterialCosts,
-            actualSalaryExpenses: stg.actualSalaryExpenses,
-            plannedSalaryExpenses: stg.plannedSalaryExpenses,
-            contractID: this.index
-          }
-          this.$store.commit('stages/SET_STAGE', data)
-          this.contractStages = this.$store.state.stages.all
-        } else if (this.editedStageIndex > -1) {
-          const oldValue = this.contractStages[this.editedStageIndex];
-          const newValue = this.editedStage;
-          if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
-              oldValue.plannedMaterialCosts !== newValue.plannedMaterialCosts ||
-              oldValue.actualMaterialCosts !== newValue.actualMaterialCosts ||
-              oldValue.plannedSalaryExpenses !== newValue.plannedSalaryExpenses ||
-              oldValue.actualSalaryExpenses !== newValue.actualSalaryExpenses ||
-              oldValue.plannedDate !== newValue.plannedDate ||
-              oldValue.actualDate !== newValue.actualDate) {
-            const planDate = newValue.plannedDate.split("-");
-            const factDate = newValue.actualDate.split("-");
-            console.log(planDate, factDate)
-            const data = {
+
+      // Trigger validation for each field
+      const valid = form.validate();
+
+      // Check if all fields are valid
+      if (valid) {
+        const newValue = this.editedStage;
+        const dates: {plannedStartDate: string, plannedEndDate: string, actualStartDate: string, actualEndDate: string} =
+            stringToDate(newValue.plannedDate, newValue.actualDate);
+        const plannedStartDate = dates.plannedStartDate;
+        const plannedEndDate = dates.plannedEndDate;
+        const actualStartDate = dates.actualStartDate;
+        const actualEndDate = dates.actualEndDate;
+        if ( this.editedStageIndex == -1) {
+          if (this.index == -1) {
+            this.itemsPerPageForAdding++;
+            this.itemsPerPage = this.itemsPerPageForAdding;
+            let data = {
               name: newValue.name,
-              plannedMaterialCosts: newValue.plannedMaterialCosts,
-              actualMaterialCosts: newValue.actualMaterialCosts,
-              plannedSalaryExpenses: newValue.plannedSalaryExpenses,
-              actualSalaryExpenses: newValue.actualSalaryExpenses,
               amount: newValue.amount,
-              plannedStartDate: planDate[0].replace(" ", ""),
-              plannedEndDate: planDate[1].replace(" ", ""),
-              actualStartDate: factDate[0].replace(" ", ""),
-              actualEndDate: factDate[1].replace(" ", ""),
-              id: newValue.id
+              plannedStartDate: plannedStartDate,
+              plannedEndDate: plannedEndDate,
+              actualStartDate: actualStartDate,
+              actualEndDate: actualEndDate,
+              actualMaterialCosts: newValue.actualMaterialCosts,
+              plannedMaterialCosts: newValue.plannedMaterialCosts,
+              actualSalaryExpenses: newValue.actualSalaryExpenses,
+              plannedSalaryExpenses: newValue.plannedSalaryExpenses,
             }
-            this.$store.dispatch('stages/putStage', data).then(
-                () => {
-                  this.editedStageIndex = -1
-                  this.closeStageForm()
-                }
+            this.$store.commit('stages/SET_STAGE', data)
+            this.$alert("Этап договора добавлен успешно!", '', 'success');
+            this.closeStageForm()
+          }else {
+            let data = {
+              name: newValue.name,
+              amount: newValue.amount,
+              plannedStartDate: plannedStartDate,
+              plannedEndDate: plannedEndDate,
+              actualStartDate: actualStartDate,
+              actualEndDate: actualEndDate,
+              actualMaterialCosts: newValue.actualMaterialCosts,
+              plannedMaterialCosts: newValue.plannedMaterialCosts,
+              actualSalaryExpenses: newValue.actualSalaryExpenses,
+              plannedSalaryExpenses: newValue.plannedSalaryExpenses,
+              contractID: this.index
+            }
+            this.$store.dispatch('stages/addStage', data).then(() => {
+              this.updatePage()
+              this.closeStageForm()
+              this.$alert("Этап договора добавлен успешно!", '', 'success');
+            }).catch(
+                ()=> this.$alert("Этап договора не может быть добавлен, проверьте правильность заполнения полей!", '', 'error')
             )
           }
-        } else {
-          const stg = this.editedStage;
-          const planDate = stg.plannedDate.split("-");
-          const factDate = stg.actualDate.split("-");
-          let data = {
-            name: stg.name,
-            amount: stg.amount,
-            plannedStartDate: planDate[0].replace(" ", ""),
-            plannedEndDate: planDate[1].replace(" ", ""),
-            actualStartDate: factDate[0].replace(" ", ""),
-            actualEndDate: factDate[1].replace(" ", ""),
-            actualMaterialCosts: stg.actualMaterialCosts,
-            plannedMaterialCosts: stg.plannedMaterialCosts,
-            actualSalaryExpenses: stg.actualSalaryExpenses,
-            plannedSalaryExpenses: stg.plannedSalaryExpenses,
-            contractID: this.index
+        } else if (this.editedStageIndex > -1) {
+          const oldValue = this.contractStages[this.editedStageIndex];
+
+            if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
+                oldValue.plannedMaterialCosts !== newValue.plannedMaterialCosts ||
+                oldValue.actualMaterialCosts !== newValue.actualMaterialCosts ||
+                oldValue.plannedSalaryExpenses !== newValue.plannedSalaryExpenses ||
+                oldValue.actualSalaryExpenses !== newValue.actualSalaryExpenses ||
+                oldValue.plannedDate !== newValue.plannedDate ||
+                oldValue.actualDate !== newValue.actualDate) {
+              if (this.index == -1) {
+                const data = {
+                  newValue: {
+                    name: newValue.name,
+                    plannedMaterialCosts: newValue.plannedMaterialCosts,
+                    actualMaterialCosts: newValue.actualMaterialCosts,
+                    plannedSalaryExpenses: newValue.plannedSalaryExpenses,
+                    actualSalaryExpenses: newValue.actualSalaryExpenses,
+                    amount: newValue.amount,
+                    plannedStartDate: plannedStartDate,
+                    plannedEndDate: plannedEndDate,
+                    actualStartDate: actualStartDate,
+                    actualEndDate: actualEndDate,
+                  },
+                  oldValueIndex: this.editedStageIndex
+                }
+                this.$store.commit('stages/PUT_STAGE_BEFORE_ADDING', data)
+                this.$alert("Изменения сохранены!", '', 'success')
+                this.closeStageForm()
+              }
+              else  {
+                const data = {
+                name: newValue.name,
+                plannedMaterialCosts: newValue.plannedMaterialCosts,
+                actualMaterialCosts: newValue.actualMaterialCosts,
+                plannedSalaryExpenses: newValue.plannedSalaryExpenses,
+                actualSalaryExpenses: newValue.actualSalaryExpenses,
+                amount: newValue.amount,
+                plannedStartDate: plannedStartDate,
+                plannedEndDate: plannedEndDate,
+                actualStartDate: actualStartDate,
+                actualEndDate: actualEndDate,
+                id: newValue.id
+              }
+              this.$store.dispatch('stages/putStage', data).then(
+                  () => {
+                    this.updatePage()
+                    this.closeStageForm()
+                    this.$alert("Изменения сохранены!", '', 'success')
+                  }
+              ).catch(() => this.$alert("Изменения этапа договора не сохранены, проверьте правильность заполнения полей!", '', 'error'))
+            }
           }
-          this.$store.dispatch('stages/addStage', data).then(() => {
-            this.closeStageForm()
-            this.editedStage = Object.assign({}, this.defaultStage)
-          })
         }
-        this.closeStageForm()
-        if(this.editedStageIndex > -1)this.$alert("Этап договора добавлен успешно!", '', 'success');
       }
     },
     closeStageForm() {
@@ -375,11 +421,16 @@ export default defineComponent( {
         this.editedStage = Object.assign({}, item)
         this.$confirm(message, '', 'warning').then(() => {
           this.$store.dispatch('stages/deleteStage', this.editedStage.id).then( () => {
-        if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
+        if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1 && this.page !==1) {
           this.page--;
         }
+        this.closeStageForm()
         this.updatePage();})})
       }
+    },
+    beforeUpdatePage() {
+      this.page = 1;
+      this.updatePage();
     },
     updatePage() {
       const page = this.page - 1;
@@ -392,13 +443,6 @@ export default defineComponent( {
       if (this.index !== -1) {
         this.$store.dispatch('stages/allStages', data)
       }
-      // else{
-      //   const data = {
-      //     page: page + 1,
-      //     size: size
-      //   };
-      //   this.$store.commit('stages/STAGES_PER_PAGE', data)
-      // }
     }
 
   }

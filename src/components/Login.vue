@@ -11,36 +11,45 @@
               <v-card-text>
                 <form ref="form" @submit.prevent="isRegister ? register() : login()">
                   <v-text-field v-if="isRegister"
+                                color="#6A76AB"
                                 v-model="fullName"
                                 name="name"
                                 label="ФИО"
                                 type="text"
-                                placeholder="name"
+                                placeholder="ФИО"
                                 required
                   ></v-text-field>
                   <v-text-field
                       v-model="username"
+                      color="#6A76AB"
                       name="username"
                       label="Имя пользователя"
                       type="text"
-                      placeholder="username"
+                      placeholder="Имя пользователя"
+                      :rules="isRegister ? [rules.minLength, rules.required] : [rules.required]"
                       required
                   ></v-text-field>
 
                   <v-text-field
                       v-model="password"
+                      color="#6A76AB"
                       name="password"
                       label="Пароль"
-                      type="password"
-                      placeholder="password"
+                      placeholder="Пароль"
+                      @click:append="() => (value = !value)"
+                      :type="value ? 'password' : 'text'"
+                      :append-icon="value ? 'mdi-eye-off' : 'mdi-eye'"
+                      :rules="isRegister ? [rules.password, rules.required] : [rules.required]"
                       required
                   ></v-text-field>
                   <v-text-field v-if="isRegister"
+                                color="#6A76AB"
                                 v-model="confirmPassword"
                                 name="confirmPassword"
                                 label="Повторите пароль"
                                 type="password"
-                                placeholder="confirm password"
+                                placeholder="Повторите пароль"
+                                :rules="[rules.required]"
                                 required
                   ></v-text-field>
                   <div class="red--text"> {{errorMessage}}</div>
@@ -59,8 +68,8 @@
 </template>
 
 <script lang="ts">
-import { mapGetters } from 'vuex'
 import Vue from "vue";
+import {rules} from "@/pages/source/rules";
 export default Vue.extend({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Login",
@@ -82,41 +91,44 @@ data() {
           name: 'Вход',
           message: 'Регистрация'
         }
-      }
+      },
+      value: true,
+      rules
     };
   },
   methods: {
     login() {
-      let login = this.username
-      let password = this.password
-      let data = {
-        login: login,
-        password: password
-      }
-      this.$store.dispatch('users/signIn', data )
-          .then(() =>{console.log(this.$store.state.users.user.id)
-            location.replace("pages/menu/menu.html")
-          })
-          .catch(err => this.stateObj.login.message = err)
-    },
-
-    register: function () {
-      if (this.password == this.confirmPassword) {
-        this.isRegister = false;
-        this.errorMessage = "";
-        (this.$refs.form as HTMLFormElement).reset();
-        const fullName = this.fullName;
-        const login = this.username;
-        const password = this.password;
-        const data = {
-          fullName: fullName,
+        let login = this.username
+        let password = this.password
+        let data = {
           login: login,
           password: password
         }
-        this.$store.dispatch('users/signUp', data ).then(() => this.login()).catch(err => this.stateObj.login.message = err)
-      } else {
-        this.errorMessage = "password did not match"
-      }
+        this.$store.dispatch('users/signIn', data)
+            .then(() => {
+              console.log(this.$store.state.users.user.id)
+              location.replace("menu.html")
+            })
+            .catch(err => this.stateObj.login.message = err)
+    },
+
+    register: function () {
+        if (this.password == this.confirmPassword) {
+          this.isRegister = false;
+          this.errorMessage = "";
+          (this.$refs.form as HTMLFormElement).reset();
+          const fullName = this.fullName;
+          const login = this.username;
+          const password = this.password;
+          const data = {
+            fullName: fullName,
+            login: login,
+            password: password
+          }
+          this.$store.dispatch('users/signUp', data ).then(() => this.login()).catch(err => this.stateObj.login.message = err)
+        } else {
+          this.errorMessage = "Пароли не совпадают"
+        }
     }
   },
   computed: {
@@ -126,8 +138,7 @@ data() {
       } else {
         return this.stateObj.register.message
       }
-    },
-    ...mapGetters('users', ['getUser']),
+    }
   }
 });
 </script>

@@ -5,10 +5,7 @@ import Contracts from "@/pages/components/Contracts.vue";
 import CounterpartyOrganizations from "@/pages/components/CounterpartyOrganizations.vue";
 import Reports from "@/pages/components/Reports.vue";
 import Administration from "@/pages/components/Administration.vue";
-import AdminRoot from "@/pages/components/AdminRoot.vue";
 import UsersPage from "@/pages/components/UsersPage.vue";
-import App from "@/App.vue"
-import Login from "@/components/Login.vue";
 
 
 Vue.use(VueRouter)
@@ -44,25 +41,14 @@ const routes: Array<RouteConfig> = [
     }
   },
   {
-    path: '/menu/admin-root',
-    name: 'admin-root',
-    component: AdminRoot,
-  },
-  {
     path: "/menu/admin-root/users",
     name: "allUsers",
     component: UsersPage,
-    meta: {
-      breadcrumb: 'Пользователи'
-    }
   },
   {
     path: "/menu/admin-root/all-contracts",
     name: "all-contracts",
     component: Administration,
-    meta: {
-      breadcrumb: 'Список всех договоров'
-    }
   }
 ]
 

@@ -1,4 +1,3 @@
-//import _ from 'lodash';
 import axios from 'axios';
 import _ from "lodash";
 import Vue from "vue";
@@ -12,8 +11,7 @@ interface User {
 }
 
 interface State {
-    isAdmin: boolean;
-    status: string,
+    isAdmin: boolean,
     user : User,
     all: User[],
     totalPages: number,
@@ -22,7 +20,6 @@ interface State {
 
 const state = {
     isAdmin: false,
-    status: '',
     user : {} as User,
     all: [] as User[],
     totalPages: 0,
@@ -30,13 +27,8 @@ const state = {
 } as State
 
 const getters =  {
-    //isLoggedIn: state => !!state.token
-    //isAdmin: state.user.isAdmin
     getUserRole: (state: State) : boolean=> {
         return state.user.isAdmin
-    },
-    getUser:(state: State): User =>{
-        return state.user
     }
 }
 
@@ -51,9 +43,6 @@ const mutations = {
         state.isAdmin = user1.isAdmin
         console.log(state.user, state.isAdmin)
     },
-    AUTH_ERR(state: State){
-        state.status = 'error'
-    },
     LOG_OUT(state: State){
         state.user = {} as User;
     },
@@ -64,8 +53,7 @@ const mutations = {
     },
     PUT_USER(state: State, data: User){
         const user = _.find(state.all, {id: data.id})
-        // @ts-ignore
-        Vue.set(state.all, state.all.indexOf(user), data)
+        if (user != null) Vue.set(state.all, state.all.indexOf(user), data)
     },
     DELETE_USER(state: State, data: number){
         state.all = state.all.filter(user => user.id !== data);
@@ -75,14 +63,13 @@ const mutations = {
 const actions = {
     signIn({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            axios({url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
+            axios({headers:{'Access-Control-Allow-Origin': 'true'}, url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
                 .then(resp => {
                     const user: User = resp.data;
                     commit('SET_USER', user);
                     resolve(resp)
                 })
                 .catch(err => {
-                    commit('AUTH_ERR')
                     reject(err)
                 })
         })
@@ -96,7 +83,6 @@ const actions = {
                     resolve(resp)
                 })
                 .catch(err => {
-                    commit('AUTH_ERR')
                     reject(err)
                 })
         })
@@ -124,7 +110,6 @@ const actions = {
                     resolve(resp)
                 })
                 .catch(err => {
-                    //commit('AUTH_ERR')
                     reject(err)
                 })
         })
@@ -135,13 +120,11 @@ const actions = {
             axios( {url: 'http://localhost:8080/api/admin/users/' + id, data: data,
                 withCredentials: true, method: "PUT" })
                 .then(resp => {
-                    const content = resp.data.content;
                     commit('PUT_USER', data);
                     resolve(resp)
                 })
                 .catch(err => {
                     console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
@@ -156,7 +139,6 @@ const actions = {
                 })
                 .catch(err => {
                     console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })

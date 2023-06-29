@@ -11,7 +11,8 @@
         <template v-slot:top>
           <v-divider></v-divider>
           <v-toolbar
-              flat
+              text
+              color="rgba(128, 101, 166, 0.22)"
           >
             <v-toolbar-title>Список всех договоров</v-toolbar-title>
             <v-divider
@@ -23,11 +24,13 @@
             <v-text-field
                 v-model="itemsPerPage"
                 color="#6A76AB"
-                label="Количество элементов на странице"
+                label="Число отображаемых элементов"
+                class="shrink"
+                outlined
+                dense
                 type="number"
                 hide-details
-                class="items-per-page-field"
-                @input="updatePage"
+                @input="beforeUpdatePage"
             ></v-text-field>
             <v-spacer></v-spacer>
             <v-dialog v-model="dialogVisible"  @click.prevent persistent>
@@ -112,7 +115,7 @@
                                         label="Сумма договора (руб.)"></v-text-field>
                         </v-col>
 
-                        <stg :index="contractID"></stg>
+                        <StageForm :index="contractID"></StageForm>
                         <counterparty-form :index="contractID"></counterparty-form>
                       </v-row>
                     </v-container>
@@ -142,10 +145,10 @@
                       item-value="id"
                       persistent-hint
                       return-object
-                      label="По ответственному пользователю"
+                      label="По пользователю"
                       dense
                       style="font-size: 0.9rem;"
-                      @input="updatePage"
+                      @input="beforeUpdatePage"
             ></v-select>
           </template>
         </template>
@@ -161,7 +164,7 @@
                           dense
                           class="filter-input"
                           style="font-size: 0.9rem;"
-                          @input="updatePage"
+                          @input="beforeUpdatePage"
             ></v-text-field>
           </template>
         </template>
@@ -180,7 +183,7 @@
                       dense
                       class="filter-input"
                       style="font-size: 0.9rem;"
-                      @input="updatePage"
+                      @input="beforeUpdatePage"
             ></v-select>
           </template>
         </template>
@@ -198,7 +201,7 @@
                 clearable
                 dense
                 style="font-size: 0.9rem;"
-                @change="updatePage"/>
+                @change="beforeUpdatePage"/>
             <v-text-field
                 outlined
                 color="#6A76AB"
@@ -209,7 +212,7 @@
                 dense
                 clearable
                 style="font-size: 0.9rem;"
-                @change="updatePage"/>
+                @change="beforeUpdatePage"/>
           </template>
         </template>
         <template v-slot:[`header.actualDate`]="{ header }">
@@ -226,7 +229,7 @@
                 clearable
                 dense
                 style="font-size: 0.9rem;"
-                @change="updatePage"/>
+                @change="beforeUpdatePage"/>
             <v-text-field
                 outlined
                 color="#6A76AB"
@@ -237,7 +240,7 @@
                 dense
                 clearable
                 style="font-size: 0.9rem;"
-                @change="updatePage"/>
+                @change="beforeUpdatePage"/>
           </template>
         </template>
         <template v-slot:[`header.amount`]="{ header }">
@@ -254,7 +257,7 @@
                 dense
                 clearable
                 style="font-size: 0.9rem;"
-                @change="updatePage"/>
+                @input="beforeUpdatePage"/>
             <v-text-field
                 outlined
                 type="number"
@@ -265,7 +268,7 @@
                 dense
                 clearable
                 style="font-size: 0.9rem;"
-                @change="updatePage"/>
+                @input="beforeUpdatePage"/>
           </template>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
@@ -277,7 +280,7 @@
           </td>
         </template>
       </v-data-table>
-      <template >
+      <template v-if="contracts.length > 0">
         <div>
           <v-pagination
               color="#6A76AB"
@@ -298,31 +301,17 @@ import { required, minLength } from "@vuelidate/validators";
 
 import CounterpartyForm from "./CounterpartyForm.vue";
 import { mapState } from 'vuex';
-import Stg from "@/pages/components/stg.vue";
+import StageForm from "@/pages/components/StageForm.vue";
+import {setFilters} from "@/pages/source/filters";
+import {dateToString, stringToDate} from "@/pages/source/dateConverters";
+import {rules} from "@/pages/source/rules";
+import {Contract, User} from "@/pages/source/interfaces";
 
-interface Contract {
-  id?: number,
-  name: string,
-  type: string,
-  amount: number,
-  plannedDate: string,
-  actualDate: string,
-  user?: User
-}
-interface User {
-  id: number,
-  login: string,
-  fullName: string,
-  terminationDate: string,
-  isAdmin: boolean
-}
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Administration",
-  components: {Stg, CounterpartyForm},
-
-
+  components: {StageForm, CounterpartyForm},
 data() {
     return {
 
@@ -340,7 +329,7 @@ data() {
           terminationDate: "",
           isAdmin: false
         } as User
-      },
+      } as Contract,
       defaultItem: {
         id: -1,
         name: "",
@@ -388,17 +377,7 @@ data() {
         { text: "Сумма", align: "start", sortable: false, value: "amount", class: "with-divider", cellClass: 'with-divider'},
         { text: "Действия", value: "actions", sortable: false},
       ],
-      rules: {
-        required: (value: String|Number) => !!value || "Обязательное поле",
-        minLength: (value: String) =>
-            value.length >= 6 || "Минимальная длина логина - 6",
-        number: (v: string) => !v ||/^\d+$/.test(v) || 'Должно быть числом',
-        planData: (v: string) => /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] (0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4}$/.test(v)
-                                || "Формат: ДД.ММ.ГГГ - ДД.ММ.ГГ",
-        factData: (v: string) => !v || "" || /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] (0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4}$/.test(v)
-           || /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] $/.test(v) ||
-            "Формат: 'ДД.ММ.ГГГ - ДД.ММ.ГГ', или 'ДД.ММ.ГГГГ - ', или пустое поле",
-      },
+       rules: rules
     };
   },
   watch: {
@@ -426,9 +405,9 @@ data() {
       return userList
     },
     contracts() {
-      console.log(this.$store.state.contractsStore.allForAdmin)
+      let dates: {plannedDate: string, actualDate: string} = {plannedDate: "", actualDate: ""}
       let contractList = this.$store.state.contractsStore.allForAdmin
-      let contract: Contract = {actualDate: "", amount: 0, id: 0, name: "", plannedDate: "", type: "",  user: {
+      let contract: Contract = {actualDate: "", amount: 0, id: -1, name: "", plannedDate: "", type: "",  user: {
           id: -1,
           login: "",
           fullName: "",
@@ -441,12 +420,14 @@ data() {
         contract.name = contractList[i].name;
         contract.type = contractList[i].type;
         contract.amount = contractList[i].amount;
-        contract.plannedDate = contractList[i].plannedStartDate + ' - ' + contractList[i].plannedEndDate;
-        contract.actualDate = (contractList[i].actualStartDate == null ? "" : contractList[i].actualStartDate) + ' - ' +
-            (contractList[i].actualEndDate == null ? "" : contractList[i].actualEndDate) ;
+        dates = dateToString(contractList[i].plannedStartDate, contractList[i].plannedEndDate,
+            contractList[i].actualStartDate, contractList[i].actualEndDate)
+        contract.plannedDate = dates.plannedDate;
+        contract.actualDate = dates.actualDate ;
         contract.user = contractList[i].user
         contractsAll.push(contract);
-        contract = {actualDate: "", amount: 0, id: 0, name: "", plannedDate: "", type: "",  user: {
+        dates = {plannedDate: "", actualDate: ""};
+        contract = {actualDate: "", amount: 0, id: -1, name: "", plannedDate: "", type: "",  user: {
             id: -1,
             login: "",
             fullName: "",
@@ -461,7 +442,7 @@ data() {
     editItem (item: any) {
       this.editedIndex = this.contracts.indexOf(item)
       this.EditedItem = Object.assign({}, item)
-      this.contractID = this.EditedItem.id
+      this.contractID = this.EditedItem.id == null ? -1 : this.EditedItem.id
       console.log(this.EditedItem.id)
       this.isEdit = true
       let data = {contractId: this.EditedItem.id}
@@ -498,43 +479,54 @@ data() {
 
     save: function () {
       let form: any = this.$refs.form
-      if(form.validate) {
+
+      // Trigger validation for each field
+      const valid = form.validate();
+
+      // Check if all fields are valid
+      if (valid)  {
+        const newValue = this.EditedItem;
+        const dates: {plannedStartDate: string, plannedEndDate: string, actualStartDate: string, actualEndDate: string} =
+            stringToDate(newValue.plannedDate, newValue.actualDate);
+        const plannedStartDate = dates.plannedStartDate;
+        const plannedEndDate = dates.plannedEndDate;
+        const actualStartDate = dates.actualStartDate;
+        const actualEndDate = dates.actualEndDate;
         if (this.editedIndex > -1) {
           const oldValue = this.contracts[this.editedIndex];
-          const newValue = this.EditedItem;
           if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
               oldValue.type !== newValue.type || oldValue.plannedDate !== newValue.plannedDate ||
               oldValue.actualDate !== newValue.actualDate || oldValue.user == null || newValue.user == null || oldValue.user.id !== newValue.user.id) {
-            const planDate = newValue.plannedDate.split("-");
-            const factDate = newValue.actualDate.split("-");
-            console.log(planDate, factDate)
             const data = {
               name: newValue.name,
               type: newValue.type,
               amount: newValue.amount,
-              plannedStartDate: planDate[0].replace(" ", ""),
-              plannedEndDate: planDate[1].replace(" ", ""),
-              actualStartDate: factDate[0] == null ? "" : factDate[0].replace(" ", ""),
-              actualEndDate: factDate[1] == null ? "" : factDate[1].replace(" ", ""),
+              plannedStartDate: plannedStartDate,
+              plannedEndDate: plannedEndDate,
+              actualStartDate: actualStartDate,
+              actualEndDate: actualEndDate,
               userId: (this.EditedItem.user == null) ? null : this.EditedItem.user.id,
               id: newValue.id
             }
-            this.$store.dispatch('contractsStore/putContract', data).then(this.updatePage)
+            this.$store.dispatch('contractsStore/putContract', data).then(()=>{
+              this.updatePage()
+              this.close()
+              this.$alert("Изменения сохранены!", '', 'success');})
+                .catch(()=> this.$alert("Изменения не удалось сохранить, проверьте правильность заполнения полей!", '', 'error'))
           }
           Object.assign(this.contracts[this.editedIndex], this.EditedItem)
           this.isEdit = false
+          this.close()
         } else {
-          const planDate = this.EditedItem.plannedDate.split("-");
-          const factDate = this.EditedItem.actualDate.split("-");
           const data = {
-            name: this.EditedItem.name,
-            type: this.EditedItem.type,
-            amount: this.EditedItem.amount,
-            plannedStartDate: planDate[0].replace(" ", ""),
-            plannedEndDate: planDate[1].replace(" ", ""),
-            actualStartDate: factDate[0] == null ? "" : factDate[0].replace(" ", ""),
-            actualEndDate: factDate[1] == null ? "" : factDate[1].replace(" ", ""),
-            userId: this.EditedItem.user.id,
+            name: newValue.name,
+            type: newValue.type,
+            amount: newValue.amount,
+            plannedStartDate: plannedStartDate,
+            plannedEndDate: plannedEndDate,
+            actualStartDate: actualStartDate,
+            actualEndDate: actualEndDate,
+            userId: (this.EditedItem.user == null) ? null : this.EditedItem.user.id,
             contractStages: this.$store.state.stages.all,
             counterpartyContracts: this.$store.state.counterContracts.allCounterContracts
           }
@@ -542,131 +534,19 @@ data() {
             this.$store.dispatch('contractsStore/getAll', {})
             this.$store.commit('stages/CLEAR_AFTER_ADDING')
             this.$store.commit('counterContracts/CLEAR_AFTER_ADDING')
+            this.$alert("Договор добавлен успешно!", '', 'success');
             this.updatePage()
-          })
+            this.close()
+          }).catch(()=>this.$alert("Договор не удалось сохранить, проверьте правильность заполнения полей!", '', 'error'))
         }
-        this.close()
-        this.$alert("Договор добавлен успешно!", '', 'success');
       }
     },
-    reload() {
-      this.$store.dispatch('contractsStore/allAdminContracts', {})
+    beforeUpdatePage() {
+      this.page = 1;
+      this.updatePage();
     },
     updatePage() {
-      const page = this.page - 1;
-      const size = this.itemsPerPage;
-      if(this.filterValues.name == null && this.filterValues.type == null && this.filterValues.type == "" || this.filterValues.name == "") {
-        const data = {
-          page: page,
-          size: size
-        };
-        this.$store.dispatch('contractsStore/allAdminContracts', data)
-      }
-      else {
-        const arr = [] as {}[];
-        for (var filter in this.filterValues) {
-          switch (filter) {
-            case 'user':
-              if (this.filterValues.user.id != null && this.filterValues.user.id !== -1) {
-                const userFilter = {
-                  key: 'USER',
-                  targetEntity: "CONTRACT",
-                  operator: "EQUAL",
-                  value: this.filterValues.user.id
-                }
-                arr.push(userFilter)
-              }
-              break;
-            case 'name':
-              if (this.filterValues.name !== null && this.filterValues.name !== "") {
-                const nameFilter = {
-                  key: 'NAME',
-                  targetEntity: "CONTRACT",
-                  operator: "LIKE",
-                  value: this.filterValues.name
-                }
-                arr.push(nameFilter)
-              }
-              break;
-            case 'type':
-              if (this.filterValues.type != null && this.filterValues.type !== "") {
-                const typeFilter = {
-                  key: 'TYPE',
-                  targetEntity: "CONTRACT",
-                  operator: "EQUAL",
-                  value: this.filterValues.type
-                }
-                arr.push(typeFilter)
-              }
-              break;
-            case 'plannedStartDate':
-              if (this.filterValues.plannedStartDate != null && this.filterValues.plannedStartDate !== "") {
-                const plannedDateFilter = {
-                  key: 'PLANNED_START_DATE',
-                  targetEntity: "CONTRACT",
-                  operator: "GREATER",
-                  value: this.filterValues.plannedStartDate.split("-").reverse().join("-")
-                }
-                arr.push(plannedDateFilter)
-              }
-              break;
-            case 'plannedEndDate':
-              if (this.filterValues.plannedEndDate != null && this.filterValues.plannedEndDate !== "") {
-                const plannedDateFilter = {
-                  key: 'PLANNED_END_DATE',
-                  targetEntity: "CONTRACT",
-                  operator: "LESS",
-                  value: this.filterValues.plannedEndDate.split("-").reverse().join("-")
-                }
-                arr.push(plannedDateFilter)
-              }
-              break;
-            case 'actualStartDate':
-              if (this.filterValues.actualStartDate != null && this.filterValues.actualStartDate !== "") {
-                const actualDateFilter = {
-                  key: 'ACTUAL_START_DATE',
-                  targetEntity: "CONTRACT",
-                  operator: "GREATER",
-                  value: this.filterValues.actualStartDate.split("-").reverse().join("-")
-                }
-                arr.push(actualDateFilter)
-              }
-              break;
-            case 'actualEndDate':
-              if (this.filterValues.actualEndDate != null && this.filterValues.actualEndDate !== "") {
-                const actualDateFilter = {
-                  key: 'ACTUAL_END_DATE',
-                  targetEntity: "CONTRACT",
-                  operator: "LESS",
-                  value: this.filterValues.actualEndDate.split("-").reverse().join("-")
-                }
-                arr.push(actualDateFilter)
-              }
-              break;
-            case 'maxAmount':
-              if (this.filterValues.maxAmount != null && this.filterValues.maxAmount.toString() !== "" && this.filterValues.maxAmount !== 0) {
-                const amountFilter = {
-                  key: 'AMOUNT',
-                  targetEntity: "CONTRACT",
-                  operator: "LESS",
-                  value: this.filterValues.maxAmount - 1
-                }
-                arr.push(amountFilter)
-              }
-              break;
-            case 'minAmount':
-              if (this.filterValues.minAmount != null && this.filterValues.minAmount.toString() !== "" && this.filterValues.minAmount !== 0) {
-                const amountFilter = {
-                  key: 'AMOUNT',
-                  targetEntity: "CONTRACT",
-                  operator: "GREATER",
-                  value: this.filterValues.minAmount - 1
-                }
-                arr.push(amountFilter)
-              }
-              break;
-          }
-        }
+        const arr = setFilters(this.filterValues);
         let page1 = this.page - 1
         if (this.totalPages == 1)  {
           page1 = 0
@@ -675,16 +555,14 @@ data() {
         const data = {
           filters: arr,
           page: page1,
-          size: size
+          size: this.itemsPerPage
         };
         this.$store.dispatch('contractsStore/allAdminContracts', data)
-      }
+
     }
-
-
   },
   created(){
-    this.$store.dispatch('counterparties/allCounterpartyOrganizations', {})
+    this.$store.dispatch('counterparties/allCounterpartyOrganizations', {page:0, size: 2147483647})
     this.$store.dispatch('contractsStore/allAdminContracts', {})
     this.$store.dispatch('users/allUsers', {page:0, size: 2147483647})
   }
@@ -707,12 +585,18 @@ data() {
 
   font-size: 1.0rem;
 
-  height: 48px;
+  height: 40px;
+}
+.v-data-table > .v-data-table__wrapper > table > tbody > tr > td, .v-data-table > .v-data-table__wrapper > table > thead > tr > td, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > td
+
+{
+
+  font-size: 1.0rem;
+
+  height: 40px;
 }
 .with-divider {
   border-right: 1px solid grey;
 }
-.items-per-page-field{
-  width: 1%;
-}
+
 </style>

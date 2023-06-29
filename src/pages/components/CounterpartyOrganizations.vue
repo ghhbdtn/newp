@@ -1,47 +1,6 @@
 <template>
   <v-app>
     <v-content>
-      <template>
-        <v-col cols="10" sm="4" md="3">
-          <label class="filter-label">Отфильтровать организации:</label>
-        </v-col>
-        <v-row align="center" justify="center">
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined
-                          color="#6A76AB"
-                          dense
-                          v-model="filterValues.name"
-                          label="По названию"
-                          clearable
-                          class="filter-input"
-                          @input="updatePage"
-            ></v-text-field>
-          </v-col>
-
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined
-                          color="#6A76AB"
-                          dense
-                          v-model="filterValues.address"
-                          label="По адресу организации"
-                          clearable
-                          class="filter-input"
-                          @input="updatePage"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined
-                          clearable
-                          dense
-                          color="#6A76AB"
-                          label="По ИНН"
-                          v-mask="'##########'"
-                          v-model="filterValues.inn"
-                          class="filter-input"
-                          @change="updatePage"/>
-          </v-col>
-        </v-row>
-      </template>
       <v-data-table
                      :headers="_organization_headers"
                      :items="organizations"
@@ -49,11 +8,11 @@
                      hide-default-footer
                      class="elevation-1 grey lighten-5"
       >
-
         <template v-slot:top>
           <v-divider></v-divider>
         <v-toolbar
-            flat
+            text
+            color="rgba(128, 101, 166, 0.22)"
         >
           <v-toolbar-title>Таблица организаций-контрагентов</v-toolbar-title>
           <v-divider
@@ -64,11 +23,13 @@
           <v-text-field
               v-model="itemsPerPage"
               color="#6A76AB"
-              label="Количество элементов на странице"
               type="number"
               hide-details
-              class="items-per-page-field"
-              @input="updatePage"
+              outlined
+              dense
+              label="Число отображаемых элементов"
+              class="shrink"
+              @input="beforeUpdatePage"
           ></v-text-field>
           <v-spacer></v-spacer>
         <v-dialog v-model="dialog">
@@ -85,7 +46,7 @@
             <v-card-text>
               <v-form ref="form"  style="background-color: rgb(255,255,255)">
                 <v-container>
-                  <v-card-title>Добавить организацию-контрагента</v-card-title>
+                  <v-card-title>{{editedIndex>-1 ? "Редактировать организацию-контрагента": "Добавить организацию-контрагента"}}</v-card-title>
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
@@ -107,19 +68,17 @@
                           clearable
                           outlined
                           v-model="editedOrganization.address"
-                          :rules="[rules.required]"
-                          required
                           label="Адрес"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field color="#6A76AB"
-                                    clearable
-                                    outlined
-                                    v-model="editedOrganization.inn" type="text" label="ИНН"
-                                    v-mask="'##########'"
-                                    :rules="[rules.required, rules.inn]"
-                                    required></v-text-field>
+                      <v-text-field
+                          color="#6A76AB"
+                          clearable
+                          outlined
+                          v-model="editedOrganization.inn" type="text" label="ИНН"
+                          v-mask="'##########'"
+                          :rules="[rules.inn, rules.required]"></v-text-field>
                     </v-col>
                   </v-row>
                   <v-card-actions>
@@ -134,9 +93,57 @@
         </v-toolbar>
           <v-divider></v-divider>
         </template>
-        <template v-slot:[`item.actions`]="{ item }" v-if="isAdmin">
+        <template v-slot:[`header.name`]="{ header }">
+          {{ header.text }}
+          <v-spacer></v-spacer>
+          <template>
+            <v-text-field outlined
+                          color="#6A76AB"
+                          dense
+                          v-model="filterValues.name"
+                          label="По названию"
+                          clearable
+                          class="filter-input"
+                          style="font-size: 0.9rem;"
+                          @input="beforeUpdatePage"
+            ></v-text-field>
+          </template>
+        </template>
+        <template v-slot:[`header.address`]="{ header }">
+          {{ header.text }}
+          <v-spacer></v-spacer>
+          <template>
+            <v-text-field outlined
+                          color="#6A76AB"
+                          dense
+                          v-model="filterValues.address"
+                          label="По адресу организации"
+                          clearable
+                          class="filter-input"
+                          style="font-size: 0.9rem;"
+                          @input="beforeUpdatePage"
+            ></v-text-field>
+          </template>
+        </template>
+        <template v-slot:[`header.inn`]="{ header }">
+          {{ header.text }}
+          <v-spacer></v-spacer>
+          <template>
+            <v-text-field outlined
+                          clearable
+                          dense
+                          color="#6A76AB"
+                          label="По ИНН"
+                          v-mask="'##########'"
+                          v-model="filterValues.inn"
+                          class="filter-input"
+                          style="font-size: 0.9rem;"
+                          @change="beforeUpdatePage"/>
+          </template>
+        </template>
+        <template v-if="isAdmin" v-slot:[`item.actions`]="{ item }">
           <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
-          <v-icon small text @click="deleteItem(item)" large style="color: darkred">
+          <v-icon small text @click="deleteOrganization(item)" large style="color: darkred">
             mdi-delete
           </v-icon>
         </template>
@@ -160,19 +167,16 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import "vue-simple-alert/lib/index";
-interface Organization {
-  id?: number,
-  name: string,
-  address: string,
-  inn: number
-}
+import {rules} from "@/pages/source/rules";
+import {setOrganizationsFilters} from "@/pages/source/filters";
+import {Organization} from "@/pages/source/interfaces";
+
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "CounterpartyOrganizations",
 
   data() {
     return {
-
       organization: {
         id: -1,
         name: "",
@@ -200,11 +204,7 @@ export default defineComponent({
       ],
       dialog: false,
       editedIndex: -1,
-      rules: {
-        required: (value: String|Number) => !!value || "Обязательное поле",
-        inn: (v: string) => !v ||/^\d{10}$/.test(v) || 'Длина ИНН должна равняться 10 цифрам',
-
-      },
+      rules
     };
   },
 
@@ -228,7 +228,8 @@ export default defineComponent({
   methods: {
     saveOrganization () {
       let form: any = this.$refs.form
-      if(form.validate) {
+      const valid = form.validate();
+      if (valid) {
         if (this.editedIndex > -1) {
           const oldValue = this.organizations[this.editedIndex];
           const newValue = this.editedOrganization;
@@ -239,19 +240,28 @@ export default defineComponent({
               address: this.editedOrganization.address,
               inn: this.editedOrganization.inn
             }
-            this.$store.dispatch('counterparties/putOrganization', data)
+            this.$store.dispatch('counterparties/putOrganization', data).then(()=> {
+              this.$alert("Изменения сохранены успешно!", '', 'success')
+              this.beforeUpdatePage()
+              this.closeForm()
+            }).catch(()=> this.$alert("Изменения не сохранены, проверьте правильность заполнения полей!", '', 'error'))
           }
           Object.assign(this.organizations[this.editedIndex], this.editedOrganization)
+          this.closeForm()
         } else {
           const data = {
             name: this.editedOrganization.name,
             address: this.editedOrganization.address,
             inn: this.editedOrganization.inn
           }
-          this.$store.dispatch('counterparties/addNewOrganization', data)
+          this.$store.dispatch('counterparties/addNewOrganization', data).then(()=> {
+            this.$alert("Организация добавлена успешно!", '', 'success')
+            this.beforeUpdatePage()
+            this.closeForm()
+          }).catch(()=>
+              this.$alert("Не удалось добавить организацию, проверьте правильность заполнения полей!", '', 'error')
+          )
         }
-        this.closeForm()
-        this.$alert("Организация добавлена успешно!", '', 'success');
       }
     },
     closeForm () {
@@ -266,19 +276,23 @@ export default defineComponent({
       this.editedOrganization = Object.assign({}, item)
       this.dialog = true
     },
-    deleteItem (item: any) {
-      //const index = this.organizations.indexOf(item)
+    deleteOrganization (item: any) {
+      this.editedIndex = this.organizations.indexOf(item)
       this.editedOrganization = Object.assign({}, item)
-
+      const id = this.editedOrganization.id
       this.$confirm('Вы действительно хотите удалить данную организацию?', '','warning').then(()=>
-          this.$store.dispatch('counterparties/deleteOrganization', this.editedOrganization.id).then(()=>{
-            this.closeForm();
+          this.$store.dispatch('counterparties/deleteOrganization', id).then(()=>{
             if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
               this.page--
             }
             this.updatePage()
+            this.closeForm();
           }).catch(()=> this.$alert('Данная организация не может быть удалена', '', 'error')))
       this.closeForm()
+    },
+    beforeUpdatePage() {
+      this.page = 1;
+      this.updatePage();
     },
     updatePage() {
       const page = this.page - 1;
@@ -292,44 +306,7 @@ export default defineComponent({
         };
         this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
       } else {
-        const arr = [] as {}[];
-        for (var filter in this.filterValues) {
-          switch (filter) {
-            case 'name':
-              if (this.filterValues.name != null && this.filterValues.name !== "") {
-                const nameFilter = {
-                  key: 'NAME',
-                  targetEntity: "COUNTERPARTY_ORGANIZATION",
-                  operator: "LIKE",
-                  value: this.filterValues.name
-                }
-                arr.push(nameFilter)
-              }
-              break;
-            case 'address':
-              if (this.filterValues.address != null && this.filterValues.address !== "") {
-                const addressFilter = {
-                  key: 'ADDRESS',
-                  targetEntity: "COUNTERPARTY_ORGANIZATION",
-                  operator: "LIKE",
-                  value: this.filterValues.address
-                }
-                arr.push(addressFilter)
-              }
-              break;
-            case 'inn':
-              if (this.filterValues.inn != null && this.filterValues.inn != 0 && this.filterValues.inn.toString() !== "") {
-                const innFilter = {
-                  key: 'INN',
-                  targetEntity: "COUNTERPARTY_ORGANIZATION",
-                  operator: "EQUAL",
-                  value: this.filterValues.inn
-                }
-                arr.push(innFilter)
-              }
-              break;
-          }
-        }
+        const arr = setOrganizationsFilters(this.filterValues);
         let page1 = this.page - 1
         if (this.totalPages == 1)  {
           page1 = 0
@@ -350,6 +327,6 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
+<style>
 
 </style>

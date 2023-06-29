@@ -1,16 +1,18 @@
 <template>
   <div id="app">
-    <router-view/>
+    <Login></Login>
   </div>
 </template>
 <script lang="ts">
 import {defineComponent} from "vue";
+import Login from "@/components/Login.vue";
 
 export default  defineComponent({
   name: 'App',
-  created () {
-    this.$router.push('/')
-  },
+  components: {Login},
+  // created () {
+  //   this.$router.push('/')
+  // },
 });
 </script>
 <style lang="scss">

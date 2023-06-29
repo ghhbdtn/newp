@@ -1,16 +1,6 @@
 import axios from 'axios';
 import _ from "lodash";
-import users from "@/store/modules/users";
 import Vue from "vue";
-
-interface User {
-    id: number,
-    login: string,
-    fullName: string,
-    terminationDate: string,
-    isAdmin: boolean
-}
-
 interface CounterContract {
     id?: number,
     name: string,
@@ -56,8 +46,8 @@ export const  counterContracts = {
         },
         PUT_COUNTER_CONTRACT(state: State, data: CounterContract){
             const countercontract = _.find(state.allCounterContracts, {id: data.id})
-            // @ts-ignore
-            Vue.set(state.allCounterContracts, state.allCounterContracts.indexOf(countercontract), data)
+            if (countercontract != null)
+                Vue.set(state.allCounterContracts, state.allCounterContracts.indexOf(countercontract), data)
         },
         DELETE_COUNTER_CONTRACT(state: State, data: number){
             state.allCounterContracts = state.allCounterContracts.filter(cct => cct.id !== data);
@@ -67,6 +57,10 @@ export const  counterContracts = {
         },
         DELETE_UNSAVED_COUNTER_CONTRACT(state: State, data: CounterContract){
             state.allCounterContracts = state.allCounterContracts.filter(cct => cct.name !== data.name);
+        },
+        PUT_COUNTER_CONTRACT_BEFORE_ADDING(state: State, data: {oldValueIndex: number, newValue: CounterContract}){
+            const countercontract = state.allCounterContracts[data.oldValueIndex]
+            Vue.set(state.allCounterContracts, state.allCounterContracts.indexOf(countercontract), data.newValue)
         },
 
     },
@@ -94,7 +88,7 @@ export const  counterContracts = {
                     })
             })
         },
-        addCounterpartyContract({commit}: any, data: number){
+        addCounterpartyContract({commit}: any, data: CounterContract){
             return new Promise((resolve, reject) => {
                 console.log(data);
                 // @ts-ignore
@@ -102,7 +96,6 @@ export const  counterContracts = {
                 axios( {url: 'http://localhost:8080/api/admin/contracts/'+ contractId + '/counterparty-contracts', data: data,
                     withCredentials: true, method: "POST" })
                     .then(resp => {
-                        const content = resp.data.content;
                         console.log(resp.data);
                         commit('SET_COUNTER_CONTRACT', data);
                         resolve(resp)
@@ -122,7 +115,6 @@ export const  counterContracts = {
                 axios( {url: 'http://localhost:8080/api/admin/counterparty-contracts/'+ id, data: data,
                     withCredentials: true, method: "PUT" })
                     .then(resp => {
-                        const content = resp.data.content;
                         console.log(resp.data);
                         commit('PUT_COUNTER_CONTRACT', data);
                         resolve(resp)

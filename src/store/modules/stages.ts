@@ -1,15 +1,7 @@
 import axios from 'axios';
 import _ from "lodash";
-import users from "@/store/modules/users";
 import Vue from "vue";
 
-interface User {
-    id: number,
-    login: string,
-    fullName: string,
-    terminationDate: string,
-    isAdmin: boolean
-}
 interface Stage {
     id?: number,
     name: string,
@@ -31,7 +23,6 @@ interface State {
     totalElements: number
 }
 
-
 export const stages =  {
     namespaced: true,
 state: {
@@ -42,9 +33,6 @@ state: {
 } as State,
 
 getters:  {
-        getStages(state: State): Stage[]{
-            return state.all
-        }
 },
 
 mutations: {
@@ -61,8 +49,7 @@ mutations: {
     },
     PUT_STAGE(state: State, data: Stage){
          const stage = _.find(state.all, {id: data.id})
-        // @ts-ignore
-        Vue.set(state.all, state.all.indexOf(stage), data)
+         if (stage != null) Vue.set(state.all, state.all.indexOf(stage), data)
     },
     DELETE_STAGE(state: State, data: number){
         state.all = state.all.filter(stg => stg.id !== data);
@@ -72,6 +59,10 @@ mutations: {
     },
     DELETE_UNSAVED_CONTRACT_STAGE(state: State, item: Stage){
         state.all = state.all.filter(stg => stg.name !== item.name);
+    },
+    PUT_STAGE_BEFORE_ADDING(state: State, item: {oldValueIndex: number, newValue: Stage}){
+        const stage = state.all[item.oldValueIndex]
+        Vue.set(state.all, state.all.indexOf(stage), item.newValue)
     }
 
 },
@@ -95,7 +86,6 @@ actions: {
                 })
                 .catch(err => {
                     console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
@@ -114,7 +104,6 @@ actions: {
                 })
                 .catch(err => {
                     console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
@@ -123,8 +112,8 @@ actions: {
         return new Promise((resolve, reject) => {
             console.log(data);
             // @ts-ignore
-            const contractId = data["id"];
-            axios( {url: 'http://localhost:8080/api/admin/contract-stages/' + contractId, data: data,
+            const id = data["id"];
+            axios( {url: 'http://localhost:8080/api/admin/contract-stages/' + id, data: data,
                 withCredentials: true, method: "PUT" })
                 .then(resp => {
                     console.log(resp.data);
@@ -133,7 +122,6 @@ actions: {
                 })
                 .catch(err => {
                     console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
@@ -150,7 +138,6 @@ actions: {
                 })
                 .catch(err => {
                     console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
@@ -172,17 +159,9 @@ actions: {
                 })
                 .catch(err => {
                     console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
     },
 }
-
-// export default {
-//     namespaced: true,
-//     state,
-//     getters,
-//     mutations,
-//     actions
 }

@@ -3,8 +3,9 @@ import Vue from 'vue'
 import Menu from "@/pages/menu/Menu.vue";
 import vuetify from "@/plugins/vuetify";
 import router from "@/pages/router";
-// @ts-ignore
+
 import store from '@/store'
+
 // @ts-ignore
 import { VueMaskDirective } from 'v-mask'
 import {contractsStore} from "@/store/modules/contractsStore";
@@ -15,10 +16,10 @@ import {reports} from "@/store/modules/reports";
 Vue.directive('mask', VueMaskDirective);
 
 Vue.config.productionTip = false
-// @ts-ignore
+
 import VueSimpleAlert from "vue-simple-alert";
 
-// @ts-ignore
+
 Vue.use(VueSimpleAlert);
 
 

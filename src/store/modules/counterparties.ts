@@ -1,14 +1,6 @@
 import axios from 'axios';
 import _ from "lodash";
-import users from "@/store/modules/users";
-
-interface User {
-    id: number,
-    login: string,
-    fullName: string,
-    terminationDate: string,
-    isAdmin: boolean
-}
+import Vue from "vue";
 interface Organization{
     id?: number,
     name: string,
@@ -40,13 +32,19 @@ export const  counterparties = {
         },
         SET_ORGANIZATION(state: State,content: Organization) {
             state.allOrganizations.push(content)
+        },
+        PUT_ORGANIZATION(state: State, data: Organization){
+            const organization = _.find(state.allOrganizations, {id: data.id})
+            if (organization != null) Vue.set(state.allOrganizations, state.allOrganizations.indexOf(organization), data)
+        },
+        DELETE_ORGANIZATION(state: State, data: number){
+            state.allOrganizations = state.allOrganizations.filter(org => org.id !== data);
         }
     },
 
     actions: {
         allCounterpartyOrganizations({commit}: any, data: {}) {
             return new Promise((resolve, reject) => {
-                console.log(data);
                 axios( {url: 'http://localhost:8080/api/user/counterparty-organizations/search', data: data,
                     withCredentials: true, method: "POST" })
                     .then(resp => {
@@ -70,13 +68,9 @@ export const  counterparties = {
         },
         addNewOrganization({commit}: any, data: {}){
             return new Promise((resolve, reject) => {
-                //const data1 = {};
-
-                console.log(data);
                 axios( {url: 'http://localhost:8080/api/admin/counterparty-organizations', data: data,
                     withCredentials: true, method: "POST" })
                     .then(resp => {
-                        const content = resp.data.content;
                         commit('SET_ORGANIZATION', data);
                         resolve(resp)
                     })
@@ -87,35 +81,27 @@ export const  counterparties = {
                     })
             })
         },
-        putOrganization({commit}: any, data: {}){
+        putOrganization({commit}: any, data: {id: number, name: "", address: "", inn: number}){
             return new Promise((resolve, reject) => {
-                //const data1 = {};
-                // @ts-ignore
-                const id = data['id']
+                const id = data.id
                 console.log(data);
                 axios( {url: 'http://localhost:8080/api/admin/counterparty-organizations/' + id, data: data,
                     withCredentials: true, method: "PUT" })
                     .then(resp => {
-                        const content = resp.data.content;
                         commit('PUT_ORGANIZATION', data);
                         resolve(resp)
                     })
                     .catch(err => {
                         console.log(err)
-                        //commit('ERR')
                         reject(err)
                     })
             })
         },
         deleteOrganization({commit}: any, data: number){
             return new Promise((resolve, reject) => {
-                //const data1 = {};
-                // @ts-ignore
-                console.log(data);
                 axios( {url: 'http://localhost:8080/api/admin/counterparty-organizations/' + data, data: {},
                     withCredentials: true, method: "DELETE" })
                     .then(resp => {
-                        const content = resp.data.content;
                         commit('DELETE_ORGANIZATION', data);
                         resolve(resp)
                     })

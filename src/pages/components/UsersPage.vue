@@ -1,36 +1,6 @@
 <template>
   <v-app>
-    <v-content>
-      <template>
-        <v-col cols="10" sm="4" md="3">
-          <label class="filter-label">Найти пользователя:</label>
-        </v-col>
-        <v-row align="center" justify="left">
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined
-                          color="#6A76AB"
-                          v-model="filterValues.fullName"
-                          label="По ФИО"
-                          clearable
-                          class="filter-input"
-                          dense
-                          @input="updatePage"
-            ></v-text-field>
-          </v-col>
-
-          <v-col cols="6" sm="3" md="3">
-            <v-text-field outlined
-                          color="#6A76AB"
-                          v-model="filterValues.login"
-                          label="По логину"
-                          clearable
-                          class="filter-input"
-                          dense
-                          @input="updatePage"
-            ></v-text-field>
-          </v-col>
-        </v-row>
-      </template>
+    <v-main>
       <v-data-table  @dblclick:row="($event, {item})=>editItem(item)"
                      :headers="user_headers"
                      :items="users"
@@ -41,7 +11,8 @@
         <template v-slot:top>
           <v-divider></v-divider>
           <v-toolbar
-              flat
+              text
+              color="rgba(128, 101, 166, 0.22)"
           >
             <v-toolbar-title>Список всех пользователей</v-toolbar-title>
             <v-divider
@@ -52,15 +23,49 @@
             <v-text-field
                 v-model="itemsPerPage"
                 color="#6A76AB"
-                label="Количество элементов на странице"
+                label="Число отображаемых элементов"
                 type="number"
                 hide-details
-                class="items-per-page-field"
-                @input="updatePage"
+                outlined
+                dense
+                class="shrink"
+                @input="beforeUpdatePage"
             ></v-text-field>
             <v-spacer></v-spacer>
           </v-toolbar>
           <v-divider></v-divider>
+        </template>
+        <template v-slot:[`header.fullName`]="{ header }">
+          {{ header.text }}
+          <v-spacer></v-spacer>
+          <template>
+            <v-text-field outlined
+                          color="#6A76AB"
+                          v-model="filterValues.fullName"
+                          label="По ФИО"
+                          clearable
+                          class="filter-input"
+                          dense
+                          style="font-size: 0.9rem;"
+                          @input="beforeUpdatePage"
+            ></v-text-field>
+          </template>
+        </template>
+        <template v-slot:[`header.login`]="{ header }">
+          {{ header.text }}
+          <v-spacer></v-spacer>
+          <template>
+            <v-text-field outlined
+                          color="#6A76AB"
+                          v-model="filterValues.login"
+                          label="По логину"
+                          clearable
+                          class="filter-input"
+                          dense
+                          style="font-size: 0.9rem;"
+                          @input="beforeUpdatePage"
+            ></v-text-field>
+          </template>
         </template>
         <template v-slot:[`item.isAdmin`]="{ item }">
           <v-simple-checkbox
@@ -127,7 +132,7 @@
                         v-model="editedUser.terminationDate"
                         v-mask="'##.##.####'"
                         placeholder="ДД.ММ.ГГГГ"
-                        :rules="[rules.data]"
+                        :rules="[rules.date]"
                         label="Дата прекращения действия"
                                   ></v-text-field>
                   </v-col>
@@ -163,7 +168,7 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-    </v-content>
+    </v-main>
   </v-app>
 
 </template>
@@ -171,21 +176,14 @@
 <script lang="ts">
 
 import {defineComponent} from "vue";
+import {rules} from "@/pages/source/rules";
+import {setUsersFilters} from "@/pages/source/filters";
+import {User} from "@/pages/source/interfaces";
 
-interface User {
-  id?: number,
-  fullName: string,
-  login: string,
-  password: string,
-  terminationDate: string,
-  newPassword: string,
-  isAdmin: boolean
-}
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "UsersPage",
-
   data() {
     return {
       user: {
@@ -207,22 +205,11 @@ export default defineComponent({
         isAdmin: false
       } as User,
       user_headers: [
-        {
-          text: "ФИО",
-          align: "start",
-          value: "fullName",
-          class: "with-divider", cellClass: 'with-divider'
-        },
-        {text: "Имя пользователя", align: "start", value: 'login', class: "with-divider", cellClass: 'with-divider'},
-        {
-          text: "Дата прекращения действия",
-          align: "start",
-          value: "terminationDate",
-          class: "with-divider",
-          cellClass: 'with-divider'
-        },
-        {text: "Администратор", align: "start", value: "isAdmin", class: "with-divider", cellClass: 'with-divider'},
-        {text: "Действия", align: "start", value: "actions", class: "with-divider", cellClass: 'with-divider'},
+        {text: "ФИО", align: "start", value: "fullName", class: "with-divider", cellClass: 'with-divider', sortable: false},
+        {text: "Имя пользователя", align: "start", value: 'login', class: "with-divider", cellClass: 'with-divider', sortable: false},
+        {text: "Дата прекращения действия", align: "start", value: "terminationDate", class: "with-divider", cellClass: 'with-divider', sortable: false},
+        {text: "Администратор", align: "start", value: "isAdmin", class: "with-divider", cellClass: 'with-divider', sortable: false},
+        {text: "Действия", align: "start", value: "actions", class: "with-divider", cellClass: 'with-divider', sortable: false},
       ],
       page: 1,
       itemsPerPage: 10,
@@ -233,15 +220,7 @@ export default defineComponent({
       editedIndex: -1,
       dialog: false,
       value: true,
-      rules: {
-        required: (value: String|Number) => !!value || "Обязательное поле",
-        minLength: (value: String) =>
-            value.length >= 6 || "Минимальная длина логина - 6",
-        password: (v: string) => !v || /^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!#$%&? "]).*$/.test(v) ||
-                              "Пароль должен быть не менее 6 символов, включать хотя бы одну прописную букву, цифру и хотя бы один специальный символ (!,#,$,%,&,?)",
-        data: (v: string) => !v || /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4}$/.test(v)
-            || "Формат: ДД.ММ.ГГГ",
-      },
+      rules
     }
   },
   computed: {
@@ -279,7 +258,6 @@ export default defineComponent({
         this.editedIndex = -1
       })
     },
-
     save() {
       let form: any = this.$refs.form
       if(form.validate) {
@@ -308,11 +286,17 @@ export default defineComponent({
               isAdmin: newValue.isAdmin
             }
           }
-          this.$store.dispatch('users/putUser', data)
+          this.$store.dispatch('users/putUser', data).then(()=>{
+            this.$alert("Изменения сохранены успешно!", '', 'success')
+            this.beforeUpdatePage()
+            this.close()
+          }).catch(()=> this.$alert("Изменения не сохранены, проверьте правильность заполнения полей!", '', 'error'))
         }
-        this.close()
-        this.updatePage()
       }
+    },
+    beforeUpdatePage() {
+      this.page = 1;
+      this.updatePage();
     },
     updatePage() {
       const page = this.page - 1;
@@ -325,33 +309,7 @@ export default defineComponent({
         };
         this.$store.dispatch('users/allUsers', data)
       } else {
-        const arr = [] as {}[];
-        for (var filter in this.filterValues) {
-          switch (filter) {
-            case 'fullName':
-              if (this.filterValues.fullName != null && this.filterValues.fullName !== "") {
-                const nameFilter = {
-                  key: 'FULL_NAME',
-                  targetEntity: "USER",
-                  operator: "LIKE",
-                  value: this.filterValues.fullName
-                }
-                arr.push(nameFilter)
-              }
-              break;
-            case 'login':
-              if (this.filterValues.login != null && this.filterValues.login !== "") {
-                const loginFilter = {
-                  key: 'LOGIN',
-                  targetEntity: "USER",
-                  operator: "LIKE",
-                  value: this.filterValues.login
-                }
-                arr.push(loginFilter)
-              }
-              break;
-          }
-        }
+        const arr = setUsersFilters(this.filterValues);
         let page1 = this.page - 1
         if (this.totalPages == 1) {
           page1 = 0
@@ -372,7 +330,6 @@ export default defineComponent({
 });
 </script>
 
-
-<style scoped>
+<style>
 
 </style>

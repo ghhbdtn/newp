@@ -1,6 +1,5 @@
 import axios from 'axios';
 import _ from "lodash";
-import users from "@/store/modules/users";
 import Vue from "vue";
 
 interface User {
@@ -46,8 +45,6 @@ export const  contractsStore = {
     },
     mutations: {
     SET: (state: State, obj: {items: [], numPages: number, numElements: number, last: boolean}) =>{
-       // console.log(content, state.all)
-        //state.all = [];
         state.all = obj.items;
         state.totalPages = obj.numPages;
         state.totalElements = obj.numElements;
@@ -62,12 +59,9 @@ export const  contractsStore = {
         },
         PUT_CONTRACT(state: State, data: Contract){
             const contract = _.find(state.all, {id: data.id})
-            // @ts-ignore
-            Vue.set(state.allForAdmin, state.allForAdmin.indexOf(contract), data)
+           if (contract != null) {Vue.set(state.allForAdmin, state.allForAdmin.indexOf(contract), data)}
         },
         SET_ADMIN: (state: State, obj: {items: [], numPages: number, numElements: number}) =>{
-            // console.log(content, state.all)
-            //state.all = [];
             state.allForAdmin = obj.items;
             state.all = obj.items;
             state.totalPages = obj.numPages;
@@ -78,8 +72,6 @@ export const  contractsStore = {
  actions: {
     getAll({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            //const data1 = {};
-
             console.log(data);
             axios( {url: 'http://localhost:8080/api/user/contracts/search', data: data,
                 withCredentials: true, method: "POST" })
@@ -113,7 +105,6 @@ export const  contractsStore = {
             axios( {url: 'http://localhost:8080/api/admin/contracts', data: data,
                 withCredentials: true, method: "POST" })
                 .then(resp => {
-                    const content = resp.data.content;
                     commit('SET_CONTRACT', data);
                     resolve(resp)
                 })
@@ -133,7 +124,6 @@ export const  contractsStore = {
             axios( {url: 'http://localhost:8080/api/admin/contracts/' + id, data: data,
                 withCredentials: true, method: "PUT" })
                 .then(resp => {
-                    const content = resp.data.content;
                     commit('PUT_CONTRACT', data);
                     resolve(resp)
                 })
@@ -163,9 +153,6 @@ export const  contractsStore = {
      },
      allAdminContracts ({commit}: any, data: {}){
          return new Promise((resolve, reject) => {
-             //const data1 = {};
-
-             console.log(data);
              axios( {url: 'http://localhost:8080/api/admin/contracts/search', data: data,
                  withCredentials: true, method: "POST" })
                  .then(resp => {
@@ -189,10 +176,4 @@ export const  contractsStore = {
          })
      },
 },
-
-
-    // state,
-    // getters,
-    // mutations,
-    // actions
 }

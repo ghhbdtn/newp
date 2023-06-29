@@ -3,25 +3,25 @@
     <v-container fluid>
       <v-row justify="center">
         <v-col cols="12" sm="10" md="8" lg="6">
-          <v-card class="mt-5">
-            <h3 class="text-center">Сформировать отчеты</h3>
+          <v-card class="mt-5" color="rgba(128, 101, 166, 0.22)">
+            <v-card-title class="justify-center">Формирование отчетов</v-card-title>
             <v-divider></v-divider>
-            <h4 class="subtitle-1">Отчет 1: Вывод всех договоров за задаваемый плановый период</h4>
-            <v-row class="mb-4">
-              <v-col cols="12" sm="6">
+            <h4  class="subtitle-1 text-decoration-underline">Отчет 1: Вывод всех договоров за задаваемый плановый период</h4>
+            <v-row class="mb-4" justify="center">
+              <v-col cols="12" sm="5">
                 <v-card-text class="subtitle-1">Плановая дата начала:</v-card-text>
-                <v-text-field type="date" color="#6A76AB" v-model="startDate" outlined dense />
+                <v-text-field clearable type="date" color="#6A76AB" v-model="startDate" outlined dense />
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="5">
                 <v-card-text class="subtitle-1">Плановая дата окончания:</v-card-text>
-                <v-text-field type="date" color="#6A76AB" v-model="endDate" outlined dense />
+                <v-text-field clearable type="date" color="#6A76AB" v-model="endDate" outlined dense />
               </v-col>
             </v-row>
             <v-card-actions class="justify-center">
               <v-btn color="#6A76AB" dark @click="downloadContracts">Сформировать отчет</v-btn>
             </v-card-actions>
             <v-divider></v-divider>
-            <h4 class="subtitle-1">Отчет 2: Вывод всех этапов для выбранного пользователем договора</h4>
+            <h4 class="subtitle-1 text-decoration-underline">Отчет 2: Вывод всех этапов для выбранного договора</h4>
             <v-row class="mb-4">
               <v-col cols="12">
                 <v-card-text class="subtitle-1">Выберите договор:</v-card-text>
@@ -69,14 +69,24 @@ export default defineComponent({
   methods: {
     downloadContracts() {
       const data = {
-        plannedStartDate: this.startDate,
-        plannedEndDate: this.endDate
+        plannedStartDate: this.startDate.split("-").reverse().join("."),
+        plannedEndDate: this.endDate.split("-").reverse().join(".")
       }
-      this.$store.dispatch('reports/downloadReport', data)
+      this.$store.dispatch('reports/downloadReport', data).catch(
+          () => {
+            const err = this.$store.state.reports.err;
+            this.$alert(err, '', 'error')
+          }
+      )
     },
     downloadStagesReport() {
       const data = this.selectedContract.id
-      this.$store.dispatch('reports/downloadStageReport', data)
+      this.$store.dispatch('reports/downloadStageReport', data).catch(
+          () => {
+            const err = this.$store.state.reports.err;
+            this.$alert(err, '', 'error')
+          }
+      )
     }
 
   },
@@ -96,9 +106,8 @@ export default defineComponent({
 
 <style scoped>
 .v-card {
-  background: rgba(128, 101, 166, 0.22);
   border-radius: 10px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 4px rgba(12, 12, 12, 0.1);
 }
 
 .text-center {

@@ -10,13 +10,40 @@
       mdi-plus
     </v-icon>
   </v-btn>
-    <v-card-title v-if="countercontracts.length> 0">Таблица договоров с контрагентами</v-card-title>
     <v-data-table  v-if="countercontracts.length > 0"
                   :headers="_countercontracts_headers"
                   :items="countercontracts"
                   :items-per-page="itemsPerPage"
                    hide-default-footer
                   class="elevation-3">
+      <template v-slot:top>
+        <v-divider></v-divider>
+        <v-toolbar
+            text
+            color="rgba(128, 101, 166, 0.22)"
+        >
+          <v-toolbar-title>Таблица договоров с контрагентами</v-toolbar-title>
+          <v-divider
+              class="mx-4"
+              inset
+              vertical
+          ></v-divider>
+          <v-text-field
+              v-if="index !== -1"
+              v-model="itemsPerPage"
+              color="#6A76AB"
+              label="Число отображаемых элементов"
+              type="number"
+              outlined
+              dense
+              hide-details
+              class="shrink"
+              @input="beforeUpdatePage"
+          ></v-text-field>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+        <v-divider></v-divider>
+      </template>
       <template v-slot:[`item.actions`]="{ item }" v-if="!isUsersData">
         <v-icon small class="mr-2" @click="editCounterItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
         <v-icon small text @click="deleteCounterItem(item)" large style="color: darkred">
@@ -40,7 +67,7 @@
 <v-card-text>
   <v-form ref="form" style="background-color: rgb(255,255,255)">
     <v-container>
-      <v-card-title>Добавить договор с контрагентом</v-card-title>
+      <v-card-title>{{editedCounterIndex != -1 ? "Редактировать договор с контрагентом": "Добавить договор с контрагентом"}}</v-card-title>
       <v-row>
         <v-col cols="12" sm="6" md="4">
           <v-text-field
@@ -80,7 +107,7 @@
               item-value="id"
               persistent-hint
               return-object
-              :rules="[rules.required]"
+              :rules="[rules.requiredOrganization]"
               required
               label="Организация-Контрагент"
           >
@@ -128,22 +155,11 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
+import {dateToString, stringToDate} from "@/pages/source/dateConverters";
+import {rules} from "@/pages/source/rules";
+import {CounterContract} from "@/pages/source/interfaces";
 
-interface CounterContract {
-  id?: number,
-  name: string,
-  type: string,
-  amount: number,
-  plannedDate: string,
-  actualDate: string,
-  organization: {
-    id: number,
-    name: string,
-    address: string,
-    inn: number
-  },
-  counterpartyOrganizationId: number
-}
+
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "CounterpartyForm",
@@ -203,19 +219,12 @@ export default defineComponent({
         {text: "Сумма договора", value: "amount", sortable: false, show: true},
         {text: "Действия", value: "actions", sortable: false, show: this.isUsersData == false},
       ],
-      rules: {
-        required: (value: String|Number) => !!value || "Обязательное поле",
-        number: (v: string) => !v ||/^\d+$/.test(v) || 'Должно быть числом',
-        planData: (v: string) => /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] (0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4}$/.test(v)
-            || "Формат: ДД.ММ.ГГГ - ДД.ММ.ГГ",
-        factData: (v: string) => !v || "" || /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] (0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4}$/.test(v)
-            || /^(0?[1-9]|[12][0-9]|3[01])[.](0?[1-9]|1[012])[.]\d{4} [-] $/.test(v) ||
-            "Формат: 'ДД.ММ.ГГГ - ДД.ММ.ГГ', или 'ДД.ММ.ГГГГ - ', или пустое поле",
-      },
+      rules
     };
   },
   computed: {
     countercontracts: function () {
+      let dates: {plannedDate: string, actualDate: string} = {plannedDate: "", actualDate: ""}
       let countercontract: CounterContract = {
         id: -1,
         name: "",
@@ -228,8 +237,7 @@ export default defineComponent({
           name: "",
           address: "",
           inn: 0
-        },
-        counterpartyOrganizationId: -1
+        }
       };
       let countercontractsAll = [] as CounterContract[];
       let countercontractList = this.$store.state.counterContracts.allCounterContracts
@@ -244,9 +252,12 @@ export default defineComponent({
           countercontract.organization.address = countercontractList[i].counterpartyOrganization.address;
           countercontract.organization.inn = countercontractList[i].counterpartyOrganization.inn;
           countercontract.amount = countercontractList[i].amount;
-          countercontract.plannedDate = countercontractList[i].plannedStartDate + ' - ' + countercontractList[i].plannedEndDate;
-          countercontract.actualDate = countercontractList[i].actualStartDate + ' - ' + countercontractList[i].actualEndDate;
+          dates = dateToString(countercontractList[i].plannedStartDate, countercontractList[i].plannedEndDate,
+              countercontractList[i].actualStartDate, countercontractList[i].actualEndDate)
+          countercontract.plannedDate = dates.plannedDate;
+          countercontract.actualDate = dates.actualDate ;
           countercontractsAll.push(countercontract);
+          dates = {plannedDate: "", actualDate: ""};
           countercontract = {
             id: -1,
             name: "",
@@ -260,7 +271,6 @@ export default defineComponent({
               address: "",
               inn: 0
             },
-            counterpartyOrganizationId: -1
           };
         }
       } else countercontractsAll = [];
@@ -296,10 +306,10 @@ export default defineComponent({
       return this.$store.state.users.user.isAdmin
     },
     totalPages(): number{
-      return this.$store.state.counterparties.totalPages;
+      return this.$store.state.counterContracts.totalPages;
     },
     totalElements(): number{
-      return this.$store.state.counterparties.totalElements;
+      return this.$store.state.counterContracts.totalElements;
     },
     _countercontracts_headers () :  {}[]{
       return this.countercontracts_headers.filter(x => x.show)
@@ -315,87 +325,110 @@ export default defineComponent({
     },
     saveCounter() {
       let form: any = this.$refs.form
-      if(form.validate) {
-        if (this.index === -1) {
+
+      // Trigger validation for each field
+      const valid = form.validate();
+
+      // Check if all fields are valid
+      if (valid) {
+        const newValue = this.editedCountercontract;
+        const dates: {plannedStartDate: string, plannedEndDate: string, actualStartDate: string, actualEndDate: string} =
+            stringToDate(newValue.plannedDate, newValue.actualDate);
+        const plannedStartDate = dates.plannedStartDate;
+        const plannedEndDate = dates.plannedEndDate;
+        const actualStartDate = dates.actualStartDate;
+        const actualEndDate = dates.actualEndDate;
+        if(this.editedCounterIndex == -1) {
+          if (this.index == -1) {
           this.itemsPerPageForAdding++;
           this.itemsPerPage = this.itemsPerPageForAdding;
-          const cct = this.editedCountercontract;
-          const planDate = cct.plannedDate.split("-");
-          const factDate = cct.actualDate.split("-");
           let data = {
-            name: cct.name,
-            amount: cct.amount,
-            type: cct.type,
-            plannedStartDate: planDate[0].replace(" ", ""),
-            plannedEndDate: planDate[1].replace(" ", ""),
-            actualStartDate: factDate[0].replace(" ", ""),
-            actualEndDate: factDate[1].replace(" ", ""),
-            counterpartyOrganizationId: cct.organization.id,
-            counterpartyOrganization: cct.organization,
-            contractID: this.index
+            name: newValue.name,
+            amount: newValue.amount,
+            type: newValue.type,
+            plannedStartDate: plannedStartDate,
+            plannedEndDate: plannedEndDate,
+            actualStartDate: actualStartDate,
+            actualEndDate: actualEndDate,
+            counterpartyOrganizationId: newValue.organization.id,
+            counterpartyOrganization: newValue.organization
           }
-          console.log(this.index)
-          //this.contractStages.push(stg)
-          if(this.editedCounterIndex > -1) this.$store.commit('counterContracts/PUT_COUNTER_CONTRACT', data)
-          else this.$store.commit('counterContracts/SET_COUNTER_CONTRACT', data)
-          this.countercontracts = this.$store.state.counterContracts.allCounterContracts
+          this.$store.commit('counterContracts/SET_COUNTER_CONTRACT', data)
+          this.$alert("Договор добавлен", '', 'success');
+          this.closeCounterForm()
+          }
+          else {
+            let data = {
+              name: newValue.name,
+              type: newValue.type,
+              amount: newValue.amount,
+              plannedStartDate: plannedStartDate,
+              plannedEndDate: plannedEndDate,
+              actualStartDate: actualStartDate,
+              actualEndDate: actualEndDate,
+              counterpartyOrganizationId: newValue.organization.id,
+              counterpartyOrganization: newValue.organization,
+              contractID: this.index
+            }
+            this.$store.dispatch('counterContracts/addCounterpartyContract', data)
+                .then(()=>{
+                  this.updatePage()
+                  this.closeCounterForm()
+                  this.$alert("Договор с контрагентом добавлен успешно!", '', 'success');})
+                .catch(()=>
+                    this.$alert("Договор не удалось сохранить, проверьте правильность заполнения полей!", '', 'error')
+                )
+          }
         } else if (this.editedCounterIndex > -1) {
           const oldValue = this.countercontracts[this.editedCounterIndex];
-          const newValue = this.editedCountercontract;
-          console.log(oldValue, newValue)
           if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
               oldValue.type !== newValue.type ||
               oldValue.organization.id !== newValue.organization.id ||
               oldValue.plannedDate !== newValue.plannedDate ||
               oldValue.actualDate !== newValue.actualDate) {
-            const planDate = newValue.plannedDate.split("-");
-            const factDate = newValue.actualDate.split("-");
-            console.log(planDate, factDate)
-            const data = {
-              name: newValue.name,
-              type: newValue.type,
-              amount: newValue.amount,
-              counterpartyOrganizationId: newValue.organization.id,
-              plannedStartDate: planDate[0].replace(" ", ""),
-              plannedEndDate: planDate[1].replace(" ", ""),
-              actualStartDate: factDate[0].replace(" ", ""),
-              actualEndDate: factDate[1].replace(" ", ""),
-              counterpartyOrganization: newValue.organization,
-              id: newValue.id
+            if (this.index == -1) {
+              let data = {
+                newValue: {
+                  name: newValue.name,
+                  amount: newValue.amount,
+                  type: newValue.type,
+                  plannedStartDate: plannedStartDate,
+                  plannedEndDate: plannedEndDate,
+                  actualStartDate: actualStartDate,
+                  actualEndDate: actualEndDate,
+                  counterpartyOrganizationId: newValue.organization.id,
+                  counterpartyOrganization: newValue.organization,
+                },
+                oldValueIndex: this.editedCounterIndex
+              }
+              this.$store.commit('counterContracts/PUT_COUNTER_CONTRACT_BEFORE_ADDING', data)
+              this.$alert("Изменения сохранены", '', 'success');
+              this.closeCounterForm();
+            }else {
+              const data = {
+                name: newValue.name,
+                type: newValue.type,
+                amount: newValue.amount,
+                counterpartyOrganizationId: newValue.organization.id,
+                plannedStartDate: plannedStartDate,
+                plannedEndDate: plannedEndDate,
+                actualStartDate: plannedStartDate,
+                actualEndDate: plannedEndDate,
+                counterpartyOrganization: newValue.organization,
+                id: newValue.id
+              }
+              this.$store.dispatch('counterContracts/putCounterContract', data).then(
+                  () => {
+                    this.$alert("Изменения сохранены успешно!", '', 'success');
+                    this.updatePage();
+                    this.closeCounterForm()
+                  }
+              ).catch(() => this.$alert("Изменения договора не сохранены, проверьте правильность заполнения полей!", '', 'error'))
             }
-            console.log(this.$store.state.stages.ID)
-            this.$store.dispatch('counterContracts/putCounterContract', data).then(
-                () => {
-                  this.editedCounterIndex = -1
-                  this.closeCounterForm()
-                }
-            )
           }
-        } else {
-          const cct = this.editedCountercontract;
-          const planDate = cct.plannedDate.split("-");
-          const factDate = cct.actualDate.split("-");
-          let data = {
-            name: cct.name,
-            type: cct.type,
-            amount: cct.amount,
-            plannedStartDate: planDate[0].replace(" ", ""),
-            plannedEndDate: planDate[1].replace(" ", ""),
-            actualStartDate: factDate[0].replace(" ", ""),
-            actualEndDate: factDate[1].replace(" ", ""),
-            counterpartyOrganizationId: cct.organization.id,
-            counterpartyOrganization: cct.organization,
-            contractID: this.index
-          }
-          console.log(this.index)
-          this.$store.dispatch('counterContracts/addCounterpartyContract', data).then(this.reload)
         }
-        this.closeCounterForm();
-        this.$alert("Договор с контрагентом добавлен успешно!", '', 'success');
+
       }
-    },
-    reload() {
-      this.$store.dispatch('counterContracts/allCounterpartyContracts')
     },
     closeCounterForm() {
       this.editedCountercontract = Object.assign({}, this.defaultCounterContract)
@@ -411,13 +444,17 @@ export default defineComponent({
         this.editedCountercontract = Object.assign({}, item)
         this.$confirm(message, '', 'warning').then(()=>
         this.$store.dispatch('counterContracts/deleteCounterContract', this.editedCountercontract.id).then(()=> {
-          if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
+          if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1 && this.page !==1) {
             this.page--;
           }
           this.updatePage();
           this.closeCounterForm();
         }))
       }
+    },
+    beforeUpdatePage() {
+      this.page = 1;
+      this.updatePage();
     },
     updatePage() {
       const page = this.page - 1;
