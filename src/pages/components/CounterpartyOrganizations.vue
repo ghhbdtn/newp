@@ -1,12 +1,13 @@
 <template>
   <v-app>
-    <v-content>
-      <v-data-table
+    <v-main>
+      <v-data-table @dblclick:row="($event, {item})=>editItem(item)"
                      :headers="_organization_headers"
                      :items="organizations"
                      :items-per-page="itemsPerPage"
                      hide-default-footer
                      class="elevation-1 grey lighten-5"
+                    no-data-text="Ничего не найдено"
       >
         <template v-slot:top>
           <v-divider></v-divider>
@@ -23,12 +24,13 @@
           <v-text-field
               v-model="itemsPerPage"
               color="#6A76AB"
-              type="number"
-              hide-details
-              outlined
-              dense
               label="Число отображаемых элементов"
               class="shrink"
+              outlined
+              dense
+              type="number"
+              min = "0"
+              hide-details
               @input="beforeUpdatePage"
           ></v-text-field>
           <v-spacer></v-spacer>
@@ -46,7 +48,8 @@
             <v-card-text>
               <v-form ref="form"  style="background-color: rgb(255,255,255)">
                 <v-container>
-                  <v-card-title>{{editedIndex>-1 ? "Редактировать организацию-контрагента": "Добавить организацию-контрагента"}}</v-card-title>
+                  <v-card-title v-if="isAdmin">{{editedIndex>-1 ? "Редактировать организацию-контрагента": "Добавить организацию-контрагента"}}</v-card-title>
+                  <v-card-title v-if="!isAdmin">Карточка организации-контрагента</v-card-title>
                   <v-row>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field
@@ -69,6 +72,8 @@
                           outlined
                           v-model="editedOrganization.address"
                           label="Адрес"
+                          :rules="[rules.required]"
+                          required
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
@@ -78,7 +83,8 @@
                           outlined
                           v-model="editedOrganization.inn" type="text" label="ИНН"
                           v-mask="'##########'"
-                          :rules="[rules.inn, rules.required]"></v-text-field>
+                          :rules="[rules.inn, rules.required]"
+                          required></v-text-field>
                     </v-col>
                   </v-row>
                   <v-card-actions>
@@ -138,7 +144,7 @@
                           v-model="filterValues.inn"
                           class="filter-input"
                           style="font-size: 0.9rem;"
-                          @change="beforeUpdatePage"/>
+                          @input="beforeUpdatePage"/>
           </template>
         </template>
         <template v-if="isAdmin" v-slot:[`item.actions`]="{ item }">
@@ -159,8 +165,7 @@
           </v-pagination>
         </div>
       </template>
-
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 
@@ -181,20 +186,20 @@ export default defineComponent({
         id: -1,
         name: "",
         address: "",
-        inn: 0,
+        inn: "",
       } as Organization,
       editedOrganization: {
         id: -1,
         name: "",
         address: "",
-        inn: 0,
+        inn: "",
       } as Organization,
       page: 1,
       itemsPerPage: 10,
       filterValues: {
         name: "",
         address: "",
-        inn: 0,
+        inn: "",
       },
       organization_headers: [
         {text: "Название организации", value: "name", sortable: false, show: true,  class: "with-divider", cellClass: 'with-divider'},
@@ -287,7 +292,7 @@ export default defineComponent({
             }
             this.updatePage()
             this.closeForm();
-          }).catch(()=> this.$alert('Данная организация не может быть удалена', '', 'error')))
+          }).catch(()=> this.$alert('Данная организация не может быть удалена', '', 'error'))).catch(()=>{})
       this.closeForm()
     },
     beforeUpdatePage() {
@@ -299,7 +304,7 @@ export default defineComponent({
       const size = this.itemsPerPage;
       if ((this.filterValues.name == null || this.filterValues.name === "") &&
           (this.filterValues.address == null || this.filterValues.address === "") &&
-          (this.filterValues.inn == null || this.filterValues.inn === 0) ) {
+          (this.filterValues.inn == null || this.filterValues.inn === "") ) {
         const data = {
           page: page,
           size: size

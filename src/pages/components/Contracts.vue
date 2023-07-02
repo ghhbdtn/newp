@@ -1,14 +1,14 @@
 <template>
   <v-app>
   <v-main>
-    <v-card>
-          <v-data-table  @click:row="editItem"
+          <v-data-table  @dblclick:row="($event, {item})=>editItem(item)"
         :headers="headers"
         :items="contracts"
         :items-per-page="itemsPerPage"
         :server-items-length="totalItems"
         :page.sync="page"
         hide-default-footer
+        no-data-text="Ничего не найдено"
         class="elevation-1 grey lighten-5"
     >
             <template v-slot:top>
@@ -29,6 +29,7 @@
                     hide-details
                     outlined
                     dense
+                    min = "0"
                     label="Число отображаемых элементов"
                     class="shrink"
                     @input="beforeUpdatePage"
@@ -153,18 +154,17 @@
               </template>
             </template>
     </v-data-table>
-      <template v-if="contracts.length> 0">
-        <div>
-          <v-pagination
-              color="#6A76AB"
-              v-model="page"
-              :length="totalPages"
-              @input="updatePage"
-          >
-          </v-pagination>
-        </div>
-      </template>
-    </v-card>
+    <template v-if="contracts.length> 0">
+      <div>
+        <v-pagination
+            color="#6A76AB"
+            v-model="page"
+            :length="totalPages"
+            @input="updatePage"
+        >
+        </v-pagination>
+      </div>
+    </template>
     <v-dialog v-model="dialogVisible"  @click.prevent persistent>
       <v-card>
       <v-card-text>
@@ -289,7 +289,7 @@ export default defineComponent({
         { text: "Тип договора", align: "start", sortable: false, value: 'type', class: "with-divider", cellClass: 'with-divider'},
         { text: "Плановые сроки", align: "start", sortable: false, value: "plannedDate", class: "with-divider", cellClass: 'with-divider'},
         { text: "Фактические сроки", align: "start", sortable: false, value:  "actualDate", class: "with-divider", cellClass: 'with-divider'},
-        { text: "Сумма", align: "start", sortable: false, value: "amount", class: "with-divider", cellClass: 'with-divider'},
+        { text: "Сумма (руб.)", align: "start", sortable: false, value: "amount", class: "with-divider", cellClass: 'with-divider'},
       ],
       filterValues: {
         name: "",

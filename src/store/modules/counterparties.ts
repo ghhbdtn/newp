@@ -7,7 +7,6 @@ interface Organization{
     address: string,
     inn: number
 }
-
 interface State {
     allOrganizations: Organization[],
     totalPages: number,
@@ -21,7 +20,6 @@ export const  counterparties = {
         totalPages: 0,
         totalElements: 0
     } as State,
-
     getters: {
     },
     mutations: {
@@ -92,7 +90,6 @@ export const  counterparties = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
                         reject(err)
                     })
             })
@@ -106,12 +103,10 @@ export const  counterparties = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
                         //commit('ERR')
                         reject(err)
                     })
             })
         }
     },
-
 }

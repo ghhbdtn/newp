@@ -12,7 +12,7 @@ interface Organization{
     id?: number,
     name: string,
     address: string,
-    inn: number
+    inn: string
 }
 interface User {
     id?: number,

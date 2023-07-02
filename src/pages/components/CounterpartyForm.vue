@@ -15,7 +15,8 @@
                   :items="countercontracts"
                   :items-per-page="itemsPerPage"
                    hide-default-footer
-                  class="elevation-3">
+                  class="elevation-3"
+                  no-data-text="Ничего не найдено">
       <template v-slot:top>
         <v-divider></v-divider>
         <v-toolbar
@@ -38,6 +39,7 @@
               dense
               hide-details
               class="shrink"
+              min="0"
               @input="beforeUpdatePage"
           ></v-text-field>
           <v-spacer></v-spacer>
@@ -116,6 +118,7 @@
         <v-col cols="12" sm="6" md="4">
           <v-text-field v-model="editedCountercontract.amount"
                         color="#6A76AB"
+                        placeholder="0.00"
                         clearable
                         outlined
                         :rules="[rules.number]"
@@ -185,7 +188,7 @@ export default defineComponent({
           id: -1,
           name: "",
           address: "",
-          inn: 0
+          inn: ""
         },
         counterpartyOrganizationId: -1
       } as CounterContract,
@@ -200,7 +203,7 @@ export default defineComponent({
           id: -1,
           name: "",
           address: "",
-          inn: 0
+          inn: ""
         },
         counterpartyOrganizationId: -1
       } as CounterContract,
@@ -216,7 +219,7 @@ export default defineComponent({
         {text: "Организация-контрагент", value: "organization.name", sortable: false, show: true},
         {text: "Плановые сроки начала и окончания", sortable: false, value: "plannedDate", show: true},
         {text: "Фактические сроки начала и окончания", sortable: false, value: "actualDate", show: true},
-        {text: "Сумма договора", value: "amount", sortable: false, show: true},
+        {text: "Сумма договора (руб.)", value: "amount", sortable: false, show: true},
         {text: "Действия", value: "actions", sortable: false, show: this.isUsersData == false},
       ],
       rules
@@ -236,13 +239,12 @@ export default defineComponent({
           id: -1,
           name: "",
           address: "",
-          inn: 0
+          inn: ""
         }
       };
       let countercontractsAll = [] as CounterContract[];
       let countercontractList = this.$store.state.counterContracts.allCounterContracts
       if (countercontractList.length !== 0) {
-
         for (let i = 0; i < countercontractList.length; i++) {
           countercontract.id = countercontractList[i].id;
           countercontract.name = countercontractList[i].name;
@@ -269,7 +271,7 @@ export default defineComponent({
               id: -1,
               name: "",
               address: "",
-              inn: 0
+              inn: ""
             },
           };
         }
@@ -438,7 +440,7 @@ export default defineComponent({
     deleteCounterItem(item: CounterContract){
       const message: string = 'Вы действительно хотите удалить данный договор с контрагентом?';
       if(this.index == -1) {
-        this.$confirm(message).then(()=>this.$store.commit('counterContracts/DELETE_UNSAVED_COUNTER_CONTRACT', item))
+        this.$confirm(message).then(()=>this.$store.commit('counterContracts/DELETE_UNSAVED_COUNTER_CONTRACT', item)).catch(()=>{})
         this.closeCounterForm();
       }else {
         this.editedCountercontract = Object.assign({}, item)
@@ -449,7 +451,7 @@ export default defineComponent({
           }
           this.updatePage();
           this.closeCounterForm();
-        }))
+        })).catch(()=>{})
       }
     },
     beforeUpdatePage() {

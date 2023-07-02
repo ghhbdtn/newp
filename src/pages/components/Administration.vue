@@ -6,6 +6,7 @@
                      :items="contracts"
                      :items-per-page="10"
                      hide-default-footer
+                     no-data-text="Ничего не найдено"
                      class="elevation-1 grey lighten-5"
       >
         <template v-slot:top>
@@ -20,7 +21,6 @@
                 inset
                 vertical
             ></v-divider>
-
             <v-text-field
                 v-model="itemsPerPage"
                 color="#6A76AB"
@@ -29,6 +29,7 @@
                 outlined
                 dense
                 type="number"
+                min = "0"
                 hide-details
                 @input="beforeUpdatePage"
             ></v-text-field>
@@ -111,10 +112,10 @@
                                         color="#6A76AB"
                                         clearable
                                         outlined
+                                        placeholder="0.00"
                                         :rules="[rules.number]"
-                                        label="Сумма договора (руб.)"></v-text-field>
+                                        label="Сумма договора (руб.)">(руб.)</v-text-field>
                         </v-col>
-
                         <StageForm :index="contractID"></StageForm>
                         <counterparty-form :index="contractID"></counterparty-form>
                       </v-row>
@@ -374,7 +375,7 @@ data() {
         { text: "Тип договора", align: "start", sortable: false, value: 'type', class: "with-divider", cellClass: 'with-divider'},
         { text: "Плановые сроки", align: "start", sortable: false, value: "plannedDate", class: "with-divider", cellClass: 'with-divider'},
         { text: "Фактические сроки", align: "start", sortable: false, value:  "actualDate", class: "with-divider", cellClass: 'with-divider'},
-        { text: "Сумма", align: "start", sortable: false, value: "amount", class: "with-divider", cellClass: 'with-divider'},
+        { text: "Сумма (руб.)", align: "start", sortable: false, value: "amount", class: "with-divider", cellClass: 'with-divider'},
         { text: "Действия", value: "actions", sortable: false},
       ],
        rules: rules
@@ -462,7 +463,7 @@ data() {
               this.page--
             }
         this.updatePage()
-      }))
+      })).catch(()=>{})
     },
 
     close () {
@@ -597,6 +598,9 @@ data() {
 }
 .with-divider {
   border-right: 1px solid grey;
+}
+.filter-input{
+  top: 10px;
 }
 
 </style>

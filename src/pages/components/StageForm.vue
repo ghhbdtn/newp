@@ -15,6 +15,7 @@
                   :items="contractStages"
                   :items-per-page="itemsPerPage"
                    hide-default-footer
+                   no-data-text="Ничего не найдено"
                   class="elevation-3">
       <template v-slot:top>
         <v-divider></v-divider>
@@ -38,6 +39,7 @@
               dense
               hide-details
               class="shrink"
+              min="0"
               @input="beforeUpdatePage"
           ></v-text-field>
           <v-spacer></v-spacer>
@@ -109,15 +111,17 @@
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
                               v-model="editedStage.amount"
+                              placeholder="0.00"
                               color="#6A76AB"
                               clearable
                               outlined
                               :rules="[rules.number]"
-                              label="Сумма этапа (руб.)"></v-text-field>
+                              label="Сумма этапа (руб.)">(руб.)</v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
                               v-model="editedStage.plannedMaterialCosts"
+                              placeholder="0.00"
                               color="#6A76AB"
                               clearable
                               outlined
@@ -128,6 +132,7 @@
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
                               v-model="editedStage.actualMaterialCosts"
+                              placeholder="0.00"
                               color="#6A76AB"
                               clearable
                               outlined
@@ -137,6 +142,7 @@
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
                               v-model="editedStage.plannedSalaryExpenses"
+                              placeholder="0.00"
                               color="#6A76AB"
                               clearable
                               outlined
@@ -147,6 +153,7 @@
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
                               v-model="editedStage.actualSalaryExpenses"
+                              placeholder="0.00"
                               color="#6A76AB"
                               clearable
                               outlined
@@ -189,11 +196,11 @@ export default defineComponent( {
         {text: "Название", value: "name", sortable: false, show: true},
         {text: "Плановые сроки", value: "plannedDate", sortable: false, show: true},
         {text:  "Фактические сроки", value: "actualDate", sortable: false, show: true},
-        {text: "Сумма этапа", value: "amount", sortable: false, show: true},
-        {text: "Плановые расходы на материалы", sortable: false, value: "plannedMaterialCosts", show: true},
-        {text: "Фактические расходы на материалы", sortable: false, value: "actualMaterialCosts", show: true},
-        {text: "Плановые расходы на зарплаты", sortable: false, value: "plannedSalaryExpenses", show: true},
-        {text: "Фактические расходы на зарплаты", sortable: false, value: "actualSalaryExpenses", show: true},
+        {text: "Сумма этапа (руб.)", value: "amount", sortable: false, show: true},
+        {text: "Плановые расходы на материалы (руб.)", sortable: false, value: "plannedMaterialCosts", show: true},
+        {text: "Фактические расходы на материалы (руб.)", sortable: false, value: "actualMaterialCosts", show: true},
+        {text: "Плановые расходы на зарплаты (руб.)", sortable: false, value: "plannedSalaryExpenses", show: true},
+        {text: "Фактические расходы на зарплаты (руб.)", sortable: false, value: "actualSalaryExpenses", show: true},
         { text: "Действия", value: "actions", sortable: false, show: this.isUsersData == false}
       ],
       defaultStage: {
@@ -416,7 +423,7 @@ export default defineComponent( {
       if (this.index === -1) {
         this.$confirm(message, '', 'warning').then( () => {
         this.$store.commit('stages/DELETE_UNSAVED_CONTRACT_STAGE', item)
-        this.closeStageForm()});
+        this.closeStageForm()}).catch(()=>{});
       } else {
         this.editedStage = Object.assign({}, item)
         this.$confirm(message, '', 'warning').then(() => {
@@ -425,7 +432,7 @@ export default defineComponent( {
           this.page--;
         }
         this.closeStageForm()
-        this.updatePage();})})
+        this.updatePage();})}).catch(()=>{})
       }
     },
     beforeUpdatePage() {

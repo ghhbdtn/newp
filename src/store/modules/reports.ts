@@ -1,16 +1,5 @@
 import axios from 'axios';
 
-interface Contract {
-    id?: number,
-    name: string,
-    type: string,
-    amount: number,
-    plannedStartDate: string,
-    plannedEndDate: string,
-    actualStartDate: string,
-    actualEndDate: string,
-    userId?: number
-}
 interface State {
     err: string
 }
@@ -20,7 +9,6 @@ export const  reports = {
     state: {
         err: ""
     }as State,
-
     getters: {
     },
     mutations: {
@@ -28,7 +16,6 @@ export const  reports = {
             state.err = err
         },
     },
-
     actions: {
         downloadReport({commit}: any, data: {}) {
             return new Promise((resolve, reject) => {
@@ -39,7 +26,7 @@ export const  reports = {
                         const href = URL.createObjectURL(resp.data);
                         const link = document.createElement('a');
                         link.href = href;
-                        link.setAttribute('download', 'file.xlsx'); //or any other extension
+                        link.setAttribute('download', 'contracts.xlsx');
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
@@ -47,7 +34,7 @@ export const  reports = {
                     })
                     .catch(err => {
                         console.log(err)
-                        commit('ERR', err)
+                        commit('ERR', err.response.message)
                         reject(err)
                     })
             })
@@ -61,14 +48,14 @@ export const  reports = {
                         const href = URL.createObjectURL(resp.data);
                         const link = document.createElement('a');
                         link.href = href;
-                        link.setAttribute('download', 'file.xlsx'); //or any other extension
+                        link.setAttribute('download', 'contract_stages.xlsx');
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
                         URL.revokeObjectURL(href);
                     })
                     .catch(err => {
-                        commit('ERR', err)
+                        commit('ERR', err.response.message)
                         reject(err)
                     })
             })

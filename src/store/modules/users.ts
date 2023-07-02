@@ -15,7 +15,8 @@ interface State {
     user : User,
     all: User[],
     totalPages: number,
-    totalElements: number
+    totalElements: number,
+    status: number
 }
 
 const state = {
@@ -23,7 +24,8 @@ const state = {
     user : {} as User,
     all: [] as User[],
     totalPages: 0,
-    totalElements: 0
+    totalElements: 0,
+    status: 0
 } as State
 
 const getters =  {
@@ -58,6 +60,9 @@ const mutations = {
     DELETE_USER(state: State, data: number){
         state.all = state.all.filter(user => user.id !== data);
     },
+    ERR(state: State, data: number) {
+        state.status = data
+    }
 };
 
 const actions = {
@@ -70,6 +75,7 @@ const actions = {
                     resolve(resp)
                 })
                 .catch(err => {
+                    commit('ERR', err.response.status)
                     reject(err)
                 })
         })
@@ -83,6 +89,7 @@ const actions = {
                     resolve(resp)
                 })
                 .catch(err => {
+                    commit('ERR', err.response.status)
                     reject(err)
                 })
         })

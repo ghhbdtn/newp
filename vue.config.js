@@ -12,22 +12,30 @@ module.exports = {
       template: 'public/index.html',
       filename: 'index.html',
       chunks: ['chunk-vendors', 'chunk-common', 'index'],
-      plugins: [new HtmlWebpackPlugin()]
+      plugins: [new HtmlWebpackPlugin({inject: 'body'})]
     },
     menu: {
       entry: 'src/pages/menu/menu.ts',
       template: 'public/menu.html',
       filename: 'menu.html',
       chunks: ['chunk-vendors', 'chunk-common', 'menu'],
-      plugins: [new HtmlWebpackPlugin()]
+      plugins: [new HtmlWebpackPlugin({inject: 'body'})]
     }
   },
   devServer: {
     historyApiFallback: {
       rewrites: [
         { from: /\/index/, to: '/index.html' },
-        { from: /\/menu/, to: '/menu.html' }
-      ]
+        { from: /\/menu/, to: '/menu.html' },
+        { from: /^\/menu\//, to: '/menu.html' }
+      ],
+    },
+    client: {
+      overlay: {
+        errors: true,
+        warnings: false,
+        runtimeErrors: true,
+      },
     },
     static: {
       directory: path.join(__dirname, 'dist'),

@@ -48,8 +48,6 @@
   </v-app>
 </template>
 
-
-
 <script lang="ts">
 import { defineComponent } from "vue";
 
@@ -69,12 +67,12 @@ export default defineComponent({
   methods: {
     downloadContracts() {
       const data = {
-        plannedStartDate: this.startDate.split("-").reverse().join("."),
-        plannedEndDate: this.endDate.split("-").reverse().join(".")
+        plannedStartDate: this.startDate == null ? "" : this.startDate.split("-").reverse().join("."),
+        plannedEndDate: this.endDate == null ? "" : this.endDate.split("-").reverse().join(".")
       }
       this.$store.dispatch('reports/downloadReport', data).catch(
           () => {
-            const err = this.$store.state.reports.err;
+            const err = this.errorMessage;
             this.$alert(err, '', 'error')
           }
       )
@@ -83,31 +81,30 @@ export default defineComponent({
       const data = this.selectedContract.id
       this.$store.dispatch('reports/downloadStageReport', data).catch(
           () => {
-            const err = this.$store.state.reports.err;
+            const err = this.errorMessage;
             this.$alert(err, '', 'error')
           }
       )
     }
-
   },
   computed: {
-    last(){
-      return this.$store.state.contractsStore.last
-    },
     contracts() {
       return this.$store.state.contractsStore.all
+    },
+    errorMessage() {
+      return this.$store.state.reports.err
     }
   },
   created() {
     this.$store.dispatch('contractsStore/getAll', {page: 0, size: 2147483647})
-  }
+  },
 });
 </script>
 
 <style scoped>
 .v-card {
   border-radius: 10px;
-  box-shadow: 2px 4px rgba(12, 12, 12, 0.1);
+  box-shadow: 2px 4px rgba(12, 12, 12, 0.45);
 }
 
 .text-center {

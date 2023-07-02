@@ -10,9 +10,6 @@ import Login from "@/components/Login.vue";
 export default  defineComponent({
   name: 'App',
   components: {Login},
-  // created () {
-  //   this.$router.push('/')
-  // },
 });
 </script>
 <style lang="scss">

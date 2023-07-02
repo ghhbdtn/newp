@@ -17,6 +17,8 @@
                                 label="ФИО"
                                 type="text"
                                 placeholder="ФИО"
+                                :rules="[rules.required]"
+                                :aria-required="true"
                                 required
                   ></v-text-field>
                   <v-text-field
@@ -29,7 +31,6 @@
                       :rules="isRegister ? [rules.minLength, rules.required] : [rules.required]"
                       required
                   ></v-text-field>
-
                   <v-text-field
                       v-model="password"
                       color="#6A76AB"
@@ -85,11 +86,11 @@ data() {
       stateObj: {
         register :{
           name: 'Регистрация',
-          message: 'Уже авторизированы? Вход.'
+          message: 'Уже зарегестрированы? Вход.'
         },
         login : {
           name: 'Вход',
-          message: 'Регистрация'
+          message: 'Еще не зарегестрированы? Регистрация'
         }
       },
       value: true,
@@ -109,7 +110,11 @@ data() {
               console.log(this.$store.state.users.user.id)
               location.replace("menu.html")
             })
-            .catch(err => this.stateObj.login.message = err)
+            .catch(err => {
+              if (this.errStatus  == 401) {
+                this.errorMessage = "Неверное имя пользователя или пароль"
+              } else this.errorMessage = err
+            console.log(this.errStatus)})
     },
 
     register: function () {
@@ -125,7 +130,12 @@ data() {
             login: login,
             password: password
           }
-          this.$store.dispatch('users/signUp', data ).then(() => this.login()).catch(err => this.stateObj.login.message = err)
+          this.$store.dispatch('users/signUp', data ).then(() => this.login()).catch(err => {
+            if (this.errStatus == 409) {
+              this.errorMessage = "Пользователь с таким логином уже существует"
+              console.log(this.errStatus)
+            } else this.errorMessage = err
+          })
         } else {
           this.errorMessage = "Пароли не совпадают"
         }
@@ -138,6 +148,9 @@ data() {
       } else {
         return this.stateObj.register.message
       }
+    },
+    errStatus() {
+      return this.$store.state.users.status
     }
   }
 });

@@ -6,6 +6,7 @@
                      :items="users"
                      :items-per-page="itemsPerPage"
                      hide-default-footer
+                     no-data-text="Ничего не найдено"
                      class="elevation-1 grey lighten-5"
       >
         <template v-slot:top>
@@ -29,6 +30,7 @@
                 outlined
                 dense
                 class="shrink"
+                min="0"
                 @input="beforeUpdatePage"
             ></v-text-field>
             <v-spacer></v-spacer>
@@ -249,7 +251,7 @@ export default defineComponent({
           this.page--
         }
         this.updatePage()
-      }).catch(()=>this.$alert('Не удалось удалить пользователя', '', 'error')))
+      }).catch(()=>this.$alert('Не удалось удалить пользователя', '', 'error'))).catch(()=>{})
     },
     close() {
       this.dialog = false

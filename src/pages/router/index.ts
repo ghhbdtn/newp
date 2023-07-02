@@ -20,25 +20,16 @@ const routes: Array<RouteConfig> = [
     path: '/menu/contracts',
     name: 'contracts',
     component: Contracts,
-    meta: {
-      breadcrumb: 'Договоры'
-    }
   },
   {
     path: '/menu/counterparty-organizations',
     name: 'organizations',
     component: CounterpartyOrganizations,
-    meta: {
-      breadcrumb: 'Организации-контрагенты'
-    }
   },
   {
     path: '/menu/reports',
     name: 'reports',
     component: Reports,
-    meta: {
-      breadcrumb: 'Отчеты'
-    }
   },
   {
     path: "/menu/admin-root/users",

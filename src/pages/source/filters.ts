@@ -44,7 +44,7 @@ function setFilters (filterValues: { user?: User; name: string; type: string; pl
                         key: 'PLANNED_START_DATE',
                         targetEntity: "CONTRACT",
                         operator: "GREATER",
-                        value: filterValues.plannedStartDate.split("-").reverse().join("-")
+                        value: filterValues.plannedStartDate.split("-").reverse().join(".")
                     }
                     arr.push(plannedDateFilter)
                 }
@@ -55,7 +55,7 @@ function setFilters (filterValues: { user?: User; name: string; type: string; pl
                         key: 'PLANNED_END_DATE',
                         targetEntity: "CONTRACT",
                         operator: "LESS",
-                        value: filterValues.plannedEndDate.split("-").reverse().join("-")
+                        value: filterValues.plannedEndDate.split("-").reverse().join(".")
                     }
                     arr.push(plannedDateFilter)
                 }
@@ -66,7 +66,7 @@ function setFilters (filterValues: { user?: User; name: string; type: string; pl
                         key: 'ACTUAL_START_DATE',
                         targetEntity: "CONTRACT",
                         operator: "GREATER",
-                        value: filterValues.actualStartDate.split("-").reverse().join("-")
+                        value: filterValues.actualStartDate.split("-").reverse().join(".")
                     }
                     arr.push(actualDateFilter)
                 }
@@ -77,7 +77,7 @@ function setFilters (filterValues: { user?: User; name: string; type: string; pl
                         key: 'ACTUAL_END_DATE',
                         targetEntity: "CONTRACT",
                         operator: "LESS",
-                        value: filterValues.actualEndDate.split("-").reverse().join("-")
+                        value: filterValues.actualEndDate.split("-").reverse().join(".")
                     }
                     arr.push(actualDateFilter)
                 }
@@ -88,7 +88,7 @@ function setFilters (filterValues: { user?: User; name: string; type: string; pl
                         key: 'AMOUNT',
                         targetEntity: "CONTRACT",
                         operator: "LESS",
-                        value: filterValues.maxAmount + 1
+                        value: filterValues.maxAmount
                     }
                     arr.push(amountFilter)
                 }
@@ -99,7 +99,7 @@ function setFilters (filterValues: { user?: User; name: string; type: string; pl
                         key: 'AMOUNT',
                         targetEntity: "CONTRACT",
                         operator: "GREATER",
-                        value: filterValues.minAmount - 1
+                        value: filterValues.minAmount
                     }
                     arr.push(amountFilter)
                 }
@@ -109,7 +109,7 @@ function setFilters (filterValues: { user?: User; name: string; type: string; pl
     return arr;
 }
 
-function setOrganizationsFilters (filterValues: {name: string; address: string; inn: number }): {}[]
+function setOrganizationsFilters (filterValues: {name: string; address: string; inn: string }): {}[]
 {
     const arr = [] as {}[];
     for (const filter in filterValues) {
@@ -137,11 +137,11 @@ function setOrganizationsFilters (filterValues: {name: string; address: string; 
                 }
                 break;
             case 'inn':
-                if (filterValues.inn != null && filterValues.inn != 0 && filterValues.inn.toString() !== "") {
+                if (filterValues.inn != null && filterValues.inn !== "") {
                     const innFilter = {
                         key: 'INN',
                         targetEntity: "COUNTERPARTY_ORGANIZATION",
-                        operator: "EQUAL",
+                        operator: "LIKE",
                         value: filterValues.inn
                     }
                     arr.push(innFilter)
