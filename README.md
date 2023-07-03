@@ -1,24 +1,26 @@
 # newp
-
-## Project setup
+## Node.js - v16.17.0
+## npm - 8.15.0 (version)
+## Установка зависимостей
 ```
 npm install
 ```
-
-### Compiles and hot-reloads for development
+ 
+### Компиляция (+hot reload) проекта для разработки
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Сборка проекта
 ```
 npm run build
 ```
 
-### Lints and fixes files
+## Разворачивание проекта в docker:
+### docker-compose.yaml файл лежит в корневой папке проекта, для запуска всех контейнеров необходимо: 
 ```
-npm run lint
+docker-compose up
 ```
+## Либо запустив через интерфейс среды разарботки, если такая возможность есть в используемой среде:
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+
