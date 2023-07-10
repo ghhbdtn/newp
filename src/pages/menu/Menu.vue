@@ -72,11 +72,12 @@ methods:
             this.$router.push('/menu/contracts').catch(()=>{})});
       },
       logout() {
-        this.$store.dispatch('users/logOut').then(() =>{if(this.$router.currentRoute.path === '/menu/contracts'){
+
+        this.$confirm('Вы действительно хотите выйти из системы?').then(() => {this.$store.dispatch('users/logOut').then(() =>{if(this.$router.currentRoute.path === '/menu/contracts'){
           this.$router.replace('/menu').catch(()=>{})
          location.replace("/index.html")
         }
-          else location.replace("/index.html")});
+          else location.replace("/index.html")}).catch()}).catch();
       },
    },
   computed: {

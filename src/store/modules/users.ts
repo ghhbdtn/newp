@@ -68,7 +68,7 @@ const mutations = {
 const actions = {
     signIn({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            axios({headers:{'Access-Control-Allow-Origin': 'true'}, url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
+            axios({url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
                 .then(resp => {
                     const user: User = resp.data;
                     commit('SET_USER', user);
@@ -95,8 +95,6 @@ const actions = {
         })
     },
     logOut({commit}: any) {
-
-        confirm('Вы действительно хотите выйти из системы?')
         document.cookie = 'jwt' +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
         commit('LOG_OUT')
