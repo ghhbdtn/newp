@@ -31,6 +31,17 @@ docker-compose up
 ```
     image: mongo:4.4.6
 ```
+## И также в месте описания 'mongodb' изменить:
+```
+     volumes:
+      - ~/apps/mongo:/data/db
+```
+## на:
+```
+    volumes:  
+     - ~/apps/mongo-no-avx:/data/db
+
+```
 ## Порт подключения к клиентскому приложению: 8081 (localhost:8081)
 ### Данные для входа суперпользователя: логин: admin, пароль: admin
 
