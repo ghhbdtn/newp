@@ -68,7 +68,7 @@ const mutations = {
 const actions = {
     signIn({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            axios({headers:{'Access-Control-Allow-Origin': 'true'}, url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
+             axios({url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
                 .then(resp => {
                     const user: User = resp.data;
                     commit('SET_USER', user);
