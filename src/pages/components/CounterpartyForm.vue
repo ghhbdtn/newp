@@ -449,7 +449,8 @@ export default defineComponent({
           if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1 && this.page !==1) {
             this.page--;
           }
-          this.updatePage();
+          if (this.page < 1) this.beforeUpdatePage()
+          else this.updatePage()
           this.closeCounterForm();
         })).catch(()=>{})
       }

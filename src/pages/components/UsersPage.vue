@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <v-data-table  @dblclick:row="($event, {item})=>editItem(item)"
+      <v-data-table  @click:row="($event, {item})=>editItem(item)"
                      :headers="user_headers"
                      :items="users"
                      :items-per-page="itemsPerPage"
@@ -75,7 +75,6 @@
               disabled
           ></v-simple-checkbox>
         </template>
-
         <template v-slot:[`item.actions`]="{ item }">
           <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
           <v-icon small text @click="deleteItem(item)" large style="color: darkred">
@@ -163,7 +162,7 @@
                 </v-row>
                 <v-card-actions>
                   <v-btn  color="#6A76AB" dark @click="save">Сохранить</v-btn>
-                  <v-btn color="red" dark @click="close">Отменить</v-btn>
+                  <v-btn color="red" dark @click.stop="close">Отменить</v-btn>
                 </v-card-actions>
               </v-container>
             </v-form>
@@ -181,7 +180,6 @@ import {defineComponent} from "vue";
 import {rules} from "@/pages/source/rules";
 import {setUsersFilters} from "@/pages/source/filters";
 import {User} from "@/pages/source/interfaces";
-
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -250,7 +248,8 @@ export default defineComponent({
         if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
           this.page--
         }
-        this.updatePage()
+        if (this.page < 1) this.beforeUpdatePage()
+        else this.updatePage()
       }).catch(()=>this.$alert('Не удалось удалить пользователя', '', 'error'))).catch(()=>{})
     },
     close() {

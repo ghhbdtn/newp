@@ -1,6 +1,8 @@
 import axios from 'axios';
 import _ from "lodash";
 import Vue from "vue";
+import {serverUrl} from "@/store/hostNameVar";
+
 interface Organization{
     id?: number,
     name: string,
@@ -43,7 +45,7 @@ export const  counterparties = {
     actions: {
         allCounterpartyOrganizations({commit}: any, data: {}) {
             return new Promise((resolve, reject) => {
-                axios( {url: 'http://localhost:8080/api/user/counterparty-organizations/search', data: data,
+                axios( {url: serverUrl + '/api/user/counterparty-organizations/search', data: data,
                     withCredentials: true, method: "POST" })
                     .then(resp => {
                         const content = resp.data.content;
@@ -58,23 +60,19 @@ export const  counterparties = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
-                        //commit('ERR')
                         reject(err)
                     })
             })
         },
         addNewOrganization({commit}: any, data: {}){
             return new Promise((resolve, reject) => {
-                axios( {url: 'http://localhost:8080/api/admin/counterparty-organizations', data: data,
+                axios( {url: serverUrl + '/api/admin/counterparty-organizations', data: data,
                     withCredentials: true, method: "POST" })
                     .then(resp => {
                         commit('SET_ORGANIZATION', data);
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
-                        //commit('ERR')
                         reject(err)
                     })
             })
@@ -83,7 +81,7 @@ export const  counterparties = {
             return new Promise((resolve, reject) => {
                 const id = data.id
                 console.log(data);
-                axios( {url: 'http://localhost:8080/api/admin/counterparty-organizations/' + id, data: data,
+                axios( {url: serverUrl + '/api/admin/counterparty-organizations/' + id, data: data,
                     withCredentials: true, method: "PUT" })
                     .then(resp => {
                         commit('PUT_ORGANIZATION', data);
@@ -96,14 +94,13 @@ export const  counterparties = {
         },
         deleteOrganization({commit}: any, data: number){
             return new Promise((resolve, reject) => {
-                axios( {url: 'http://localhost:8080/api/admin/counterparty-organizations/' + data, data: {},
+                axios( {url: serverUrl + '/api/admin/counterparty-organizations/' + data, data: {},
                     withCredentials: true, method: "DELETE" })
                     .then(resp => {
                         commit('DELETE_ORGANIZATION', data);
                         resolve(resp)
                     })
                     .catch(err => {
-                        //commit('ERR')
                         reject(err)
                     })
             })

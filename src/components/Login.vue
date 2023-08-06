@@ -105,6 +105,7 @@ data() {
           login: login,
           password: password
         }
+      console.log(location.hostname)
         this.$store.dispatch('users/signIn', data)
             .then(() => {
               console.log(this.$store.state.users.user.id)
@@ -113,8 +114,7 @@ data() {
             .catch(err => {
               if (this.errStatus  == 401) {
                 this.errorMessage = "Неверное имя пользователя или пароль"
-              } else this.errorMessage = err
-            console.log(this.errStatus)})
+              } else this.errorMessage = err})
     },
 
     register: function () {

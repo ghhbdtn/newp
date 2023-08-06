@@ -428,11 +428,12 @@ export default defineComponent( {
         this.editedStage = Object.assign({}, item)
         this.$confirm(message, '', 'warning').then(() => {
           this.$store.dispatch('stages/deleteStage', this.editedStage.id).then( () => {
-        if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1 && this.page !==1) {
+        if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
           this.page--;
         }
-        this.closeStageForm()
-        this.updatePage();})}).catch(()=>{})
+        if (this.page < 1) this.beforeUpdatePage()
+        else this.updatePage()
+        this.closeStageForm();})}).catch(()=>{})
       }
     },
     beforeUpdatePage() {
