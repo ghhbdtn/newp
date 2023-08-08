@@ -106,33 +106,27 @@ export default defineComponent({
   border-radius: 10px;
   box-shadow: 2px 4px rgba(12, 12, 12, 0.45);
 }
-
 .text-center {
   text-align: center;
 }
-
 .mt-4 {
   margin-top: 1.5rem;
 }
-
 .v-divider {
   margin: 2rem 0;
 }
-
 .v-select {
   width: 50%;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
-
 .v-btn {
   margin-top: 1.5rem;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
-
 .col-12 {
   padding-top: 0;
   padding-bottom: 0;
@@ -142,7 +136,5 @@ export default defineComponent({
   padding-bottom: 0;
   color: #6A76AB;
 }
-
-
 </style>
 

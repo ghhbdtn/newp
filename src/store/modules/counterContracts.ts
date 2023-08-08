@@ -1,6 +1,8 @@
 import axios from 'axios';
 import _ from "lodash";
 import Vue from "vue";
+import {serverUrl} from "@/store/hostNameVar";
+
 interface CounterContract {
     id?: number,
     name: string,
@@ -71,7 +73,7 @@ export const  counterContracts = {
                 console.log(data);
                 const contractId = data.contractId;
                 const data1 = (data.page==null && data.size==null)? {} : {page: data.page, size: data.size}
-                axios( {url: 'http://localhost:8080/api/user/contracts/'+ contractId + '/counterparty-contracts/search', data: data1,
+                axios( {url: serverUrl + '/api/user/contracts/'+ contractId + '/counterparty-contracts/search', data: data1,
                     withCredentials: true, method: "POST" })
                     .then(resp => {
                         const content = resp.data.content;
@@ -82,8 +84,6 @@ export const  counterContracts = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
-                        //commit('ERR')
                         reject(err)
                     })
             })
@@ -93,7 +93,7 @@ export const  counterContracts = {
                 console.log(data);
                 // @ts-ignore
                 const contractId = data['contractID'];
-                axios( {url: 'http://localhost:8080/api/admin/contracts/'+ contractId + '/counterparty-contracts', data: data,
+                axios( {url: serverUrl + '/api/admin/contracts/'+ contractId + '/counterparty-contracts', data: data,
                     withCredentials: true, method: "POST" })
                     .then(resp => {
                         console.log(resp.data);
@@ -101,8 +101,6 @@ export const  counterContracts = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
-                        //commit('ERR')
                         reject(err)
                     })
             })
@@ -112,7 +110,7 @@ export const  counterContracts = {
                 console.log(data);
                 // @ts-ignore
                 const id = data['id'];
-                axios( {url: 'http://localhost:8080/api/admin/counterparty-contracts/'+ id, data: data,
+                axios( {url: serverUrl + '/api/admin/counterparty-contracts/'+ id, data: data,
                     withCredentials: true, method: "PUT" })
                     .then(resp => {
                         console.log(resp.data);
@@ -120,8 +118,6 @@ export const  counterContracts = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
-                        //commit('ERR')
                         reject(err)
                     })
             })
@@ -129,7 +125,7 @@ export const  counterContracts = {
         deleteCounterContract({commit}: any, data: number) {
             return new Promise((resolve, reject) => {
                 console.log(data);
-                axios( {url: 'http://localhost:8080/api/admin/counterparty-contracts/' + data, data: {},
+                axios( {url: serverUrl + '/api/admin/counterparty-contracts/' + data, data: {},
                     withCredentials: true, method: "DELETE" })
                     .then(resp => {
                         console.log(resp.data);
@@ -137,8 +133,6 @@ export const  counterContracts = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
-                        //commit('ERR')
                         reject(err)
                     })
             })
@@ -148,7 +142,7 @@ export const  counterContracts = {
                 console.log(data);
                 const contractId = data.contractId;
                 const data1 = (data.page==null && data.size==null)? {} : {page: data.page, size: data.size}
-                axios( {url: 'http://localhost:8080/api/admin/contracts/'+ contractId + '/counterparty-contracts/search', data: data1,
+                axios( {url:  serverUrl + '/api/admin/contracts/'+ contractId + '/counterparty-contracts/search', data: data1,
                     withCredentials: true, method: "POST" })
                     .then(resp => {
                         const content = resp.data.content;
@@ -159,13 +153,9 @@ export const  counterContracts = {
                         resolve(resp)
                     })
                     .catch(err => {
-                        console.log(err)
-                        //commit('ERR')
                         reject(err)
                     })
             })
         },
-
-
-},
+    },
 }

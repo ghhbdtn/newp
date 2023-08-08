@@ -1,6 +1,7 @@
 import axios from 'axios';
 import _ from "lodash";
 import Vue from "vue";
+import {serverUrl} from "@/store/hostNameVar";
 
 interface User {
     id: number,
@@ -68,42 +69,40 @@ const mutations = {
 const actions = {
     signIn({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-             axios({url: 'http://localhost:8080/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
+            axios({url: serverUrl + '/api/auth/sign-in ', data: data, method: 'POST', withCredentials: true})
                 .then(resp => {
                     const user: User = resp.data;
                     commit('SET_USER', user);
                     resolve(resp)
                 })
                 .catch(err => {
-                    commit('ERR', err.response.status)
+                    commit('ERR', err.response != null ? err.response.status : err)
                     reject(err)
                 })
         })
     },
     signUp({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            axios({url: 'http://localhost:8080/api/auth/sign-up ', data: data, method: 'POST', withCredentials: true })
+            axios({url: serverUrl + '/api/auth/sign-up ', data: data, method: 'POST', withCredentials: true })
                 .then(resp => {
                     const user: User = resp.data;
                     commit('SET_USER', user);
                     resolve(resp)
                 })
                 .catch(err => {
-                    commit('ERR', err.response.status)
+                    commit('ERR', err.response != null ? err.response.status : err)
                     reject(err)
                 })
         })
     },
     logOut({commit}: any) {
-
-        confirm('Вы действительно хотите выйти из системы?')
         document.cookie = 'jwt' +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 
         commit('LOG_OUT')
     },
     allUsers({commit}: any, data: {}) {
         return new Promise((resolve, reject) => {
-            axios({url: 'http://localhost:8080/api/admin/users', data: data, method: 'POST', withCredentials: true })
+            axios({url: serverUrl + '/api/admin/users', data: data, method: 'POST', withCredentials: true })
                 .then(resp => {
                     const content: User[] = resp.data.content;
                     const pages = resp.data.totalPages;
@@ -124,7 +123,7 @@ const actions = {
     putUser({commit}: any, data: {fullName: string, login: string, terminationDate: string, id: number, newPassword?: string, isAdmin: boolean}){
         return new Promise((resolve, reject) => {
             const id = data.id
-            axios( {url: 'http://localhost:8080/api/admin/users/' + id, data: data,
+            axios( {url: serverUrl + '/api/admin/users/' + id, data: data,
                 withCredentials: true, method: "PUT" })
                 .then(resp => {
                     commit('PUT_USER', data);
@@ -138,7 +137,7 @@ const actions = {
     },
     deleteUser({commit}: any, data: number){
         return new Promise((resolve, reject) => {
-            axios( {url: 'http://localhost:8080/api/admin/users/' + data, data: {},
+            axios( {url: serverUrl + '/api/admin/users/' + data, data: {},
                 withCredentials: true, method: "DELETE" })
                 .then(resp => {
                     commit('DELETE_USER', data);

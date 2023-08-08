@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <v-data-table @dblclick:row="($event, {item})=>editItem(item)"
+      <v-data-table @click:row="($event, {item})=>editItem(item)"
                      :headers="_organization_headers"
                      :items="organizations"
                      :items-per-page="itemsPerPage"
@@ -149,7 +149,7 @@
         </template>
         <template v-if="isAdmin" v-slot:[`item.actions`]="{ item }">
           <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
-          <v-icon small text @click="deleteOrganization(item)" large style="color: darkred">
+          <v-icon small text @click.stop="deleteOrganization(item)" large style="color: darkred">
             mdi-delete
           </v-icon>
         </template>
@@ -290,7 +290,8 @@ export default defineComponent({
             if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
               this.page--
             }
-            this.updatePage()
+            if (this.page < 1) this.beforeUpdatePage()
+            else this.updatePage()
             this.closeForm();
           }).catch(()=> this.$alert('Данная организация не может быть удалена', '', 'error'))).catch(()=>{})
       this.closeForm()

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import {serverUrl} from "@/store/hostNameVar";
 
 interface State {
     err: string
@@ -20,7 +21,7 @@ export const  reports = {
         downloadReport({commit}: any, data: {}) {
             return new Promise((resolve, reject) => {
                 console.log(data);
-                axios( {url: 'http://localhost:8080/api/user/downland-contract-report/dates', params: data,  responseType: 'blob',
+                axios( {url: serverUrl + '/api/user/downland-contract-report/dates', params: data,  responseType: 'blob',
                     withCredentials: true, method: "GET" })
                     .then(resp => {
                         const href = URL.createObjectURL(resp.data);
@@ -42,7 +43,7 @@ export const  reports = {
         downloadStageReport({commit}: any, data: number) {
             return new Promise((resolve, reject) => {
                 console.log(data);
-                axios( {url: 'http://localhost:8080/api/user/downland-contract-stage-report/'+ data, params: {},  responseType: 'blob',
+                axios( {url:  serverUrl + '/api/user/downland-contract-stage-report/'+ data, params: {},  responseType: 'blob',
                     withCredentials: true, method: "GET" })
                     .then(resp => {
                         const href = URL.createObjectURL(resp.data);

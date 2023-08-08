@@ -1,6 +1,7 @@
 import axios from 'axios';
 import _ from "lodash";
 import Vue from "vue";
+import {serverUrl} from "@/store/hostNameVar";
 
 interface User {
     id: number,
@@ -73,7 +74,7 @@ export const  contractsStore = {
     getAll({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
             console.log(data);
-            axios( {url: 'http://localhost:8080/api/user/contracts/search', data: data,
+            axios( {url: serverUrl + '/api/user/contracts/search', data: data,
                 withCredentials: true, method: "POST" })
                 .then(resp => {
                     const content = resp.data.content;
@@ -91,8 +92,6 @@ export const  contractsStore = {
                     resolve(resp)
                 })
                 .catch(err => {
-                    console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
@@ -102,15 +101,13 @@ export const  contractsStore = {
             //const data1 = {};
 
             console.log(data);
-            axios( {url: 'http://localhost:8080/api/admin/contracts', data: data,
+            axios( {url: serverUrl + '/api/admin/contracts', data: data,
                 withCredentials: true, method: "POST" })
                 .then(resp => {
                     commit('SET_CONTRACT', data);
                     resolve(resp)
                 })
                 .catch(err => {
-                    console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
@@ -121,15 +118,13 @@ export const  contractsStore = {
             // @ts-ignore
             const id = data['id']
             console.log(data);
-            axios( {url: 'http://localhost:8080/api/admin/contracts/' + id, data: data,
+            axios( {url: serverUrl + '/api/admin/contracts/' + id, data: data,
                 withCredentials: true, method: "PUT" })
                 .then(resp => {
                     commit('PUT_CONTRACT', data);
                     resolve(resp)
                 })
                 .catch(err => {
-                    console.log(err)
-                    //commit('ERR')
                     reject(err)
                 })
         })
@@ -137,7 +132,7 @@ export const  contractsStore = {
      deleteContract({commit}: any, data: number) {
          return new Promise((resolve, reject) => {
              console.log(data);
-             axios( {url: 'http://localhost:8080/api/admin/contracts/' + data, data: {},
+             axios( {url: serverUrl + '/api/admin/contracts/' + data, data: {},
                  withCredentials: true, method: "DELETE" })
                  .then(resp => {
                      console.log(resp.data);
@@ -145,15 +140,13 @@ export const  contractsStore = {
                      resolve(resp)
                  })
                  .catch(err => {
-                     console.log(err)
-                     //commit('ERR')
                      reject(err)
                  })
          })
      },
      allAdminContracts ({commit}: any, data: {}){
          return new Promise((resolve, reject) => {
-             axios( {url: 'http://localhost:8080/api/admin/contracts/search', data: data,
+             axios( {url: serverUrl + '/api/admin/contracts/search', data: data,
                  withCredentials: true, method: "POST" })
                  .then(resp => {
                      const content = resp.data.content;
@@ -169,8 +162,6 @@ export const  contractsStore = {
                      resolve(resp)
                  })
                  .catch(err => {
-                     console.log(err)
-                     //commit('ERR')
                      reject(err)
                  })
          })

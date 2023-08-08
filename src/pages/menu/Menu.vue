@@ -7,9 +7,9 @@
         <v-spacer></v-spacer>
         <template v-slot:extension>
           <v-tabs align-with-title>
-            <v-tab @click="contracts1"> Договоры</v-tab>
-            <v-tab @click="counterparty">Организации-Контрагенты</v-tab>
-            <v-tab @click="reports">Отчеты</v-tab>
+            <v-tab :to="{ name: 'contracts' }">Договоры</v-tab>
+            <v-tab :to="{ name: 'organizations' }">Организации-Контрагенты</v-tab>
+            <v-tab :to="{ name: 'reports' }">Отчеты</v-tab>
             <v-menu open-on-hover offset-y transition="slide-x-transition" bottom right v-if="isAdmin1">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn text
@@ -52,15 +52,15 @@ export default defineComponent({
   data() {
     return {
       items: [
-        { title: 'Список всех договоров', path: "/menu/admin-root/all-contracts" },
-        { title: 'Список всех пользователей', path: "/menu/admin-root/users" }
+        { title: 'Список всех договоров', path: '/menu/admin-root/all-contracts'},
+        { title: 'Список всех пользователей', path: '/menu/admin-root/users' }
       ],
     }
   },
 methods:
     {
       reports: function () {
-        this.$router.push("/menu/reports").catch(() => {})
+        this.$router.push('/menu/reports').catch(() => {})
       },
       counterparty: function () {
         this.$store.dispatch('counterparties/allCounterpartyOrganizations', {}).then(()=>
@@ -71,8 +71,7 @@ methods:
         this.$store.dispatch('contractsStore/getAll', data).then(() => {
             this.$router.push('/menu/contracts').catch(()=>{})});
       },
-      logout() {
-
+      logout: function () {
         this.$confirm('Вы действительно хотите выйти из системы?').then(() => {this.$store.dispatch('users/logOut').then(() =>{if(this.$router.currentRoute.path === '/menu/contracts'){
           this.$router.replace('/menu').catch(()=>{})
          location.replace("/index.html")
@@ -86,7 +85,16 @@ methods:
     }
   },
   created() {
-    this.$router.push('/menu/contracts').catch(()=>{})
+    if(this.$router.currentRoute.name == null || this.$router.currentRoute.name == 'menu' || this.$router.currentRoute.name == 'contracts')
+      this.contracts1()
+    else if (this.$router.currentRoute.name == 'organizations')
+      this.counterparty()
+    else if (this.$router.currentRoute.name == 'reports')
+      this.reports()
+    else if (this.$router.currentRoute.name == 'all-contracts')
+      this.$router.push('/menu/admin-root/all-contracts').catch(()=>{})
+    else if (this.$router.currentRoute.name == 'allUsers')
+      this.$router.push('/menu/admin-root/users').catch(()=>{})
   }
 })
 

@@ -1,7 +1,7 @@
 <template>
   <v-app>
   <v-main>
-          <v-data-table  @dblclick:row="($event, {item})=>editItem(item)"
+          <v-data-table  @click:row="($event, {item})=>editItem(item)"
         :headers="headers"
         :items="contracts"
         :items-per-page="itemsPerPage"
@@ -202,7 +202,7 @@
                             outlined
                             type="text" label="Плановые сроки"
                             v-mask="'##.##.#### - ##.##.####'"
-              placeholder="ГГГГ.ММ.ДД-ГГГГ.ММ.ДД"
+              placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"
                             readonly
                             aria-required="true"></v-text-field>
             </v-col>
@@ -213,7 +213,7 @@
                             label="Фактические сроки"
                             readonly
                             v-mask="'##.##.#### - ##.##.####'"
-                            placeholder="ГГГГ.ММ.ДД-ГГГГ.ММ.ДД"></v-text-field>
+                            placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"></v-text-field>
             </v-col>
             <v-col cols="12" sm="6" md="4">
               <v-text-field v-model="EditedItem.amount"
@@ -392,11 +392,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
-
 .filter-input {
   width: 70%;
 }
-
 .col-12 {
   padding-top: 0;
   padding-bottom: 0;
@@ -407,11 +405,8 @@ export default defineComponent({
   color: #6A76AB;
 }
 .v-data-table > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table > .v-data-table__wrapper > table > thead > tr > th, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > th
-
 {
-
   font-size: 1.0rem;
-
   height: 48px;
 }
 .with-divider {

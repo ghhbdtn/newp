@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-content>
-      <v-data-table  @dblclick:row="($event, {item})=>editItem(item)"
+      <v-data-table  @click:row="($event, {item})=>editItem(item)"
                      :headers="headers"
                      :items="contracts"
                      :items-per-page="10"
@@ -275,7 +275,7 @@
         <template v-slot:[`item.actions`]="{ item }">
           <td>
           <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
-          <v-icon small text @click.self="deleteItem(item)" large style="color: darkred">
+          <v-icon small text @click.stop="deleteItem(item)" large style="color: darkred">
             mdi-delete
           </v-icon>
           </td>
@@ -462,6 +462,8 @@ data() {
             if (this.page == this.totalPages && this.totalItems == (this.page - 1) * this.itemsPerPage + 1) {
               this.page--
             }
+            if (this.page < 1) this.beforeUpdatePage()
+            else this.updatePage()
         this.updatePage()
       })).catch(()=>{})
     },
@@ -480,10 +482,8 @@ data() {
 
     save: function () {
       let form: any = this.$refs.form
-
       // Trigger validation for each field
       const valid = form.validate();
-
       // Check if all fields are valid
       if (valid)  {
         const newValue = this.EditedItem;
@@ -527,7 +527,7 @@ data() {
             plannedEndDate: plannedEndDate,
             actualStartDate: actualStartDate,
             actualEndDate: actualEndDate,
-            userId: (this.EditedItem.user == null) ? null : this.EditedItem.user.id,
+            userId: (this.EditedItem.user == null || this.EditedItem.user.id == -1) ? null : this.EditedItem.user.id,
             contractStages: this.$store.state.stages.all,
             counterpartyContracts: this.$store.state.counterContracts.allCounterContracts
           }
@@ -559,7 +559,6 @@ data() {
           size: this.itemsPerPage
         };
         this.$store.dispatch('contractsStore/allAdminContracts', data)
-
     }
   },
   created(){
@@ -581,19 +580,13 @@ data() {
   color: #6A76AB;
 }
 .v-data-table > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table > .v-data-table__wrapper > table > thead > tr > th, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > th
-
 {
-
   font-size: 1.0rem;
-
   height: 40px;
 }
 .v-data-table > .v-data-table__wrapper > table > tbody > tr > td, .v-data-table > .v-data-table__wrapper > table > thead > tr > td, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > td
-
 {
-
   font-size: 1.0rem;
-
   height: 40px;
 }
 .with-divider {
@@ -602,5 +595,4 @@ data() {
 .filter-input{
   top: 10px;
 }
-
 </style>
