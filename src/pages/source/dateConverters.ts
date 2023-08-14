@@ -20,7 +20,7 @@ function stringToDate(plannedDate: string, actualDate: string|null) :{
 function dateToString(plannedStartDate: string, plannedEndDate: string, actualStartDate: string, actualEndDate: string)
     :{plannedDate: string, actualDate: string}{
     const plannedDate = plannedStartDate + ' - ' + plannedEndDate;
-    const actualDate = (actualStartDate == null ? "" : actualStartDate) + ' - ' +
+    const actualDate = (actualStartDate == null ? "" : actualStartDate + ' - ') +
         (actualEndDate == null ? "" : actualEndDate);
     return {plannedDate: plannedDate, actualDate: actualDate}
 }

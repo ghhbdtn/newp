@@ -77,7 +77,7 @@
         </template>
         <template v-slot:[`item.actions`]="{ item }">
           <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
-          <v-icon small text @click="deleteItem(item)" large style="color: darkred">
+          <v-icon small text @click.stop="deleteItem(item)" large style="color: darkred">
             mdi-delete
           </v-icon>
         </template>
@@ -147,8 +147,8 @@
                       color="#6A76AB"
                       clearable
                       outlined
-                      :rules="[rules.password]"
-                      placeholder="password"
+                      :rules="[rules.password, rules.stringLen]"
+                      placeholder="Новый пароль"
                   ></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
@@ -180,6 +180,7 @@ import {defineComponent} from "vue";
 import {rules} from "@/pages/source/rules";
 import {setUsersFilters} from "@/pages/source/filters";
 import {User} from "@/pages/source/interfaces";
+import {messages} from "@/pages/source/messages";
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -242,15 +243,20 @@ export default defineComponent({
     },
     deleteItem(item: any) {
       this.editedUser = Object.assign({}, item);
-      this.$confirm('Вы действительно хотите удалить этого пользователя?', '', 'warning').then(()=>
-      this.$store.dispatch('users/deleteUser', this.editedUser.id).then(() => {
-        this.close();
-        if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
-          this.page--
-        }
-        if (this.page < 1) this.beforeUpdatePage()
-        else this.updatePage()
-      }).catch(()=>this.$alert('Не удалось удалить пользователя', '', 'error'))).catch(()=>{})
+      if (this.editedUser.isAdmin){
+        this.$alert(messages.DELETE_ADMIN, '', 'error')
+      } else {
+        this.$confirm(messages.DELETE_USER_CONFIRM, '', 'warning').then(() =>
+            this.$store.dispatch('users/deleteUser', this.editedUser.id).then(() => {
+              this.close();
+              if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
+                this.page--
+              }
+              if (this.page < 1) this.beforeUpdatePage()
+              else this.updatePage()
+            }).catch(() => this.$alert(messages.FAILED_DELETE_USER, '', 'error'))).catch(() => {
+        })
+      }
     },
     close() {
       this.dialog = false
@@ -269,7 +275,7 @@ export default defineComponent({
             oldValue.terminationDate !== newValue.terminationDate ||
             oldValue.isAdmin !== newValue.isAdmin || oldValue.newPassword !== newValue.newPassword) {
           let data = {};
-          if (newValue.newPassword !== '' && newValue.newPassword !== null) {
+          if (newValue.newPassword !== '' && newValue.newPassword != null) {
             data = {
               fullName: newValue.fullName,
               login: newValue.login,
@@ -288,10 +294,10 @@ export default defineComponent({
             }
           }
           this.$store.dispatch('users/putUser', data).then(()=>{
-            this.$alert("Изменения сохранены успешно!", '', 'success')
+            this.$alert(messages.SAVED_CHANGES, '', 'success')
             this.beforeUpdatePage()
             this.close()
-          }).catch(()=> this.$alert("Изменения не сохранены, проверьте правильность заполнения полей!", '', 'error'))
+          }).catch(()=> this.$alert(messages.FAILED_CHANGES, '', 'error'))
         }
       }
     },

@@ -61,7 +61,7 @@
                           name="name"
                           style="text-decoration-color: #303234; text-align: start"
                           type="input"
-                          :rules="[rules.required]"
+                          :rules="[rules.required, rules.stringLen]"
                           required
                       ></v-text-field>
                     </v-col>
@@ -72,7 +72,7 @@
                           outlined
                           v-model="editedOrganization.address"
                           label="Адрес"
-                          :rules="[rules.required]"
+                          :rules="[rules.required, rules.stringLen]"
                           required
                       ></v-text-field>
                     </v-col>
@@ -175,6 +175,7 @@ import "vue-simple-alert/lib/index";
 import {rules} from "@/pages/source/rules";
 import {setOrganizationsFilters} from "@/pages/source/filters";
 import {Organization} from "@/pages/source/interfaces";
+import {messages} from "@/pages/source/messages";
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -246,10 +247,10 @@ export default defineComponent({
               inn: this.editedOrganization.inn
             }
             this.$store.dispatch('counterparties/putOrganization', data).then(()=> {
-              this.$alert("Изменения сохранены успешно!", '', 'success')
+              this.$alert(messages.SAVED_CHANGES, '', 'success')
               this.beforeUpdatePage()
               this.closeForm()
-            }).catch(()=> this.$alert("Изменения не сохранены, проверьте правильность заполнения полей!", '', 'error'))
+            }).catch(()=> this.$alert(messages.FAILED_CHANGES, '', 'error'))
           }
           Object.assign(this.organizations[this.editedIndex], this.editedOrganization)
           this.closeForm()
@@ -260,11 +261,11 @@ export default defineComponent({
             inn: this.editedOrganization.inn
           }
           this.$store.dispatch('counterparties/addNewOrganization', data).then(()=> {
-            this.$alert("Организация добавлена успешно!", '', 'success')
+            this.$alert(messages.SUCCESS_ADDING_ORGANIZATION, '', 'success')
             this.beforeUpdatePage()
             this.closeForm()
           }).catch(()=>
-              this.$alert("Не удалось добавить организацию, проверьте правильность заполнения полей!", '', 'error')
+              this.$alert(messages.FAILED_ADDING_ORGANIZATION, '', 'error')
           )
         }
       }
@@ -285,7 +286,7 @@ export default defineComponent({
       this.editedIndex = this.organizations.indexOf(item)
       this.editedOrganization = Object.assign({}, item)
       const id = this.editedOrganization.id
-      this.$confirm('Вы действительно хотите удалить данную организацию?', '','warning').then(()=>
+      this.$confirm(messages.DELETE_ORGANIZATION_CONFIRM, '','warning').then(()=>
           this.$store.dispatch('counterparties/deleteOrganization', id).then(()=>{
             if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
               this.page--
@@ -293,7 +294,7 @@ export default defineComponent({
             if (this.page < 1) this.beforeUpdatePage()
             else this.updatePage()
             this.closeForm();
-          }).catch(()=> this.$alert('Данная организация не может быть удалена', '', 'error'))).catch(()=>{})
+          }).catch(()=> this.$alert(messages.FAILED_DELETE_ORGANIZATION, '', 'error'))).catch(()=>{})
       this.closeForm()
     },
     beforeUpdatePage() {

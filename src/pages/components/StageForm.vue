@@ -15,7 +15,7 @@
                   :items="contractStages"
                   :items-per-page="itemsPerPage"
                    hide-default-footer
-                   no-data-text="Ничего не найдено"
+                   no-data-text='Ничего не найдено'
                   class="elevation-3">
       <template v-slot:top>
         <v-divider></v-divider>
@@ -33,7 +33,7 @@
               v-if="index !== -1"
               v-model="itemsPerPage"
               color="#6A76AB"
-              label="Число отображаемых элементов"
+              label='Число отображаемых элементов'
               type="number"
               outlined
               dense
@@ -81,7 +81,7 @@
                               name="name"
                               style="text-decoration-color: #303234; text-align: start"
                               type="input"
-                              :rules="[rules.required]"
+                              :rules="[rules.required, rules.stringLen]"
                               required></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
@@ -93,7 +93,7 @@
                               v-mask="'##.##.#### - ##.##.####'"
                               label="Плановые сроки начала и окончания"
                               placeholder="дд.мм.гггг - дд.мм.гггг"
-                              :rules="[rules.required, rules.planData]"
+                              :rules="[rules.required, rules.planData, rules.range]"
                               required></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
@@ -105,7 +105,7 @@
                               v-mask="'##.##.#### - ##.##.####'"
                               label="Фактические сроки начала и окончания"
                               placeholder="дд.мм.гггг - дд.мм.гггг"
-                              :rules="[rules.factData]"
+                              :rules="[rules.factData, rules.range]"
                               ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
@@ -115,7 +115,7 @@
                               color="#6A76AB"
                               clearable
                               outlined
-                              :rules="[rules.number]"
+                              :rules="[rules.number, rules.required]"
                               label="Сумма этапа (руб.)">(руб.)</v-text-field>
               </v-col>
               <v-col cols="12" sm="6" md="4">
@@ -176,6 +176,7 @@ import {defineComponent} from "vue";
 import {dateToString, stringToDate} from "@/pages/source/dateConverters";
 import {rules} from "@/pages/source/rules";
 import {Stage} from "@/pages/source/interfaces";
+import {messages} from "@/pages/source/messages";
 
 export default defineComponent( {
   // eslint-disable-next-line vue/multi-word-component-names
@@ -331,7 +332,7 @@ export default defineComponent( {
               plannedSalaryExpenses: newValue.plannedSalaryExpenses,
             }
             this.$store.commit('stages/SET_STAGE', data)
-            this.$alert("Этап договора добавлен успешно!", '', 'success');
+            this.$alert(messages.SUCCESS_ADDING_STAGE, '', 'success');
             this.closeStageForm()
           }else {
             let data = {
@@ -350,14 +351,13 @@ export default defineComponent( {
             this.$store.dispatch('stages/addStage', data).then(() => {
               this.updatePage()
               this.closeStageForm()
-              this.$alert("Этап договора добавлен успешно!", '', 'success');
+              this.$alert(messages.SUCCESS_ADDING_STAGE, '', 'success');
             }).catch(
-                ()=> this.$alert("Этап договора не может быть добавлен, проверьте правильность заполнения полей!", '', 'error')
+                ()=> this.$alert(messages.FAILED_ADDING_STAGE, '', 'error')
             )
           }
         } else if (this.editedStageIndex > -1) {
           const oldValue = this.contractStages[this.editedStageIndex];
-
             if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
                 oldValue.plannedMaterialCosts !== newValue.plannedMaterialCosts ||
                 oldValue.actualMaterialCosts !== newValue.actualMaterialCosts ||
@@ -382,7 +382,7 @@ export default defineComponent( {
                   oldValueIndex: this.editedStageIndex
                 }
                 this.$store.commit('stages/PUT_STAGE_BEFORE_ADDING', data)
-                this.$alert("Изменения сохранены!", '', 'success')
+                this.$alert(messages.SAVED_CHANGES, '', 'success')
                 this.closeStageForm()
               }
               else  {
@@ -401,13 +401,13 @@ export default defineComponent( {
               }
               this.$store.dispatch('stages/putStage', data).then(
                   () => {
-                    this.updatePage()
+                    this.beforeUpdatePage()
                     this.closeStageForm()
-                    this.$alert("Изменения сохранены!", '', 'success')
+                    this.$alert(messages.SAVED_CHANGES, '', 'success')
                   }
-              ).catch(() => this.$alert("Изменения этапа договора не сохранены, проверьте правильность заполнения полей!", '', 'error'))
+              ).catch(() => this.$alert(messages.FAILED_CHANGES, '', 'error'))
             }
-          }
+          } else this.closeStageForm()
         }
       }
     },
@@ -419,21 +419,22 @@ export default defineComponent( {
       this.stageAct = false;
     },
     deleteStageItem(item: Stage){
-      const message: string = 'Вы действительно хотите удалить данный этап договора?';
       if (this.index === -1) {
-        this.$confirm(message, '', 'warning').then( () => {
+        this.$confirm(messages.DELETE_STAGE_CONFIRM, '', 'warning').then( () => {
         this.$store.commit('stages/DELETE_UNSAVED_CONTRACT_STAGE', item)
-        this.closeStageForm()}).catch(()=>{});
+        this.closeStageForm()}).catch(()=>{})
       } else {
         this.editedStage = Object.assign({}, item)
-        this.$confirm(message, '', 'warning').then(() => {
+        this.$confirm(messages.DELETE_STAGE_CONFIRM, '', 'warning').then(() => {
           this.$store.dispatch('stages/deleteStage', this.editedStage.id).then( () => {
-        if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
-          this.page--;
-        }
-        if (this.page < 1) this.beforeUpdatePage()
-        else this.updatePage()
-        this.closeStageForm();})}).catch(()=>{})
+            if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
+              this.page--
+            }
+            if (this.page < 1) this.beforeUpdatePage()
+            else this.updatePage()
+            this.closeStageForm()
+          })
+        }).catch(()=>this.$alert(messages.FAILED_DELETE_STAGE, '', 'error'))
       }
     },
     beforeUpdatePage() {
@@ -452,7 +453,6 @@ export default defineComponent( {
         this.$store.dispatch('stages/allStages', data)
       }
     }
-
   }
 })
 </script>

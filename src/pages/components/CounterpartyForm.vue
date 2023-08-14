@@ -82,7 +82,7 @@
               style="text-decoration-color: #303234; text-align: start"
               type="input"
               placeholder="Название договора"
-              :rules="[rules.required]"
+              :rules="[rules.required, rules.stringLen]"
               required
           ></v-text-field>
         </v-col>
@@ -121,7 +121,7 @@
                         placeholder="0.00"
                         clearable
                         outlined
-                        :rules="[rules.number]"
+                        :rules="[rules.number, rules.required]"
                         label="Сумма"></v-text-field>
         </v-col>
         <v-col cols="12" sm="6" md="4">
@@ -130,7 +130,7 @@
                         clearable
                         outlined
                         type="text" label="Плановые сроки"
-                        :rules="[rules.required, rules.planData]"
+                        :rules="[rules.required, rules.planData, rules.range]"
                         required
                         v-mask="'##.##.#### - ##.##.####'" ></v-text-field>
         </v-col>
@@ -140,7 +140,7 @@
                         clearable
                         outlined
                         label="Фактические сроки"
-                        :rules="[rules.factData]"
+                        :rules="[rules.factData, rules.range]"
                         v-mask="'##.##.#### - ##.##.####'"></v-text-field>
         </v-col>
       </v-row>
@@ -161,6 +161,7 @@ import {defineComponent} from "vue";
 import {dateToString, stringToDate} from "@/pages/source/dateConverters";
 import {rules} from "@/pages/source/rules";
 import {CounterContract} from "@/pages/source/interfaces";
+import {messages} from "@/pages/source/messages";
 
 
 export default defineComponent({
@@ -327,10 +328,8 @@ export default defineComponent({
     },
     saveCounter() {
       let form: any = this.$refs.form
-
       // Trigger validation for each field
       const valid = form.validate();
-
       // Check if all fields are valid
       if (valid) {
         const newValue = this.editedCountercontract;
@@ -356,7 +355,7 @@ export default defineComponent({
             counterpartyOrganization: newValue.organization
           }
           this.$store.commit('counterContracts/SET_COUNTER_CONTRACT', data)
-          this.$alert("Договор добавлен", '', 'success');
+          this.$alert(messages.SUCCESS_ADDING_COUNTERCONTRACT, '', 'success');
           this.closeCounterForm()
           }
           else {
@@ -376,9 +375,9 @@ export default defineComponent({
                 .then(()=>{
                   this.updatePage()
                   this.closeCounterForm()
-                  this.$alert("Договор с контрагентом добавлен успешно!", '', 'success');})
+                  this.$alert(messages.SUCCESS_ADDING_COUNTERCONTRACT, '', 'success');})
                 .catch(()=>
-                    this.$alert("Договор не удалось сохранить, проверьте правильность заполнения полей!", '', 'error')
+                    this.$alert(messages.FAILED_ADDING_COUNTERCONTRACT, '', 'error')
                 )
           }
         } else if (this.editedCounterIndex > -1) {
@@ -404,7 +403,7 @@ export default defineComponent({
                 oldValueIndex: this.editedCounterIndex
               }
               this.$store.commit('counterContracts/PUT_COUNTER_CONTRACT_BEFORE_ADDING', data)
-              this.$alert("Изменения сохранены", '', 'success');
+              this.$alert(messages.SAVED_CHANGES, '', 'success');
               this.closeCounterForm();
             }else {
               const data = {
@@ -421,13 +420,13 @@ export default defineComponent({
               }
               this.$store.dispatch('counterContracts/putCounterContract', data).then(
                   () => {
-                    this.$alert("Изменения сохранены успешно!", '', 'success');
+                    this.$alert(messages.SAVED_CHANGES, '', 'success');
                     this.updatePage();
                     this.closeCounterForm()
                   }
-              ).catch(() => this.$alert("Изменения договора не сохранены, проверьте правильность заполнения полей!", '', 'error'))
+              ).catch(() => this.$alert(messages.FAILED_CHANGES, '', 'error'))
             }
-          }
+          } else this.closeCounterForm()
         }
 
       }
@@ -438,13 +437,12 @@ export default defineComponent({
       this.editedCounterIndex = -1;
     },
     deleteCounterItem(item: CounterContract){
-      const message: string = 'Вы действительно хотите удалить данный договор с контрагентом?';
       if(this.index == -1) {
-        this.$confirm(message).then(()=>this.$store.commit('counterContracts/DELETE_UNSAVED_COUNTER_CONTRACT', item)).catch(()=>{})
+        this.$confirm(messages.DELETE_COUNTERCONTRACT_CONFIRM).then(()=>this.$store.commit('counterContracts/DELETE_UNSAVED_COUNTER_CONTRACT', item)).catch(()=>{})
         this.closeCounterForm();
       }else {
         this.editedCountercontract = Object.assign({}, item)
-        this.$confirm(message, '', 'warning').then(()=>
+        this.$confirm(messages.DELETE_COUNTERCONTRACT_CONFIRM, '', 'warning').then(()=>
         this.$store.dispatch('counterContracts/deleteCounterContract', this.editedCountercontract.id).then(()=> {
           if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1 && this.page !==1) {
             this.page--;
@@ -452,7 +450,7 @@ export default defineComponent({
           if (this.page < 1) this.beforeUpdatePage()
           else this.updatePage()
           this.closeCounterForm();
-        })).catch(()=>{})
+        })).catch(()=>this.$alert(messages.FAILED_DELETE_COUNTERCONTRACT, '', 'error'))
       }
     },
     beforeUpdatePage() {

@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-content>
+    <v-main>
       <v-data-table  @click:row="($event, {item})=>editItem(item)"
                      :headers="headers"
                      :items="contracts"
@@ -75,7 +75,7 @@
                               style="text-decoration-color: #303234; text-align: start"
                               type="input"
                               placeholder="Название договора"
-                              :rules="[rules.required]"
+                              :rules="[rules.required, rules.stringLen]"
                               aria-required="true"
                           ></v-text-field>
                         </v-col>
@@ -96,7 +96,7 @@
                                         placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"
                                         color="#6A76AB"
                                         outlined
-                                        :rules="[rules.required, rules.planData]"
+                                        :rules="[rules.required, rules.planData, rules.range]"
                                         aria-required="true"></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
@@ -104,7 +104,7 @@
                                         v-mask="'##.##.#### - ##.##.####'"
                                         color="#6A76AB"
                                         outlined
-                                        :rules="[rules.factData]"
+                                        :rules="[rules.factData, rules.range]"
                                         placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"></v-text-field>
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
@@ -113,7 +113,7 @@
                                         clearable
                                         outlined
                                         placeholder="0.00"
-                                        :rules="[rules.number]"
+                                        :rules="[rules.number, rules.required]"
                                         label="Сумма договора (руб.)">(руб.)</v-text-field>
                         </v-col>
                         <StageForm :index="contractID"></StageForm>
@@ -128,11 +128,8 @@
               </v-card>
             </v-dialog>
           </v-toolbar>
-          <v-divider
-
-          ></v-divider>
+          <v-divider></v-divider>
         </template>
-
         <template v-slot:[`header.user.fullName`]="{ header }">
           {{ header.text }}
           <v-spacer></v-spacer>
@@ -292,14 +289,13 @@
           </v-pagination>
         </div>
       </template>
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
 import Vue, { defineComponent } from "vue";
 import { required, minLength } from "@vuelidate/validators";
-
 import CounterpartyForm from "./CounterpartyForm.vue";
 import { mapState } from 'vuex';
 import StageForm from "@/pages/components/StageForm.vue";
@@ -307,7 +303,7 @@ import {setFilters} from "@/pages/source/filters";
 import {dateToString, stringToDate} from "@/pages/source/dateConverters";
 import {rules} from "@/pages/source/rules";
 import {Contract, User} from "@/pages/source/interfaces";
-
+import {messages} from "@/pages/source/messages";
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -315,7 +311,6 @@ export default defineComponent({
   components: {StageForm, CounterpartyForm},
 data() {
     return {
-
       EditedItem: {
         id: -1,
         name: "",
@@ -455,7 +450,7 @@ data() {
 
     deleteItem (item: any) {
       this.EditedItem = Object.assign({}, item)
-      this.$confirm('Вы действительно хотите удалить данный договор?', '', "warning").then(()=>
+      this.$confirm(messages.DELETE_CONTRACT_CONFIRM, '', "warning").then(()=>
           this.$store.dispatch('contractsStore/deleteContract', this.EditedItem.id).
       then(()=> {
         this.close()
@@ -465,7 +460,7 @@ data() {
             if (this.page < 1) this.beforeUpdatePage()
             else this.updatePage()
         this.updatePage()
-      })).catch(()=>{})
+      })).catch(()=>this.$alert(messages.FAILED_DELETE_CONTRACT, '', 'error'))
     },
 
     close () {
@@ -497,7 +492,8 @@ data() {
           const oldValue = this.contracts[this.editedIndex];
           if (oldValue.name !== newValue.name || oldValue.amount !== newValue.amount ||
               oldValue.type !== newValue.type || oldValue.plannedDate !== newValue.plannedDate ||
-              oldValue.actualDate !== newValue.actualDate || oldValue.user == null || newValue.user == null || oldValue.user.id !== newValue.user.id) {
+              oldValue.actualDate !== newValue.actualDate || oldValue.user == null ||
+              newValue.user == null || oldValue.user.id !== newValue.user.id) {
             const data = {
               name: newValue.name,
               type: newValue.type,
@@ -512,8 +508,8 @@ data() {
             this.$store.dispatch('contractsStore/putContract', data).then(()=>{
               this.updatePage()
               this.close()
-              this.$alert("Изменения сохранены!", '', 'success');})
-                .catch(()=> this.$alert("Изменения не удалось сохранить, проверьте правильность заполнения полей!", '', 'error'))
+              this.$alert(messages.SAVED_CHANGES, '', 'success');})
+                .catch(()=> this.$alert(messages.FAILED_CHANGES, '', 'error'))
           }
           Object.assign(this.contracts[this.editedIndex], this.EditedItem)
           this.isEdit = false
@@ -535,10 +531,10 @@ data() {
             this.$store.dispatch('contractsStore/getAll', {})
             this.$store.commit('stages/CLEAR_AFTER_ADDING')
             this.$store.commit('counterContracts/CLEAR_AFTER_ADDING')
-            this.$alert("Договор добавлен успешно!", '', 'success');
+            this.$alert(messages.SUCCESS_ADDING_CONTRACT, '', 'success');
             this.updatePage()
             this.close()
-          }).catch(()=>this.$alert("Договор не удалось сохранить, проверьте правильность заполнения полей!", '', 'error'))
+          }).catch(()=>this.$alert(messages.FAILED_ADDING_CONTRACT, '', 'error'))
         }
       }
     },

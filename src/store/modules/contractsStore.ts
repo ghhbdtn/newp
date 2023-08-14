@@ -98,9 +98,6 @@ export const  contractsStore = {
     },
     addNew({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            //const data1 = {};
-
-            console.log(data);
             axios( {url: serverUrl + '/api/admin/contracts', data: data,
                 withCredentials: true, method: "POST" })
                 .then(resp => {
@@ -114,7 +111,6 @@ export const  contractsStore = {
     },
     putContract({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            //const data1 = {};
             // @ts-ignore
             const id = data['id']
             console.log(data);

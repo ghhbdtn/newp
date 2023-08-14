@@ -9,7 +9,7 @@
                 <v-toolbar-title>{{isRegister ? stateObj.register.name : stateObj.login.name}}</v-toolbar-title>
               </v-toolbar>
               <v-card-text>
-                <form ref="form" @submit.prevent="isRegister ? register() : login()">
+                <v-form ref="form" >
                   <v-text-field v-if="isRegister"
                                 color="#6A76AB"
                                 v-model="fullName"
@@ -17,7 +17,7 @@
                                 label="ФИО"
                                 type="text"
                                 placeholder="ФИО"
-                                :rules="[rules.required]"
+                                :rules="[rules.required, rules.stringLen]"
                                 :aria-required="true"
                                 required
                   ></v-text-field>
@@ -28,7 +28,7 @@
                       label="Имя пользователя"
                       type="text"
                       placeholder="Имя пользователя"
-                      :rules="isRegister ? [rules.minLength, rules.required] : [rules.required]"
+                      :rules="isRegister ? [rules.minLength, rules.required, rules.stringLen] : [rules.required]"
                       required
                   ></v-text-field>
                   <v-text-field
@@ -40,7 +40,7 @@
                       @click:append="() => (value = !value)"
                       :type="value ? 'password' : 'text'"
                       :append-icon="value ? 'mdi-eye-off' : 'mdi-eye'"
-                      :rules="isRegister ? [rules.password, rules.required] : [rules.required]"
+                      :rules="isRegister ? [rules.password, rules.required, rules.stringLen] : [rules.required]"
                       required
                   ></v-text-field>
                   <v-text-field v-if="isRegister"
@@ -54,11 +54,14 @@
                                 required
                   ></v-text-field>
                   <div class="red--text"> {{errorMessage}}</div>
-                  <v-btn type="submit" class="mt-4" color="#6A76AB" value="Войти">{{isRegister ? stateObj.register.name : stateObj.login.name}}</v-btn>
+                  <v-card-actions style="justify-content: center">
+                    <v-btn @click="isRegister ? register() : login()" class="mt-4" color="#6A76AB">
+                      {{isRegister ? stateObj.register.name : stateObj.login.name}}</v-btn>
+                  </v-card-actions>
                   <div class="grey--text mt-4" v-on:click="isRegister = !isRegister;">
                     {{toggleMessage}}
                   </div>
-                </form>
+                </v-form>
               </v-card-text>
             </v-card>
           </v-flex>
@@ -71,6 +74,7 @@
 <script lang="ts">
 import Vue from "vue";
 import {rules} from "@/pages/source/rules";
+import {messages} from "@/pages/source/messages";
 export default Vue.extend({
   // eslint-disable-next-line vue/multi-word-component-names
   name: "Login",
@@ -98,30 +102,36 @@ data() {
     };
   },
   methods: {
-    login() {
+    login: function() {
+      let form: any = this.$refs.form as HTMLFormElement
+      const valid = form.validate()
+      if (valid) {
         let login = this.username
         let password = this.password
         let data = {
           login: login,
           password: password
         }
-      console.log(location.hostname)
         this.$store.dispatch('users/signIn', data)
             .then(() => {
               console.log(this.$store.state.users.user.id)
               location.replace("menu.html")
             })
-            .catch(err => {
-              if (this.errStatus  == 401) {
-                this.errorMessage = "Неверное имя пользователя или пароль"
-              } else this.errorMessage = err})
+            .catch(() => {
+              if (this.errStatus == 401) {
+                this.errorMessage = messages.INVALID_DATA
+              } else this.errorMessage = messages.FAILED_LOGIN
+            })
+      }
     },
 
-    register: function () {
+    register: function() {
+      let form: any = this.$refs.form as HTMLFormElement
+      const valid = form.validate()
+      if (valid) {
         if (this.password == this.confirmPassword) {
           this.isRegister = false;
           this.errorMessage = "";
-          (this.$refs.form as HTMLFormElement).reset();
           const fullName = this.fullName;
           const login = this.username;
           const password = this.password;
@@ -130,15 +140,15 @@ data() {
             login: login,
             password: password
           }
-          this.$store.dispatch('users/signUp', data ).then(() => this.login()).catch(err => {
+          this.$store.dispatch('users/signUp', data).then(() => this.login()).catch(() => {
             if (this.errStatus == 409) {
-              this.errorMessage = "Пользователь с таким логином уже существует"
-              console.log(this.errStatus)
-            } else this.errorMessage = err
+              this.errorMessage = messages.EXISTING_USER
+            } else this.errorMessage = messages.FAILED_REGISTRATION
           })
         } else {
-          this.errorMessage = "Пароли не совпадают"
+          this.errorMessage = messages.DIFFERENT_PASSWORDS
         }
+      }
     }
   },
   computed: {
@@ -151,7 +161,7 @@ data() {
     },
     errStatus() {
       return this.$store.state.users.status
-    }
+    },
   }
 });
 </script>

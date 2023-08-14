@@ -13,15 +13,14 @@ import {stages} from "@/store/modules/stages";
 import {counterContracts} from "@/store/modules/counterContracts";
 import {counterparties} from "@/store/modules/counterparties";
 import {reports} from "@/store/modules/reports";
+
 Vue.directive('mask', VueMaskDirective);
 
 Vue.config.productionTip = false
 
 import VueSimpleAlert from "vue-simple-alert";
 
-
 Vue.use(VueSimpleAlert);
-
 
  new Vue({
   el: '#menu',

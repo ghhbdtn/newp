@@ -34,6 +34,7 @@
                     outlined
                     dense
                     return-object
+                    no-data-text="Ничего не найдено"
                 >
                 </v-select>
               </v-col>
@@ -50,6 +51,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import {messages} from "@/pages/source/messages";
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
@@ -72,8 +74,7 @@ export default defineComponent({
       }
       this.$store.dispatch('reports/downloadReport', data).catch(
           () => {
-            const err = this.errorMessage;
-            this.$alert(err, '', 'error')
+            this.$alert(messages.FAILED_DOWNLOADING, '', 'error')
           }
       )
     },
@@ -81,8 +82,7 @@ export default defineComponent({
       const data = this.selectedContract.id
       this.$store.dispatch('reports/downloadStageReport', data).catch(
           () => {
-            const err = this.errorMessage;
-            this.$alert(err, '', 'error')
+            this.$alert(messages.FAILED_DOWNLOADING, '', 'error')
           }
       )
     }
