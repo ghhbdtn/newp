@@ -80,7 +80,6 @@ export const  counterparties = {
         putOrganization({commit}: any, data: {id: number, name: "", address: "", inn: number}){
             return new Promise((resolve, reject) => {
                 const id = data.id
-                console.log(data);
                 axios( {url: serverUrl + '/api/admin/counterparty-organizations/' + id, data: data,
                     withCredentials: true, method: "PUT" })
                     .then(resp => {

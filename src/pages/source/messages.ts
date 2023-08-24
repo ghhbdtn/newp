@@ -3,6 +3,7 @@ const messages = {
     FAILED_LOGIN: 'Не удалось войти в систему',
     EXISTING_USER: 'Пользователь с таким логином уже существует',
     FAILED_REGISTRATION: 'Не удалось зарегестрировать пользователя',
+    SUCCESS_REGISTRATION: 'Пользователь успешно зарегестрирован',
     DIFFERENT_PASSWORDS: 'Пароли не совпадают',
     DELETE_CONTRACT_CONFIRM: 'Вы действительно хотите удалить данный договор?',
     SAVED_CHANGES: 'Изменения сохранены!',

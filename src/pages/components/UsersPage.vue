@@ -9,8 +9,8 @@
                      no-data-text="Ничего не найдено"
                      class="elevation-1 grey lighten-5"
       >
-        <template v-slot:top>
-          <v-divider></v-divider>
+        <template #top>
+          <v-divider />
           <v-toolbar
               text
               color="rgba(128, 101, 166, 0.22)"
@@ -20,7 +20,7 @@
                 class="mx-4"
                 inset
                 vertical
-            ></v-divider>
+            />
             <v-text-field
                 v-model="itemsPerPage"
                 color="#6A76AB"
@@ -32,54 +32,54 @@
                 class="shrink"
                 min="0"
                 @input="beforeUpdatePage"
-            ></v-text-field>
-            <v-spacer></v-spacer>
+            />
+            <v-spacer />
           </v-toolbar>
-          <v-divider></v-divider>
+          <v-divider />
         </template>
-        <template v-slot:[`header.fullName`]="{ header }">
+        <template #[`header.fullName`]="{ header }">
           {{ header.text }}
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template>
-            <v-text-field outlined
-                          color="#6A76AB"
-                          v-model="filterValues.fullName"
-                          label="По ФИО"
-                          clearable
-                          class="filter-input"
-                          dense
-                          style="font-size: 0.9rem;"
-                          @input="beforeUpdatePage"
-            ></v-text-field>
+            <v-text-field
+                outlined
+                color="#6A76AB"
+                v-model="filterValues.fullName"
+                label="По ФИО"
+                clearable
+                class="filter-input"
+                dense
+                style="font-size: 0.9rem;"
+                @input="beforeUpdatePage" />
           </template>
         </template>
-        <template v-slot:[`header.login`]="{ header }">
+        <template #[`header.login`]="{ header }">
           {{ header.text }}
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template>
-            <v-text-field outlined
-                          color="#6A76AB"
-                          v-model="filterValues.login"
-                          label="По логину"
-                          clearable
-                          class="filter-input"
-                          dense
-                          style="font-size: 0.9rem;"
-                          @input="beforeUpdatePage"
-            ></v-text-field>
+            <v-text-field
+                outlined
+                color="#6A76AB"
+                v-model="filterValues.login"
+                label="По логину"
+                clearable
+                class="filter-input"
+                dense
+                style="font-size: 0.9rem;"
+                @input="beforeUpdatePage" />
           </template>
         </template>
-        <template v-slot:[`item.isAdmin`]="{ item }">
+        <template #[`item.isAdmin`]="{ item }">
           <v-simple-checkbox
               v-model="item.isAdmin"
               disabled
           ></v-simple-checkbox>
         </template>
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
+        <template #[`item.actions`]="{ item }">
+          <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">
+            mdi-pencil</v-icon>
           <v-icon small text @click.stop="deleteItem(item)" large style="color: darkred">
-            mdi-delete
-          </v-icon>
+            mdi-delete</v-icon>
         </template>
       </v-data-table>
       <template v-if="users.length > 0">
@@ -88,8 +88,7 @@
               color="#6A76AB"
               v-model="page"
               :length="totalPages"
-              @input="updatePage"
-          >
+              @input="updatePage" >
           </v-pagination>
         </div>
       </template>
@@ -112,7 +111,7 @@
                         type="input"
                         :rules="[rules.required]"
                         required
-                    ></v-text-field>
+                    />
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
@@ -123,7 +122,7 @@
                         :rules="[rules.required, rules.minLength]"
                         required
                         label="Имя пользователя"
-                    ></v-text-field>
+                    />
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-text-field
@@ -135,21 +134,21 @@
                         placeholder="ДД.ММ.ГГГГ"
                         :rules="[rules.date]"
                         label="Дата прекращения действия"
-                                  ></v-text-field>
+                  />
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                   <v-text-field
                       v-model="editedUser.newPassword"
                       label="Сменить пароль"
-                      @click:append="() => (value = !value)"
-                      :type="value ? 'password' : 'text'"
-                      :append-icon="value ? 'mdi-eye-off' : 'mdi-eye'"
+                      @click:append="() => (isPasswordShown = !isPasswordShown)"
+                      :type="isPasswordShown ? 'password' : 'text'"
+                      :append-icon="isPasswordShown ? 'mdi-eye-off' : 'mdi-eye'"
                       color="#6A76AB"
                       clearable
                       outlined
                       :rules="[rules.password, rules.stringLen]"
                       placeholder="Новый пароль"
-                  ></v-text-field>
+                  />
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-checkbox
@@ -171,19 +170,18 @@
       </v-dialog>
     </v-main>
   </v-app>
-
 </template>
 
 <script lang="ts">
-
 import {defineComponent} from "vue";
 import {rules} from "@/pages/source/rules";
 import {setUsersFilters} from "@/pages/source/filters";
 import {User} from "@/pages/source/interfaces";
 import {messages} from "@/pages/source/messages";
+import {VForm} from "@/formType";
+import {headers} from "@/pages/source/componentsHeaders";
 
 export default defineComponent({
-  // eslint-disable-next-line vue/multi-word-component-names
   name: "UsersPage",
   data() {
     return {
@@ -205,13 +203,7 @@ export default defineComponent({
         newPassword: "",
         isAdmin: false
       } as User,
-      user_headers: [
-        {text: "ФИО", align: "start", value: "fullName", class: "with-divider", cellClass: 'with-divider', sortable: false},
-        {text: "Имя пользователя", align: "start", value: 'login', class: "with-divider", cellClass: 'with-divider', sortable: false},
-        {text: "Дата прекращения действия", align: "start", value: "terminationDate", class: "with-divider", cellClass: 'with-divider', sortable: false},
-        {text: "Администратор", align: "start", value: "isAdmin", class: "with-divider", cellClass: 'with-divider', sortable: false},
-        {text: "Действия", align: "start", value: "actions", class: "with-divider", cellClass: 'with-divider', sortable: false},
-      ],
+      user_headers: headers.userHeaders,
       page: 1,
       itemsPerPage: 10,
       filterValues: {
@@ -220,7 +212,7 @@ export default defineComponent({
       },
       editedIndex: -1,
       dialog: false,
-      value: true,
+      isPasswordShown: true,
       rules
     }
   },
@@ -243,7 +235,7 @@ export default defineComponent({
     },
     deleteItem(item: any) {
       this.editedUser = Object.assign({}, item);
-      if (this.editedUser.isAdmin){
+      if (this.editedUser.isAdmin) {
         this.$alert(messages.DELETE_ADMIN, '', 'error')
       } else {
         this.$confirm(messages.DELETE_USER_CONFIRM, '', 'warning').then(() =>
@@ -266,8 +258,8 @@ export default defineComponent({
       })
     },
     save() {
-      let form: any = this.$refs.form
-      if(form.validate) {
+      let form: VForm = this.$refs.form as VForm
+      if (form.validate()) {
         const oldValue = this.users[this.editedIndex];
         const newValue = this.editedUser;
         if (oldValue.fullName !== newValue.fullName ||
@@ -293,11 +285,11 @@ export default defineComponent({
               isAdmin: newValue.isAdmin
             }
           }
-          this.$store.dispatch('users/putUser', data).then(()=>{
+          this.$store.dispatch('users/putUser', data).then(() => {
             this.$alert(messages.SAVED_CHANGES, '', 'success')
             this.beforeUpdatePage()
             this.close()
-          }).catch(()=> this.$alert(messages.FAILED_CHANGES, '', 'error'))
+          }).catch(() => this.$alert(messages.FAILED_CHANGES, '', 'error'))
         }
       }
     },
@@ -313,8 +305,10 @@ export default defineComponent({
         const data = {
           page: page,
           size: size
-        };
-        this.$store.dispatch('users/allUsers', data)
+        }
+        if (size > 0) {
+          this.$store.dispatch('users/allUsers', data)
+        }
       } else {
         const arr = setUsersFilters(this.filterValues);
         let page1 = this.page - 1
@@ -326,8 +320,10 @@ export default defineComponent({
           filters: arr,
           page: page1,
           size: size
-        };
-        this.$store.dispatch('users/allUsers', data)
+        }
+        if (size > 0) {
+          this.$store.dispatch('users/allUsers', data)
+        }
       }
     }
   },
@@ -336,7 +332,3 @@ export default defineComponent({
   }
 });
 </script>
-
-<style>
-
-</style>

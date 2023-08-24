@@ -9,8 +9,8 @@
                      no-data-text="Ничего не найдено"
                      class="elevation-1 grey lighten-5"
       >
-        <template v-slot:top>
-          <v-divider></v-divider>
+        <template #top>
+          <v-divider/>
           <v-toolbar
               text
               color="rgba(128, 101, 166, 0.22)"
@@ -20,7 +20,7 @@
                 class="mx-4"
                 inset
                 vertical
-            ></v-divider>
+            />
             <v-text-field
                 v-model="itemsPerPage"
                 color="#6A76AB"
@@ -32,10 +32,10 @@
                 min = "0"
                 hide-details
                 @input="beforeUpdatePage"
-            ></v-text-field>
-            <v-spacer></v-spacer>
+            />
+            <v-spacer />
             <v-dialog v-model="dialogVisible"  @click.prevent persistent>
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-btn
                     color="#6A76AB"
                     dark
@@ -55,21 +55,21 @@
                               color="#6A76AB"
                               clearable
                               outlined
-                              v-model="EditedItem.user"
-                              :items="users"
+                              v-model="editedItem.user"
+                              :items="usersList"
                               item-text="fullName"
                               item-value="id"
                               persistent-hint
                               return-object
                               label="Ответственный пользователь"
-                          ></v-select>
+                          />
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
                           <v-text-field
                               color="#6A76AB"
                               clearable
                               outlined
-                              v-model="EditedItem.name"
+                              v-model="editedItem.name"
                               label="Название"
                               name="name"
                               style="text-decoration-color: #303234; text-align: start"
@@ -77,68 +77,75 @@
                               placeholder="Название договора"
                               :rules="[rules.required, rules.stringLen]"
                               aria-required="true"
-                          ></v-text-field>
+                          />
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
                           <v-select
                               color="#6A76AB"
                               clearable
                               outlined
-                              v-model="EditedItem.type"
+                              v-model="editedItem.type"
                               :items="types"
                               label="Тип договора"
                               :rules="[rules.required]"
-                              aria-required="true"></v-select>
+                              aria-required="true"/>
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
-                          <v-text-field v-model="EditedItem.plannedDate" type="text" label="Плановые сроки"
-                                        v-mask="'##.##.#### - ##.##.####'"
-                                        placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"
-                                        color="#6A76AB"
-                                        outlined
-                                        :rules="[rules.required, rules.planData, rules.range]"
-                                        aria-required="true"></v-text-field>
+                          <v-text-field
+                              v-model="editedItem.plannedDate"
+                              type="text"
+                              label="Плановые сроки"
+                              v-mask="'##.##.#### - ##.##.####'"
+                              placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"
+                              color="#6A76AB"
+                              outlined
+                              :rules="[rules.required, rules.planData, rules.range]"
+                              aria-required="true"/>
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
-                          <v-text-field v-model="EditedItem.actualDate" label="Фактические сроки"
-                                        v-mask="'##.##.#### - ##.##.####'"
-                                        color="#6A76AB"
-                                        outlined
-                                        :rules="[rules.factData, rules.range]"
-                                        placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"></v-text-field>
+                          <v-text-field
+                              v-model="editedItem.actualDate"
+                              label="Фактические сроки"
+                              v-mask="'##.##.#### - ##.##.####'"
+                              color="#6A76AB"
+                              outlined
+                              :rules="[rules.factData, rules.range]"
+                              placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"/>
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
-                          <v-text-field v-model="EditedItem.amount"
-                                        color="#6A76AB"
-                                        clearable
-                                        outlined
-                                        placeholder="0.00"
-                                        :rules="[rules.number, rules.required]"
-                                        label="Сумма договора (руб.)">(руб.)</v-text-field>
+                          <v-text-field
+                              v-model="editedItem.amount"
+                              color="#6A76AB"
+                              clearable
+                              outlined
+                              placeholder="0.00"
+                              :rules="[rules.number, rules.required]"
+                              label="Сумма договора (руб.)"/>
                         </v-col>
                         <StageForm :index="contractID"></StageForm>
-                        <counterparty-form :index="contractID"></counterparty-form>
+                        <CounterpartyForm :index="contractID"></CounterpartyForm>
                       </v-row>
                     </v-container>
                     <v-card-actions>
                       <v-btn color="#6A76AB" dark @click="save">Сохранить</v-btn>
                       <v-btn color="red" dark @click="close">Отменить</v-btn>
                     </v-card-actions>
-                  </v-form></v-card-text>
+                  </v-form>
+                </v-card-text>
               </v-card>
             </v-dialog>
           </v-toolbar>
-          <v-divider></v-divider>
+          <v-divider />
         </template>
-        <template v-slot:[`header.user.fullName`]="{ header }">
+        <template #[`header.user.fullName`]="{ header }">
           {{ header.text }}
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template>
             <v-select outlined
                       clearable
                       color="#6A76AB"
                       v-model="filterValues.user"
-                      :items="users"
+                      :items="usersList"
                       item-text="fullName"
                       item-value="id"
                       persistent-hint
@@ -147,12 +154,12 @@
                       dense
                       style="font-size: 0.9rem;"
                       @input="beforeUpdatePage"
-            ></v-select>
+            />
           </template>
         </template>
-        <template v-slot:[`header.name`]="{ header }">
+        <template #[`header.name`]="{ header }">
           {{ header.text }}
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template>
             <v-text-field outlined
                           color="#6A76AB"
@@ -163,12 +170,12 @@
                           class="filter-input"
                           style="font-size: 0.9rem;"
                           @input="beforeUpdatePage"
-            ></v-text-field>
+            />
           </template>
         </template>
-        <template v-slot:[`header.type`]="{ header }">
+        <template #[`header.type`]="{ header }">
           {{ header.text }}
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template>
             <v-select outlined
                       clearable
@@ -182,12 +189,12 @@
                       class="filter-input"
                       style="font-size: 0.9rem;"
                       @input="beforeUpdatePage"
-            ></v-select>
+            />
           </template>
         </template>
-        <template v-slot:[`header.plannedDate`]="{ header }">
+        <template #[`header.plannedDate`]="{ header }">
           {{ header.text }}
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template>
             <v-text-field
                 outlined
@@ -213,9 +220,9 @@
                 @change="beforeUpdatePage"/>
           </template>
         </template>
-        <template v-slot:[`header.actualDate`]="{ header }">
+        <template #[`header.actualDate`]="{ header }">
           {{ header.text }}
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template>
             <v-text-field
                 outlined
@@ -241,7 +248,7 @@
                 @change="beforeUpdatePage"/>
           </template>
         </template>
-        <template v-slot:[`header.amount`]="{ header }">
+        <template #[`header.amount`]="{ header }">
           {{ header.text }}
           <v-spacer></v-spacer>
           <template>
@@ -269,7 +276,7 @@
                 @input="beforeUpdatePage"/>
           </template>
         </template>
-        <template v-slot:[`item.actions`]="{ item }">
+        <template #[`item.actions`]="{ item }">
           <td>
           <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
           <v-icon small text @click.stop="deleteItem(item)" large style="color: darkred">
@@ -294,7 +301,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent } from "vue";
+
 import { required, minLength } from "@vuelidate/validators";
 import CounterpartyForm from "./CounterpartyForm.vue";
 import { mapState } from 'vuex';
@@ -304,14 +311,16 @@ import {dateToString, stringToDate} from "@/pages/source/dateConverters";
 import {rules} from "@/pages/source/rules";
 import {Contract, User} from "@/pages/source/interfaces";
 import {messages} from "@/pages/source/messages";
+import {defineComponent} from "vue";
+import {VForm} from "@/formType";
+import {headers} from "@/pages/source/componentsHeaders";
 
 export default defineComponent({
-  // eslint-disable-next-line vue/multi-word-component-names
   name: "Administration",
   components: {StageForm, CounterpartyForm},
 data() {
     return {
-      EditedItem: {
+      editedItem: {
         id: -1,
         name: "",
         type: "",
@@ -364,16 +373,8 @@ data() {
         minAmount: 0
       },
       types: ["Закупка", "Поставка", "Работы"],
-      headers: [
-        {text: "Ответственный пользователь", sortable: false, value: "user.fullName", class: "with-divider", cellClass: 'with-divider'},
-        {text: "Название", align: "start", sortable: false, value: "name", class: "with-divider", cellClass: 'with-divider'},
-        { text: "Тип договора", align: "start", sortable: false, value: 'type', class: "with-divider", cellClass: 'with-divider'},
-        { text: "Плановые сроки", align: "start", sortable: false, value: "plannedDate", class: "with-divider", cellClass: 'with-divider'},
-        { text: "Фактические сроки", align: "start", sortable: false, value:  "actualDate", class: "with-divider", cellClass: 'with-divider'},
-        { text: "Сумма (руб.)", align: "start", sortable: false, value: "amount", class: "with-divider", cellClass: 'with-divider'},
-        { text: "Действия", value: "actions", sortable: false},
-      ],
-       rules: rules
+      headers: headers.administrationHeaders,
+      rules: rules
     };
   },
   watch: {
@@ -382,23 +383,14 @@ data() {
     }
   },
   computed: {
-    ...mapState('contractsStore', ['all']),
-    isAdmin1() {
-      return  this.$store.getters["users/getUserRole"];
-    },
+    ...mapState('users', {
+      usersList: 'all'
+    }),
     totalPages(){
       return this.$store.state.contractsStore.totalPages
     },
     totalItems(){
       return this.$store.state.contractsStore.totalElements
-    },
-    form(): Vue & { validate: () => boolean } {
-      return this.$refs.form as Vue & { validate: () => boolean }
-    },
-    users() {
-      let userList = [] as User[]
-      userList = this.$store.state.users.all
-      return userList
     },
     contracts() {
       let dates: {plannedDate: string, actualDate: string} = {plannedDate: "", actualDate: ""}
@@ -437,11 +429,10 @@ data() {
   methods: {
     editItem (item: any) {
       this.editedIndex = this.contracts.indexOf(item)
-      this.EditedItem = Object.assign({}, item)
-      this.contractID = this.EditedItem.id == null ? -1 : this.EditedItem.id
-      console.log(this.EditedItem.id)
+      this.editedItem = Object.assign({}, item)
+      this.contractID = this.editedItem.id == null ? -1 : this.editedItem.id
       this.isEdit = true
-      let data = {contractId: this.EditedItem.id}
+      let data = {contractId: this.editedItem.id}
       this.$store.dispatch('stages/allStagesAdmin', data).then()
       this.$store.dispatch('counterContracts/allAdminCounterpartyContracts', data).then(()=>{
         this.dialogVisible = true
@@ -449,9 +440,9 @@ data() {
     },
 
     deleteItem (item: any) {
-      this.EditedItem = Object.assign({}, item)
+      this.editedItem = Object.assign({}, item)
       this.$confirm(messages.DELETE_CONTRACT_CONFIRM, '', "warning").then(()=>
-          this.$store.dispatch('contractsStore/deleteContract', this.EditedItem.id).
+          this.$store.dispatch('contractsStore/deleteContract', this.editedItem.id).
       then(()=> {
         this.close()
             if (this.page == this.totalPages && this.totalItems == (this.page - 1) * this.itemsPerPage + 1) {
@@ -467,7 +458,7 @@ data() {
       this.dialogVisible = false
       this.isEdit = false
       this.$nextTick(() => {
-        this.EditedItem = Object.assign({}, this.defaultItem)
+        this.editedItem = Object.assign({}, this.defaultItem)
         this.editedIndex = -1
         this.contractID = -1
         this.$store.commit('stages/CLEAR_AFTER_ADDING')
@@ -476,12 +467,12 @@ data() {
     },
 
     save: function () {
-      let form: any = this.$refs.form
+      let form: VForm = this.$refs.form as VForm
       // Trigger validation for each field
       const valid = form.validate();
       // Check if all fields are valid
       if (valid)  {
-        const newValue = this.EditedItem;
+        const newValue = this.editedItem;
         const dates: {plannedStartDate: string, plannedEndDate: string, actualStartDate: string, actualEndDate: string} =
             stringToDate(newValue.plannedDate, newValue.actualDate);
         const plannedStartDate = dates.plannedStartDate;
@@ -502,7 +493,7 @@ data() {
               plannedEndDate: plannedEndDate,
               actualStartDate: actualStartDate,
               actualEndDate: actualEndDate,
-              userId: (this.EditedItem.user == null) ? null : this.EditedItem.user.id,
+              userId: (this.editedItem.user == null) ? null : this.editedItem.user.id,
               id: newValue.id
             }
             this.$store.dispatch('contractsStore/putContract', data).then(()=>{
@@ -511,7 +502,7 @@ data() {
               this.$alert(messages.SAVED_CHANGES, '', 'success');})
                 .catch(()=> this.$alert(messages.FAILED_CHANGES, '', 'error'))
           }
-          Object.assign(this.contracts[this.editedIndex], this.EditedItem)
+          Object.assign(this.contracts[this.editedIndex], this.editedItem)
           this.isEdit = false
           this.close()
         } else {
@@ -523,7 +514,7 @@ data() {
             plannedEndDate: plannedEndDate,
             actualStartDate: actualStartDate,
             actualEndDate: actualEndDate,
-            userId: (this.EditedItem.user == null || this.EditedItem.user.id == -1) ? null : this.EditedItem.user.id,
+            userId: (this.editedItem.user == null || this.editedItem.user.id == -1) ? null : this.editedItem.user.id,
             contractStages: this.$store.state.stages.all,
             counterpartyContracts: this.$store.state.counterContracts.allCounterContracts
           }
@@ -554,7 +545,9 @@ data() {
           page: page1,
           size: this.itemsPerPage
         };
-        this.$store.dispatch('contractsStore/allAdminContracts', data)
+        if (this.itemsPerPage > 0) {
+          this.$store.dispatch('contractsStore/allAdminContracts', data)
+        }
     }
   },
   created(){
@@ -575,13 +568,15 @@ data() {
   padding-bottom: 0;
   color: #6A76AB;
 }
-.v-data-table > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table > .v-data-table__wrapper > table > thead > tr > th, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > th
-{
+.v-data-table > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table >
+.v-data-table__wrapper > table > thead > tr > th, .v-data-table > .v-data-table__wrapper >
+table > tfoot > tr > th {
   font-size: 1.0rem;
   height: 40px;
 }
-.v-data-table > .v-data-table__wrapper > table > tbody > tr > td, .v-data-table > .v-data-table__wrapper > table > thead > tr > td, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > td
-{
+.v-data-table > .v-data-table__wrapper > table > tbody > tr > td, .v-data-table >
+.v-data-table__wrapper > table > thead > tr > td, .v-data-table > .v-data-table__wrapper >
+table > tfoot > tr > td {
   font-size: 1.0rem;
   height: 40px;
 }

@@ -5,22 +5,34 @@
         <v-col cols="12" sm="10" md="8" lg="6">
           <v-card class="mt-5" color="rgba(128, 101, 166, 0.22)">
             <v-card-title class="justify-center">Формирование отчетов</v-card-title>
-            <v-divider></v-divider>
+            <v-divider />
             <h4  class="subtitle-1 text-decoration-underline">Отчет 1: Вывод всех договоров за задаваемый плановый период</h4>
             <v-row class="mb-4" justify="center">
               <v-col cols="12" sm="5">
                 <v-card-text class="subtitle-1">Плановая дата начала:</v-card-text>
-                <v-text-field clearable type="date" color="#6A76AB" v-model="startDate" outlined dense />
+                <v-text-field
+                    clearable
+                    type="date"
+                    color="#6A76AB"
+                    v-model="startDate"
+                    outlined
+                    dense />
               </v-col>
               <v-col cols="12" sm="5">
                 <v-card-text class="subtitle-1">Плановая дата окончания:</v-card-text>
-                <v-text-field clearable type="date" color="#6A76AB" v-model="endDate" outlined dense />
+                <v-text-field
+                    clearable
+                    type="date"
+                    color="#6A76AB"
+                    v-model="endDate"
+                    outlined
+                    dense />
               </v-col>
             </v-row>
             <v-card-actions class="justify-center">
               <v-btn color="#6A76AB" dark @click="downloadContracts">Сформировать отчет</v-btn>
             </v-card-actions>
-            <v-divider></v-divider>
+            <v-divider />
             <h4 class="subtitle-1 text-decoration-underline">Отчет 2: Вывод всех этапов для выбранного договора</h4>
             <v-row class="mb-4">
               <v-col cols="12">
@@ -34,9 +46,7 @@
                     outlined
                     dense
                     return-object
-                    no-data-text="Ничего не найдено"
-                >
-                </v-select>
+                    no-data-text="Ничего не найдено" />
               </v-col>
             </v-row>
             <v-card-actions class="justify-center">
@@ -54,7 +64,6 @@ import { defineComponent } from "vue";
 import {messages} from "@/pages/source/messages";
 
 export default defineComponent({
-  // eslint-disable-next-line vue/multi-word-component-names
   name: "Reports",
   data() {
     return {
@@ -96,7 +105,7 @@ export default defineComponent({
     }
   },
   created() {
-    this.$store.dispatch('contractsStore/getAll', {page: 0, size: 2147483647})
+    this.$store.dispatch('contractsStore/getAll', {page: 0, size: 2147483647}).catch()
   },
 });
 </script>

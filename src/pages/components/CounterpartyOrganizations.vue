@@ -9,8 +9,8 @@
                      class="elevation-1 grey lighten-5"
                     no-data-text="Ничего не найдено"
       >
-        <template v-slot:top>
-          <v-divider></v-divider>
+        <template #top>
+          <v-divider />
         <v-toolbar
             text
             color="rgba(128, 101, 166, 0.22)"
@@ -20,7 +20,7 @@
               class="mx-4"
               inset
               vertical
-          ></v-divider>
+          />
           <v-text-field
               v-model="itemsPerPage"
               color="#6A76AB"
@@ -32,122 +32,127 @@
               min = "0"
               hide-details
               @input="beforeUpdatePage"
-          ></v-text-field>
-          <v-spacer></v-spacer>
-        <v-dialog v-model="dialog">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn v-if="isAdmin"
-                   color="#6A76AB"
-                   dark
-                   class="mb-2"
-                   v-bind="attrs"
-                   v-on="on"
-            >Добавить</v-btn>
-          </template>
-          <v-card>
-            <v-card-text>
-              <v-form ref="form"  style="background-color: rgb(255,255,255)">
-                <v-container>
-                  <v-card-title v-if="isAdmin">{{editedIndex>-1 ? "Редактировать организацию-контрагента": "Добавить организацию-контрагента"}}</v-card-title>
-                  <v-card-title v-if="!isAdmin">Карточка организации-контрагента</v-card-title>
-                  <v-row>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                          color="#6A76AB"
-                          clearable
-                          outlined
-                          v-model="editedOrganization.name"
-                          label="Название организации"
-                          name="name"
-                          style="text-decoration-color: #303234; text-align: start"
-                          type="input"
-                          :rules="[rules.required, rules.stringLen]"
-                          required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                          color="#6A76AB"
-                          clearable
-                          outlined
-                          v-model="editedOrganization.address"
-                          label="Адрес"
-                          :rules="[rules.required, rules.stringLen]"
-                          required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field
-                          color="#6A76AB"
-                          clearable
-                          outlined
-                          v-model="editedOrganization.inn" type="text" label="ИНН"
-                          v-mask="'##########'"
-                          :rules="[rules.inn, rules.required]"
-                          required></v-text-field>
-                    </v-col>
-                  </v-row>
-                  <v-card-actions>
-                    <v-btn color="#6A76AB" dark @click="saveOrganization" v-if="isAdmin">Сохранить</v-btn>
-                    <v-btn color="red" dark @click="closeForm">{{isAdmin ? `Отменить` : `Закрыть`}}</v-btn>
-                  </v-card-actions>
-                </v-container>
-              </v-form>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
+          />
+          <v-spacer />
+          <v-dialog v-model="dialog">
+            <template #activator="{ on, attrs }">
+              <v-btn v-if="isAdmin"
+                     color="#6A76AB"
+                     dark
+                     class="mb-2"
+                     v-bind="attrs"
+                     v-on="on"
+              >Добавить</v-btn>
+            </template>
+            <v-card>
+              <v-card-text>
+                <v-form ref="form"  style="background-color: rgb(255,255,255)">
+                  <v-container>
+                    <v-card-title v-if="isAdmin">{{editedIndex>-1 ? "Редактировать организацию-контрагента": "Добавить организацию-контрагента"}}</v-card-title>
+                    <v-card-title v-if="!isAdmin">Карточка организации-контрагента</v-card-title>
+                    <v-row>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                            color="#6A76AB"
+                            clearable
+                            outlined
+                            v-model="editedOrganization.name"
+                            label="Название организации"
+                            name="name"
+                            style="text-decoration-color: #303234; text-align: start"
+                            type="input"
+                            :rules="[rules.required, rules.stringLen]"
+                            required
+                        />
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                            color="#6A76AB"
+                            clearable
+                            outlined
+                            v-model="editedOrganization.address"
+                            label="Адрес"
+                            :rules="[rules.required, rules.stringLen]"
+                            required
+                        />
+                      </v-col>
+                      <v-col cols="12" sm="6" md="4">
+                        <v-text-field
+                            color="#6A76AB"
+                            clearable
+                            outlined
+                            v-model="editedOrganization.inn"
+                            type="text"
+                            label="ИНН"
+                            v-mask="'##########'"
+                            :rules="[rules.inn, rules.required]"
+                            required/>
+                      </v-col>
+                    </v-row>
+                    <v-card-actions>
+                      <v-btn color="#6A76AB" dark @click="saveOrganization" v-if="isAdmin">Сохранить</v-btn>
+                      <v-btn color="red" dark @click="closeForm">{{isAdmin ? `Отменить` : `Закрыть`}}</v-btn>
+                    </v-card-actions>
+                  </v-container>
+                </v-form>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
         </v-toolbar>
-          <v-divider></v-divider>
+          <v-divider />
         </template>
-        <template v-slot:[`header.name`]="{ header }">
+        <template #[`header.name`]="{ header }">
+          {{ header.text }}
+          <v-spacer />
+          <template>
+            <v-text-field
+                outlined
+                color="#6A76AB"
+                dense
+                v-model="filterValues.name"
+                label="По названию"
+                clearable
+                class="filter-input"
+                style="font-size: 0.9rem;"
+                @input="beforeUpdatePage"
+            />
+          </template>
+        </template>
+        <template #[`header.address`]="{ header }">
           {{ header.text }}
           <v-spacer></v-spacer>
           <template>
-            <v-text-field outlined
-                          color="#6A76AB"
-                          dense
-                          v-model="filterValues.name"
-                          label="По названию"
-                          clearable
-                          class="filter-input"
-                          style="font-size: 0.9rem;"
-                          @input="beforeUpdatePage"
-            ></v-text-field>
+            <v-text-field
+                outlined
+                color="#6A76AB"
+                dense
+                v-model="filterValues.address"
+                label="По адресу организации"
+                clearable
+                class="filter-input"
+                style="font-size: 0.9rem;"
+                @input="beforeUpdatePage"
+            />
           </template>
         </template>
-        <template v-slot:[`header.address`]="{ header }">
+        <template #[`header.inn`]="{ header }">
           {{ header.text }}
-          <v-spacer></v-spacer>
+          <v-spacer />
           <template>
-            <v-text-field outlined
-                          color="#6A76AB"
-                          dense
-                          v-model="filterValues.address"
-                          label="По адресу организации"
-                          clearable
-                          class="filter-input"
-                          style="font-size: 0.9rem;"
-                          @input="beforeUpdatePage"
-            ></v-text-field>
+            <v-text-field
+                outlined
+                clearable
+                dense
+                color="#6A76AB"
+                label="По ИНН"
+                v-mask="'##########'"
+                v-model="filterValues.inn"
+                class="filter-input"
+                style="font-size: 0.9rem;"
+                @input="beforeUpdatePage"/>
           </template>
         </template>
-        <template v-slot:[`header.inn`]="{ header }">
-          {{ header.text }}
-          <v-spacer></v-spacer>
-          <template>
-            <v-text-field outlined
-                          clearable
-                          dense
-                          color="#6A76AB"
-                          label="По ИНН"
-                          v-mask="'##########'"
-                          v-model="filterValues.inn"
-                          class="filter-input"
-                          style="font-size: 0.9rem;"
-                          @input="beforeUpdatePage"/>
-          </template>
-        </template>
-        <template v-if="isAdmin" v-slot:[`item.actions`]="{ item }">
+        <template v-if="isAdmin" #[`item.actions`]="{ item }">
           <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
           <v-icon small text @click.stop="deleteOrganization(item)" large style="color: darkred">
             mdi-delete
@@ -161,8 +166,7 @@
               v-model="page"
               :length="totalPages"
               @input="updatePage"
-          >
-          </v-pagination>
+          ></v-pagination>
         </div>
       </template>
     </v-main>
@@ -176,9 +180,9 @@ import {rules} from "@/pages/source/rules";
 import {setOrganizationsFilters} from "@/pages/source/filters";
 import {Organization} from "@/pages/source/interfaces";
 import {messages} from "@/pages/source/messages";
+import {VForm} from "@/formType";
 
 export default defineComponent({
-  // eslint-disable-next-line vue/multi-word-component-names
   name: "CounterpartyOrganizations",
 
   data() {
@@ -233,7 +237,7 @@ export default defineComponent({
   },
   methods: {
     saveOrganization () {
-      let form: any = this.$refs.form
+      let form: VForm = this.$refs.form as VForm
       const valid = form.validate();
       if (valid) {
         if (this.editedIndex > -1) {
@@ -310,8 +314,10 @@ export default defineComponent({
         const data = {
           page: page,
           size: size
-        };
-        this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
+        }
+        if (size > 0) {
+          this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
+        }
       } else {
         const arr = setOrganizationsFilters(this.filterValues);
         let page1 = this.page - 1
@@ -324,7 +330,9 @@ export default defineComponent({
           page: page1,
           size: size
         };
-        this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
+        if (size > 0) {
+          this.$store.dispatch('counterparties/allCounterpartyOrganizations', data)
+        }
       }
     }
   },
@@ -333,7 +341,3 @@ export default defineComponent({
   }
 });
 </script>
-
-<style>
-
-</style>

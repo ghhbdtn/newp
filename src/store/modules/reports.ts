@@ -20,7 +20,6 @@ export const  reports = {
     actions: {
         downloadReport({commit}: any, data: {}) {
             return new Promise((resolve, reject) => {
-                console.log(data);
                 axios( {url: serverUrl + '/api/user/downland-contract-report/dates', params: data,  responseType: 'blob',
                     withCredentials: true, method: "GET" })
                     .then(resp => {
@@ -34,7 +33,6 @@ export const  reports = {
                         URL.revokeObjectURL(href);
                     })
                     .catch(err => {
-                        console.log(err)
                         commit('ERR', err.response.message)
                         reject(err)
                     })
@@ -42,7 +40,6 @@ export const  reports = {
         },
         downloadStageReport({commit}: any, data: number) {
             return new Promise((resolve, reject) => {
-                console.log(data);
                 axios( {url:  serverUrl + '/api/user/downland-contract-stage-report/'+ data, params: {},  responseType: 'blob',
                     withCredentials: true, method: "GET" })
                     .then(resp => {

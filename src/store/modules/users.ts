@@ -11,7 +11,8 @@ interface User {
     isAdmin: boolean
 }
 
-interface State {
+export interface State {
+    isAuthenticated: boolean,
     isAdmin: boolean,
     user : User,
     all: User[],
@@ -22,6 +23,7 @@ interface State {
 
 const state = {
     isAdmin: false,
+    isAuthenticated: false,
     user : {} as User,
     all: [] as User[],
     totalPages: 0,
@@ -37,17 +39,17 @@ const getters =  {
 
 const mutations = {
     SET_USER:  (state: State, user1: User) => {
-        console.log(state, user1)
         state.user.id = user1.id
         state.user.login = user1.fullName
         state.user.login = user1.login
         state.user.isAdmin = user1.isAdmin
         state.user.terminationDate = user1.terminationDate
         state.isAdmin = user1.isAdmin
-        console.log(state.user, state.isAdmin)
+        state.isAuthenticated = true
     },
     LOG_OUT(state: State){
         state.user = {} as User;
+        state.isAuthenticated = false
     },
     SET_USERS(state: State, content: {items: User[], numPages: number, numElements: number}) {
         state.all = content.items;
@@ -85,8 +87,8 @@ const actions = {
         return new Promise((resolve, reject) => {
             axios({url: serverUrl + '/api/auth/sign-up ', data: data, method: 'POST', withCredentials: true })
                 .then(resp => {
-                    const user: User = resp.data;
-                    commit('SET_USER', user);
+                    //const user: User = resp.data;
+                    //commit('SET_USER', user);
                     resolve(resp)
                 })
                 .catch(err => {
@@ -130,7 +132,6 @@ const actions = {
                     resolve(resp)
                 })
                 .catch(err => {
-                    console.log(err)
                     reject(err)
                 })
         })
@@ -144,7 +145,6 @@ const actions = {
                     resolve(resp)
                 })
                 .catch(err => {
-                    console.log(err)
                     reject(err)
                 })
         })

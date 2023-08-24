@@ -50,30 +50,28 @@ export const  contractsStore = {
         state.totalPages = obj.numPages;
         state.totalElements = obj.numElements;
         state.last = obj.last
-        console.log(state.totalPages)
     },
     SET_CONTRACT: (state: State, data: any) => {
         state.all.push(data)
     },
-        DELETE_CONTRACT(state: State, data: number){
-            state.all = state.all.filter(ct => ct.id !== data);
-        },
-        PUT_CONTRACT(state: State, data: Contract){
-            const contract = _.find(state.all, {id: data.id})
-           if (contract != null) {Vue.set(state.allForAdmin, state.allForAdmin.indexOf(contract), data)}
-        },
-        SET_ADMIN: (state: State, obj: {items: [], numPages: number, numElements: number}) =>{
-            state.allForAdmin = obj.items;
-            state.all = obj.items;
-            state.totalPages = obj.numPages;
-            state.totalElements = obj.numElements;
-        },
+    DELETE_CONTRACT(state: State, data: number){
+        state.all = state.all.filter(ct => ct.id !== data);
+    },
+    PUT_CONTRACT(state: State, data: Contract){
+        const contract = _.find(state.all, {id: data.id})
+        if (contract != null) {Vue.set(state.allForAdmin, state.allForAdmin.indexOf(contract), data)}
+    },
+    SET_ADMIN: (state: State, obj: {items: [], numPages: number, numElements: number}) =>{
+        state.allForAdmin = obj.items;
+        state.all = obj.items;
+        state.totalPages = obj.numPages;
+        state.totalElements = obj.numElements;
+    },
 },
 
  actions: {
     getAll({commit}: any, data: {}){
         return new Promise((resolve, reject) => {
-            console.log(data);
             axios( {url: serverUrl + '/api/user/contracts/search', data: data,
                 withCredentials: true, method: "POST" })
                 .then(resp => {
@@ -87,7 +85,6 @@ export const  contractsStore = {
                         numElements: elements,
                         last: isLast
                     }
-                    console.log(resp.data);
                     commit('SET', obj);
                     resolve(resp)
                 })
@@ -113,7 +110,6 @@ export const  contractsStore = {
         return new Promise((resolve, reject) => {
             // @ts-ignore
             const id = data['id']
-            console.log(data);
             axios( {url: serverUrl + '/api/admin/contracts/' + id, data: data,
                 withCredentials: true, method: "PUT" })
                 .then(resp => {
@@ -127,11 +123,9 @@ export const  contractsStore = {
     },
      deleteContract({commit}: any, data: number) {
          return new Promise((resolve, reject) => {
-             console.log(data);
              axios( {url: serverUrl + '/api/admin/contracts/' + data, data: {},
                  withCredentials: true, method: "DELETE" })
                  .then(resp => {
-                     console.log(resp.data);
                      commit('DELETE_CONTRACT', data);
                      resolve(resp)
                  })
@@ -153,7 +147,6 @@ export const  contractsStore = {
                          numPages: pages,
                          numElements: elements
                      }
-                     console.log(resp.data);
                      commit('SET_ADMIN', obj);
                      resolve(resp)
                  })

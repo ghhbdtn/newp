@@ -16,9 +16,9 @@
                   :items-per-page="itemsPerPage"
                    hide-default-footer
                    no-data-text='Ничего не найдено'
-                  class="elevation-3">
-      <template v-slot:top>
-        <v-divider></v-divider>
+                   class="elevation-3">
+      <template #top>
+        <v-divider />
         <v-toolbar
             text
             color="rgba(128, 101, 166, 0.22)"
@@ -28,7 +28,7 @@
               class="mx-4"
               inset
               vertical
-          ></v-divider>
+          />
           <v-text-field
               v-if="index !== -1"
               v-model="itemsPerPage"
@@ -41,12 +41,12 @@
               class="shrink"
               min="0"
               @input="beforeUpdatePage"
-          ></v-text-field>
-          <v-spacer></v-spacer>
+          />
+          <v-spacer />
         </v-toolbar>
-        <v-divider></v-divider>
+        <v-divider />
       </template>
-      <template v-slot:[`item.actions`]="{ item }" v-if="!isUsersData">
+      <template #[`item.actions`]="{ item }" v-if="!isUsersData">
         <v-icon small class="mr-2" @click="editStageItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
         <v-icon small text @click="deleteStageItem(item)" large style="color: darkred">
           mdi-delete
@@ -72,97 +72,101 @@
             <v-card-title>{{editedStageIndex != -1 ? "Редактировать этап договора": "Добавить этап договора"}}</v-card-title>
             <v-row>
               <v-col cols="12" sm="6" md="4">
-
-                <v-text-field id="name" v-model="editedStage.name"
-                              color="#6A76AB"
-                              clearable
-                              outlined
-                              label="Название этапа"
-                              name="name"
-                              style="text-decoration-color: #303234; text-align: start"
-                              type="input"
-                              :rules="[rules.required, rules.stringLen]"
-                              required></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field type="text"
-                              v-model="editedStage.plannedDate"
-                              color="#6A76AB"
-                              clearable
-                              outlined
-                              v-mask="'##.##.#### - ##.##.####'"
-                              label="Плановые сроки начала и окончания"
-                              placeholder="дд.мм.гггг - дд.мм.гггг"
-                              :rules="[rules.required, rules.planData, rules.range]"
-                              required></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field type="text"
-                              v-model="editedStage.actualDate"
-                              color="#6A76AB"
-                              clearable
-                              outlined
-                              v-mask="'##.##.#### - ##.##.####'"
-                              label="Фактические сроки начала и окончания"
-                              placeholder="дд.мм.гггг - дд.мм.гггг"
-                              :rules="[rules.factData, rules.range]"
-                              ></v-text-field>
+                <v-text-field
+                    v-model="editedStage.name"
+                    color="#6A76AB"
+                    clearable
+                    outlined
+                    label="Название этапа"
+                    name="name"
+                    style="text-decoration-color: #303234; text-align: start"
+                    type="input"
+                    :rules="[rules.required, rules.stringLen]"
+                    required/>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
-                              v-model="editedStage.amount"
-                              placeholder="0.00"
-                              color="#6A76AB"
-                              clearable
-                              outlined
-                              :rules="[rules.number, rules.required]"
-                              label="Сумма этапа (руб.)">(руб.)</v-text-field>
+                    type="text"
+                    v-model="editedStage.plannedDate"
+                    color="#6A76AB"
+                    clearable
+                    outlined
+                    v-mask="'##.##.#### - ##.##.####'"
+                    label="Плановые сроки начала и окончания"
+                    placeholder="дд.мм.гггг - дд.мм.гггг"
+                    :rules="[rules.required, rules.planData, rules.range]"
+                    required/>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
-                              v-model="editedStage.plannedMaterialCosts"
-                              placeholder="0.00"
-                              color="#6A76AB"
-                              clearable
-                              outlined
-                              :rules="[rules.required, rules.number]"
-                              label="Плановые расходы на материалы (руб.)"
-                              aria-required="true"></v-text-field>
+                    type="text"
+                    v-model="editedStage.actualDate"
+                    color="#6A76AB"
+                    clearable
+                    outlined
+                    v-mask="'##.##.#### - ##.##.####'"
+                    label="Фактические сроки начала и окончания"
+                    placeholder="дд.мм.гггг - дд.мм.гггг"
+                    :rules="[rules.factData, rules.range]"
+                />
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
-                              v-model="editedStage.actualMaterialCosts"
-                              placeholder="0.00"
-                              color="#6A76AB"
-                              clearable
-                              outlined
-                              label="Фактические расходы на материалы (руб.)"
-                              :rules="[rules.number]"></v-text-field>
+                    v-model="editedStage.amount"
+                    placeholder="0.00"
+                    color="#6A76AB"
+                    clearable
+                    outlined
+                    :rules="[rules.number, rules.required]"
+                    label="Сумма этапа (руб.)"/>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
-                              v-model="editedStage.plannedSalaryExpenses"
-                              placeholder="0.00"
-                              color="#6A76AB"
-                              clearable
-                              outlined
-                              label="Плановые расходы на зарплаты (руб.)"
-                              :rules="[rules.required, rules.number]"
-                              aria-required="true"></v-text-field>
+                    v-model="editedStage.plannedMaterialCosts"
+                    placeholder="0.00"
+                    color="#6A76AB"
+                    clearable
+                    outlined
+                    :rules="[rules.required, rules.number]"
+                    label="Плановые расходы на материалы (руб.)"
+                    aria-required="true"/>
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
-                              v-model="editedStage.actualSalaryExpenses"
-                              placeholder="0.00"
-                              color="#6A76AB"
-                              clearable
-                              outlined
-                              label="Фактические расходы на зарплаты (руб.)"
-                              :rules="[rules.number]"></v-text-field>
+                    v-model="editedStage.actualMaterialCosts"
+                    placeholder="0.00"
+                    color="#6A76AB"
+                    clearable
+                    outlined
+                    label="Фактические расходы на материалы (руб.)"
+                    :rules="[rules.number]"/>
+              </v-col>
+              <v-col cols="12" sm="6" md="4">
+                <v-text-field
+                    v-model="editedStage.plannedSalaryExpenses"
+                    placeholder="0.00"
+                    color="#6A76AB"
+                    clearable
+                    outlined
+                    label="Плановые расходы на зарплаты (руб.)"
+                    :rules="[rules.required, rules.number]"
+                    aria-required="true"/>
+              </v-col>
+              <v-col cols="12" sm="6" md="4">
+                <v-text-field
+                    v-model="editedStage.actualSalaryExpenses"
+                    placeholder="0.00"
+                    color="#6A76AB"
+                    clearable
+                    outlined
+                    label="Фактические расходы на зарплаты (руб.)"
+                    :rules="[rules.number]"/>
               </v-col>
             </v-row>
-            <v-btn color="#6A76AB" dark type="submit" @click.prevent="saveStage" v-if="isAdmin">Сохранить</v-btn>
-            <v-btn color="red" dark type="button" @click="closeStageForm">Отменить</v-btn>
+            <v-card-actions>
+              <v-btn color="#6A76AB" dark type="submit" @click.prevent="saveStage" v-if="isAdmin">Сохранить </v-btn>
+              <v-btn color="red" dark type="button" @click="closeStageForm">Отменить</v-btn>
+            </v-card-actions>
           </v-container>
         </v-form>
       </v-card-text>
@@ -177,9 +181,9 @@ import {dateToString, stringToDate} from "@/pages/source/dateConverters";
 import {rules} from "@/pages/source/rules";
 import {Stage} from "@/pages/source/interfaces";
 import {messages} from "@/pages/source/messages";
+import {VForm} from "@/formType";
 
 export default defineComponent( {
-  // eslint-disable-next-line vue/multi-word-component-names
   name: "StageForm",
   props: {
     index: {
@@ -301,11 +305,9 @@ export default defineComponent( {
       this.stageAct = true
     },
     saveStage( ) {
-      let form: any = this.$refs.form
-
+      let form: VForm = this.$refs.form as VForm
       // Trigger validation for each field
       const valid = form.validate();
-
       // Check if all fields are valid
       if (valid) {
         const newValue = this.editedStage;
@@ -449,14 +451,10 @@ export default defineComponent( {
         page: page,
         size: size
       };
-      if (this.index !== -1) {
+      if (this.index !== -1 && this.itemsPerPage > 0) {
         this.$store.dispatch('stages/allStages', data)
       }
     }
   }
 })
 </script>
-
-<style scoped>
-
-</style>

@@ -17,18 +17,17 @@
                    hide-default-footer
                   class="elevation-3"
                   no-data-text="Ничего не найдено">
-      <template v-slot:top>
-        <v-divider></v-divider>
+      <template #top>
+        <v-divider />
         <v-toolbar
             text
-            color="rgba(128, 101, 166, 0.22)"
-        >
+            color="rgba(128, 101, 166, 0.22)">
           <v-toolbar-title>Таблица договоров с контрагентами</v-toolbar-title>
           <v-divider
               class="mx-4"
               inset
               vertical
-          ></v-divider>
+          />
           <v-text-field
               v-if="index !== -1"
               v-model="itemsPerPage"
@@ -41,12 +40,12 @@
               class="shrink"
               min="0"
               @input="beforeUpdatePage"
-          ></v-text-field>
-          <v-spacer></v-spacer>
+          />
+          <v-spacer />
         </v-toolbar>
-        <v-divider></v-divider>
+        <v-divider />
       </template>
-      <template v-slot:[`item.actions`]="{ item }" v-if="!isUsersData">
+      <template #[`item.actions`]="{ item }" v-if="!isUsersData">
         <v-icon small class="mr-2" @click="editCounterItem(item);" style="color: #6A76AB">mdi-pencil</v-icon>
         <v-icon small text @click="deleteCounterItem(item)" large style="color: darkred">
           mdi-delete
@@ -65,93 +64,96 @@
       </div>
     </template>
     <v-dialog v-model="counterpartyAct" @click.prevent persistent>
-<v-card>
-<v-card-text>
-  <v-form ref="form" style="background-color: rgb(255,255,255)">
-    <v-container>
-      <v-card-title>{{editedCounterIndex != -1 ? "Редактировать договор с контрагентом": "Добавить договор с контрагентом"}}</v-card-title>
-      <v-row>
-        <v-col cols="12" sm="6" md="4">
-          <v-text-field
-              v-model="editedCountercontract.name"
-              color="#6A76AB"
-              clearable
-              outlined
-              label="Название"
-              name="name"
-              style="text-decoration-color: #303234; text-align: start"
-              type="input"
-              placeholder="Название договора"
-              :rules="[rules.required, rules.stringLen]"
-              required
-          ></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
-          <v-select
-              v-model="editedCountercontract.type"
-              color="#6A76AB"
-              clearable
-              outlined
-              :items="countercontractTypes"
-              :rules="[rules.required]"
-              required
-              label="Тип договора"
-          ></v-select>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
-          <v-select
-              v-model="editedCountercontract.organization"
-              color="#6A76AB"
-              clearable
-              outlined
-              :items="organizations"
-              item-text="name"
-              item-value="id"
-              persistent-hint
-              return-object
-              :rules="[rules.requiredOrganization]"
-              required
-              label="Организация-Контрагент"
-          >
-          </v-select>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
-          <v-text-field v-model="editedCountercontract.amount"
-                        color="#6A76AB"
-                        placeholder="0.00"
-                        clearable
-                        outlined
-                        :rules="[rules.number, rules.required]"
-                        label="Сумма"></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
-          <v-text-field v-model="editedCountercontract.plannedDate"
-                        color="#6A76AB"
-                        clearable
-                        outlined
-                        type="text" label="Плановые сроки"
-                        :rules="[rules.required, rules.planData, rules.range]"
-                        required
-                        v-mask="'##.##.#### - ##.##.####'" ></v-text-field>
-        </v-col>
-        <v-col cols="12" sm="6" md="4">
-          <v-text-field v-model="editedCountercontract.actualDate"
-                        color="#6A76AB"
-                        clearable
-                        outlined
-                        label="Фактические сроки"
-                        :rules="[rules.factData, rules.range]"
-                        v-mask="'##.##.#### - ##.##.####'"></v-text-field>
-        </v-col>
-      </v-row>
-      <v-card-actions>
-        <v-btn color="#6A76AB" dark @click="saveCounter">Сохранить</v-btn>
-        <v-btn color="red" dark @click="closeCounterForm">Отменить</v-btn>
-      </v-card-actions>
-    </v-container>
-  </v-form>
-</v-card-text>
-</v-card>
+      <v-card>
+        <v-card-text>
+          <v-form ref="form" style="background-color: rgb(255,255,255)">
+            <v-container>
+              <v-card-title>{{editedCounterIndex !== -1 ? "Редактировать договор с контрагентом": "Добавить договор с контрагентом"}}</v-card-title>
+              <v-row>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                      v-model="editedCountercontract.name"
+                      color="#6A76AB"
+                      clearable
+                      outlined
+                      label="Название"
+                      name="name"
+                      style="text-decoration-color: #303234; text-align: start"
+                      type="input"
+                      placeholder="Название договора"
+                      :rules="[rules.required, rules.stringLen]"
+                      required
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-select
+                      v-model="editedCountercontract.type"
+                      color="#6A76AB"
+                      clearable
+                      outlined
+                      :items="countercontractTypes"
+                      :rules="[rules.required]"
+                      required
+                      label="Тип договора"
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-select
+                      v-model="editedCountercontract.organization"
+                      color="#6A76AB"
+                      clearable
+                      outlined
+                      :items="organizations"
+                      item-text="name"
+                      item-value="id"
+                      persistent-hint
+                      return-object
+                      :rules="[rules.requiredOrganization]"
+                      required
+                      label="Организация-Контрагент"
+                  />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                      v-model="editedCountercontract.amount"
+                      color="#6A76AB"
+                      placeholder="0.00"
+                      clearable
+                      outlined
+                      :rules="[rules.number, rules.required]"
+                      label="Сумма"/>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                      v-model="editedCountercontract.plannedDate"
+                      color="#6A76AB"
+                      clearable
+                      outlined
+                      type="text"
+                      label="Плановые сроки"
+                      :rules="[rules.required, rules.planData, rules.range]"
+                      required
+                      v-mask="'##.##.#### - ##.##.####'" />
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                      v-model="editedCountercontract.actualDate"
+                      color="#6A76AB"
+                      clearable
+                      outlined
+                      label="Фактические сроки"
+                      :rules="[rules.factData, rules.range]"
+                      v-mask="'##.##.#### - ##.##.####'"/>
+                </v-col>
+              </v-row>
+              <v-card-actions>
+                <v-btn color="#6A76AB" dark @click="saveCounter">Сохранить</v-btn>
+                <v-btn color="red" dark @click="closeCounterForm">Отменить</v-btn>
+              </v-card-actions>
+            </v-container>
+          </v-form>
+        </v-card-text>
+      </v-card>
     </v-dialog>
   </div>
 </template>
@@ -162,10 +164,10 @@ import {dateToString, stringToDate} from "@/pages/source/dateConverters";
 import {rules} from "@/pages/source/rules";
 import {CounterContract} from "@/pages/source/interfaces";
 import {messages} from "@/pages/source/messages";
+import {VForm} from "@/formType";
 
 
 export default defineComponent({
-  // eslint-disable-next-line vue/multi-word-component-names
   name: "CounterpartyForm",
   props: {
     index: {
@@ -177,7 +179,6 @@ export default defineComponent({
   },
   data: function () {
     return {
-
       editedCountercontract: {
         id: -1,
         name: "",
@@ -327,7 +328,7 @@ export default defineComponent({
       this.counterpartyAct = true;
     },
     saveCounter() {
-      let form: any = this.$refs.form
+      let form: VForm = this.$refs.form as VForm
       // Trigger validation for each field
       const valid = form.validate();
       // Check if all fields are valid
@@ -465,12 +466,10 @@ export default defineComponent({
         page: page,
         size: size
       };
-      this.$store.dispatch('counterContracts/allCounterpartyContracts', data)
+      if (this.itemsPerPage > 0) {
+        this.$store.dispatch('counterContracts/allCounterpartyContracts', data)
+      }
     }
   }
 });
 </script>
-
-<style scoped>
-
-</style>
