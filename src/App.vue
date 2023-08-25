@@ -11,7 +11,7 @@
 
 <script>
 import LoginView from "@/components/LoginView.vue";
-import {useRouter} from "vue-router/composables"; // Import the correct package for Vue 2
+import {useRouter} from "vue-router/composables";
 import store from "@/store";
 
 export default {
