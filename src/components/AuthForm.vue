@@ -54,7 +54,9 @@ export default defineComponent({
           login: this.username,
           password: this.password
         }
-        this.$store.dispatch('users/signIn', data).then(() => {})
+        this.$store.dispatch('users/signIn', data).then(() => {
+          this.$alert(messages.SUCCESS_LOGIN, '', 'success')
+        })
             .catch(() => {
               if (this.errStatus === 401) {
                 this.errorMessage = messages.INVALID_DATA

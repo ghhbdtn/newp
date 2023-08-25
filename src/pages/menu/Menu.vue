@@ -10,7 +10,7 @@
             <v-tab :to="{ name: 'contracts' }">Договоры</v-tab>
             <v-tab :to="{ name: 'organizations' }">Организации-Контрагенты</v-tab>
             <v-tab :to="{ name: 'reports' }">Отчеты</v-tab>
-            <v-menu open-on-hover offset-y transition="slide-x-transition" bottom right v-if="isAdmin1">
+            <v-menu open-on-hover offset-y transition="slide-x-transition" bottom right v-if="isAdmin">
               <template #activator="{ on, attrs }">
                 <v-btn
                     text
@@ -48,6 +48,7 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
+import {messages} from "@/pages/source/messages";
 
 export default defineComponent({
   name: "Menu",
@@ -70,22 +71,26 @@ methods:
             this.$router.push('/menu/contracts').catch(()=>{})});
       },
       logout: function () {
-        this.$confirm('Вы действительно хотите выйти из системы?').then(() => {this.$store.dispatch('users/logOut').then(() =>{if(this.$router.currentRoute.path === '/menu/contracts'){
-          this.$router.replace('/menu').catch(()=>{})
-          location.replace("/")
-        }
-          else location.replace("/")}).catch()}).catch();
-      },
+        this.$confirm(messages.LOG_OUT_CONFIRM)
+            .then(() => {this.$store.dispatch('users/logOut')
+                .then(() =>{
+                  if(this.$router.currentRoute.path === '/menu/contracts'){
+                    this.$router.replace('/menu').catch(()=>{})
+                    location.replace("/")
+                  }
+                  else location.replace("/")
+                }).catch()
+            }).catch(()=>{});
+        },
    },
   computed: {
-    isAdmin1() {
+    isAdmin() {
       return  this.$store.getters["users/getUserRole"];
     }
   },
   created() {
     if(this.$router.currentRoute.name == 'menu' || this.$router.currentRoute.name == 'contracts')
       this.contracts1()
-
   }
 })
 

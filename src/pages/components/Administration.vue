@@ -451,7 +451,7 @@ data() {
             if (this.page < 1) this.beforeUpdatePage()
             else this.updatePage()
         this.updatePage()
-      })).catch(()=>this.$alert(messages.FAILED_DELETE_CONTRACT, '', 'error'))
+      }).catch(()=>this.$alert(messages.FAILED_DELETE_CONTRACT, '', 'error'))).catch(()=>{})
     },
 
     close () {

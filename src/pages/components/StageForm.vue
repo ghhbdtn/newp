@@ -435,8 +435,8 @@ export default defineComponent( {
             if (this.page < 1) this.beforeUpdatePage()
             else this.updatePage()
             this.closeStageForm()
-          })
-        }).catch(()=>this.$alert(messages.FAILED_DELETE_STAGE, '', 'error'))
+          }).catch(()=>this.$alert(messages.FAILED_DELETE_STAGE, '', 'error'))
+        }).catch(()=>{})
       }
     },
     beforeUpdatePage() {

@@ -9,41 +9,58 @@
   </div>
 </template>
 
-<script lang="ts">
-import {defineComponent} from "vue";
+<script>
 import LoginView from "@/components/LoginView.vue";
+import {useRouter} from "vue-router/composables"; // Import the correct package for Vue 2
+import store from "@/store";
 
-export default  defineComponent({
+export default {
   name: 'App',
-  components: {LoginView},
+  components: {
+    LoginView
+  },
   computed: {
     userIsAuthenticated() {
-      return this.$store.state.users.isAuthenticated
-    },
-  },
-  created() {
-    if (this.userIsAuthenticated) {
-      switch (this.$router.currentRoute.name){
-        case 'menu': this.$router.push('/menu').catch(()=>{})
-              break;
-        case 'contracts': this.$router.push('/menu/contracts').catch(()=>{})
-              break;
-        case 'organizations': this.$router.push('/menu/counterparty-organizations').catch(()=>{})
-              break;
-        case 'reports': this.$router.push('/menu/reports').catch(() => {})
-              break;
-        case 'all-contracts': this.$router.push('/menu/admin-root/all-contracts').catch(()=>{})
-              break;
-        case 'allUsers': this.$router.push('/menu/admin-root/users').catch(()=>{})
-              break;
-        default: this.$router.push('/menu')
-      }
+      return this.$store.state.users.isAuthenticated;
     }
+  },
+  mounted() {
+    const router = useRouter();
+    const redirectToRoute = (routeName) => {
+      router.push({ name: routeName }).catch(() => {});
+    };
+    this.$nextTick(() => {
+      let userIsAuthenticated = store.state.users.isAuthenticated;
+      if (userIsAuthenticated) {
+        switch (router.currentRoute.name) {
+          case 'menu':
+            redirectToRoute('menu');
+            break;
+          case 'contracts':
+            redirectToRoute('contracts');
+            break;
+          case 'organizations':
+            redirectToRoute('organizations');
+            break;
+          case 'reports':
+            redirectToRoute('reports');
+            break;
+          case 'all-contracts':
+            redirectToRoute('all-contracts');
+            break;
+          case 'allUsers':
+            redirectToRoute('allUsers');
+            break;
+          default:
+            redirectToRoute('menu');
+        }
+      }
+    });
   }
-});
+};
 </script>
 
-<style lang="scss">
+<style scoped>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

@@ -3,6 +3,7 @@ const messages = {
     FAILED_LOGIN: 'Не удалось войти в систему',
     EXISTING_USER: 'Пользователь с таким логином уже существует',
     FAILED_REGISTRATION: 'Не удалось зарегестрировать пользователя',
+    SUCCESS_LOGIN: 'Выполнен вход в систему',
     SUCCESS_REGISTRATION: 'Пользователь успешно зарегестрирован',
     DIFFERENT_PASSWORDS: 'Пароли не совпадают',
     DELETE_CONTRACT_CONFIRM: 'Вы действительно хотите удалить данный договор?',
@@ -26,7 +27,8 @@ const messages = {
     DELETE_ADMIN: 'Нельзя удалить администратора',
     DELETE_USER_CONFIRM: 'Вы действительно хотите удалить этого пользователя?',
     FAILED_DELETE_USER: 'Не удалось удалить пользователя',
-    FAILED_DOWNLOADING: 'Не удалось загрузить отчет'
+    FAILED_DOWNLOADING: 'Не удалось загрузить отчет',
+    LOG_OUT_CONFIRM: 'Вы действительно хотите выйти из системы?'
 }
 
 export {messages}

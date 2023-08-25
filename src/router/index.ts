@@ -7,8 +7,7 @@ import CounterpartyOrganizations from "@/pages/components/CounterpartyOrganizati
 import Reports from "@/pages/components/Reports.vue";
 import UsersPage from "@/pages/components/UsersPage.vue";
 import Administration from "@/pages/components/Administration.vue";
-import store from '@/store'
-import {Store} from "vuex";
+
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -56,7 +55,5 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL
 })
-
-
 
 export default router

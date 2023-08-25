@@ -451,7 +451,7 @@ export default defineComponent({
           if (this.page < 1) this.beforeUpdatePage()
           else this.updatePage()
           this.closeCounterForm();
-        })).catch(()=>this.$alert(messages.FAILED_DELETE_COUNTERCONTRACT, '', 'error'))
+        }).catch(()=>this.$alert(messages.FAILED_DELETE_COUNTERCONTRACT, '', 'error'))).catch(()=>{})
       }
     },
     beforeUpdatePage() {
