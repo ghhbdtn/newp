@@ -46,7 +46,8 @@
               dense
               class="filter-input"
               style="font-size: 0.9rem;"
-              @input="beforeUpdatePage"/>
+              @input="beforeUpdatePage"
+          />
         </template>
       </template>
       <template #[`header.type`]="{ header }">
@@ -64,7 +65,8 @@
               dense
               class="filter-input"
               style="font-size: 0.9rem;"
-              @change="beforeUpdatePage"/>
+              @change="beforeUpdatePage"
+          />
         </template>
       </template>
       <template #[`header.plannedDate`]="{ header }">
@@ -81,7 +83,8 @@
               clearable
               dense
               style="font-size: 0.9rem;"
-              @change="beforeUpdatePage"/>
+              @change="beforeUpdatePage"
+          />
           <v-text-field
               outlined
               color="#6A76AB"
@@ -92,7 +95,8 @@
               dense
               clearable
               style="font-size: 0.9rem;"
-              @change="beforeUpdatePage"/>
+              @change="beforeUpdatePage"
+          />
         </template>
       </template>
       <template #[`header.actualDate`]="{ header }">
@@ -109,7 +113,8 @@
               clearable
               dense
               style="font-size: 0.9rem;"
-              @change="beforeUpdatePage"/>
+              @change="beforeUpdatePage"
+          />
           <v-text-field
               outlined
               color="#6A76AB"
@@ -120,7 +125,8 @@
               dense
               clearable
               style="font-size: 0.9rem;"
-              @change="beforeUpdatePage"/>
+              @change="beforeUpdatePage"
+          />
         </template>
       </template>
       <template #[`header.amount`]="{ header }">
@@ -136,7 +142,8 @@
               class="filter-input"
               dense
               clearable
-              @input="beforeUpdatePage"/>
+              @input="beforeUpdatePage"
+          />
           <v-text-field
               outlined
               type="number"
@@ -146,7 +153,8 @@
               class="filter-input"
               dense
               clearable
-              @input="beforeUpdatePage"/>
+              @input="beforeUpdatePage"
+          />
         </template>
       </template>
     </v-data-table>
@@ -179,7 +187,8 @@
                       type="input"
                       placeholder="Название договора"
                       readonly
-                      aria-required="true"/>
+                      aria-required="true"
+                  />
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-select
@@ -189,7 +198,8 @@
                       :items="types"
                       label="Тип договора"
                       readonly
-                      aria-required="true" />
+                      aria-required="true"
+                  />
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -201,7 +211,8 @@
                       v-mask="'##.##.#### - ##.##.####'"
                       placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"
                       readonly
-                      aria-required="true" />
+                      aria-required="true" 
+                  />
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -211,7 +222,8 @@
                       label="Фактические сроки"
                       readonly
                       v-mask="'##.##.#### - ##.##.####'"
-                      placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ" />
+                      placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"
+                  />
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -219,7 +231,8 @@
                       color="#6A76AB"
                       outlined
                       readonly
-                      label="Сумма договора" />
+                      label="Сумма договора" 
+                  />
                 </v-col>
                 <StageForm :index="contractID" :isUsersData="true" ></StageForm>
                 <CounterpartyForm :index="contractID" :isUsersData ="true"></CounterpartyForm>

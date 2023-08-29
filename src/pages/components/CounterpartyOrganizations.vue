@@ -86,7 +86,8 @@
                             label="ИНН"
                             v-mask="'##########'"
                             :rules="[rules.inn, rules.required]"
-                            required/>
+                            required
+                        />
                       </v-col>
                     </v-row>
                     <v-card-actions>
@@ -149,7 +150,8 @@
                 v-model="filterValues.inn"
                 class="filter-input"
                 style="font-size: 0.9rem;"
-                @input="beforeUpdatePage"/>
+                @input="beforeUpdatePage"
+            />
           </template>
         </template>
         <template v-if="isAdmin" #[`item.actions`]="{ item }">

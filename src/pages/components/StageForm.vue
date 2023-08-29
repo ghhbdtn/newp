@@ -82,7 +82,8 @@
                     style="text-decoration-color: #303234; text-align: start"
                     type="input"
                     :rules="[rules.required, rules.stringLen]"
-                    required/>
+                    required
+                />
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
@@ -95,7 +96,8 @@
                     label="Плановые сроки начала и окончания"
                     placeholder="дд.мм.гггг - дд.мм.гггг"
                     :rules="[rules.required, rules.planData, rules.range]"
-                    required/>
+                    required
+                />
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
@@ -118,7 +120,8 @@
                     clearable
                     outlined
                     :rules="[rules.number, rules.required]"
-                    label="Сумма этапа (руб.)"/>
+                    label="Сумма этапа (руб.)"
+                />
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
@@ -129,7 +132,8 @@
                     outlined
                     :rules="[rules.required, rules.number]"
                     label="Плановые расходы на материалы (руб.)"
-                    aria-required="true"/>
+                    aria-required="true"
+                />
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
@@ -139,7 +143,8 @@
                     clearable
                     outlined
                     label="Фактические расходы на материалы (руб.)"
-                    :rules="[rules.number]"/>
+                    :rules="[rules.number]"
+                />
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
@@ -150,7 +155,8 @@
                     outlined
                     label="Плановые расходы на зарплаты (руб.)"
                     :rules="[rules.required, rules.number]"
-                    aria-required="true"/>
+                    aria-required="true"
+                />
               </v-col>
               <v-col cols="12" sm="6" md="4">
                 <v-text-field
@@ -160,7 +166,8 @@
                     clearable
                     outlined
                     label="Фактические расходы на зарплаты (руб.)"
-                    :rules="[rules.number]"/>
+                    :rules="[rules.number]"
+                />
               </v-col>
             </v-row>
             <v-card-actions>

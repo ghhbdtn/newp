@@ -88,7 +88,8 @@
                               :items="types"
                               label="Тип договора"
                               :rules="[rules.required]"
-                              aria-required="true"/>
+                              aria-required="true"
+                          />
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
                           <v-text-field
@@ -100,7 +101,8 @@
                               color="#6A76AB"
                               outlined
                               :rules="[rules.required, rules.planData, rules.range]"
-                              aria-required="true"/>
+                              aria-required="true"
+                          />
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
                           <v-text-field
@@ -110,7 +112,8 @@
                               color="#6A76AB"
                               outlined
                               :rules="[rules.factData, rules.range]"
-                              placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"/>
+                              placeholder="ДД.ММ.ГГГГ-ДД.ММ.ГГГГ"
+                          />
                         </v-col>
                         <v-col cols="12" sm="6" md="4">
                           <v-text-field
@@ -120,7 +123,8 @@
                               outlined
                               placeholder="0.00"
                               :rules="[rules.number, rules.required]"
-                              label="Сумма договора (руб.)"/>
+                              label="Сумма договора (руб.)"
+                          />
                         </v-col>
                         <StageForm :index="contractID"></StageForm>
                         <CounterpartyForm :index="contractID"></CounterpartyForm>
@@ -206,7 +210,8 @@
                 clearable
                 dense
                 style="font-size: 0.9rem;"
-                @change="beforeUpdatePage"/>
+                @change="beforeUpdatePage"
+            />
             <v-text-field
                 outlined
                 color="#6A76AB"
@@ -217,7 +222,8 @@
                 dense
                 clearable
                 style="font-size: 0.9rem;"
-                @change="beforeUpdatePage"/>
+                @change="beforeUpdatePage"
+            />
           </template>
         </template>
         <template #[`header.actualDate`]="{ header }">
@@ -234,7 +240,8 @@
                 clearable
                 dense
                 style="font-size: 0.9rem;"
-                @change="beforeUpdatePage"/>
+                @change="beforeUpdatePage"
+            />
             <v-text-field
                 outlined
                 color="#6A76AB"
@@ -245,7 +252,8 @@
                 dense
                 clearable
                 style="font-size: 0.9rem;"
-                @change="beforeUpdatePage"/>
+                @change="beforeUpdatePage"
+            />
           </template>
         </template>
         <template #[`header.amount`]="{ header }">
@@ -262,7 +270,8 @@
                 dense
                 clearable
                 style="font-size: 0.9rem;"
-                @input="beforeUpdatePage"/>
+                @input="beforeUpdatePage"
+            />
             <v-text-field
                 outlined
                 type="number"
@@ -273,7 +282,8 @@
                 dense
                 clearable
                 style="font-size: 0.9rem;"
-                @input="beforeUpdatePage"/>
+                @input="beforeUpdatePage"
+            />
           </template>
         </template>
         <template #[`item.actions`]="{ item }">

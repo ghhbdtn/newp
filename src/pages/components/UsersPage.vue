@@ -50,7 +50,8 @@
                 class="filter-input"
                 dense
                 style="font-size: 0.9rem;"
-                @input="beforeUpdatePage" />
+                @input="beforeUpdatePage" 
+            />
           </template>
         </template>
         <template #[`header.login`]="{ header }">
@@ -66,7 +67,8 @@
                 class="filter-input"
                 dense
                 style="font-size: 0.9rem;"
-                @input="beforeUpdatePage" />
+                @input="beforeUpdatePage" 
+            />
           </template>
         </template>
         <template #[`item.isAdmin`]="{ item }">
@@ -134,7 +136,7 @@
                         placeholder="ДД.ММ.ГГГГ"
                         :rules="[rules.date]"
                         label="Дата прекращения действия"
-                  />
+                    />
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                   <v-text-field

@@ -16,7 +16,8 @@
                     color="#6A76AB"
                     v-model="startDate"
                     outlined
-                    dense />
+                    dense 
+                />
               </v-col>
               <v-col cols="12" sm="5">
                 <v-card-text class="subtitle-1">Плановая дата окончания:</v-card-text>
@@ -26,7 +27,8 @@
                     color="#6A76AB"
                     v-model="endDate"
                     outlined
-                    dense />
+                    dense 
+                />
               </v-col>
             </v-row>
             <v-card-actions class="justify-center">
@@ -46,7 +48,8 @@
                     outlined
                     dense
                     return-object
-                    no-data-text="Ничего не найдено" />
+                    no-data-text="Ничего не найдено" 
+                />
               </v-col>
             </v-row>
             <v-card-actions class="justify-center">

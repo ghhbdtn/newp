@@ -121,7 +121,8 @@
                       clearable
                       outlined
                       :rules="[rules.number, rules.required]"
-                      label="Сумма"/>
+                      label="Сумма"
+                  />
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -133,7 +134,8 @@
                       label="Плановые сроки"
                       :rules="[rules.required, rules.planData, rules.range]"
                       required
-                      v-mask="'##.##.#### - ##.##.####'" />
+                      v-mask="'##.##.#### - ##.##.####'" 
+                  />
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -143,7 +145,8 @@
                       outlined
                       label="Фактические сроки"
                       :rules="[rules.factData, rules.range]"
-                      v-mask="'##.##.#### - ##.##.####'"/>
+                      v-mask="'##.##.#### - ##.##.####'"
+                  />
                 </v-col>
               </v-row>
               <v-card-actions>

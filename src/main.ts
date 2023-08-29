@@ -5,13 +5,12 @@ import router from './router'
 import store from './store'
 // @ts-ignore
 import { VueMaskDirective } from 'v-mask'
+
 Vue.directive('mask', VueMaskDirective);
 
 Vue.config.productionTip = false
 
 import VueSimpleAlert from "vue-simple-alert";
-import {Store} from "vuex";
-
 
 Vue.use(VueSimpleAlert);
 
