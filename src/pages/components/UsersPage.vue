@@ -1,19 +1,19 @@
 <template>
   <v-app>
     <v-main>
-      <v-data-table  @click:row="($event, {item})=>editItem(item)"
-                     :headers="user_headers"
-                     :items="users"
-                     :items-per-page="itemsPerPage"
-                     hide-default-footer
-                     no-data-text="Ничего не найдено"
-                     class="elevation-1 grey lighten-5"
+      <v-data-table :headers="userHeaders"
+                    :items="users"
+                    class="elevation-1 grey lighten-5"
+                    hide-default-footer
+                    no-data-text="Ничего не найдено"
+                    @click:row="($event, {item})=>editItem(item)"
       >
         <template #top>
-          <v-divider />
+          <v-divider/>
           <v-toolbar
-              text
               color="rgba(128, 101, 166, 0.22)"
+              height="80"
+              text
           >
             <v-toolbar-title>Список всех пользователей</v-toolbar-title>
             <v-divider
@@ -23,73 +23,73 @@
             />
             <v-text-field
                 v-model="itemsPerPage"
+                :rules="[rules.itemsPerPage]"
+                class="shrink"
                 color="#6A76AB"
                 label="Число отображаемых элементов"
-                type="number"
-                hide-details
-                outlined
-                dense
-                class="shrink"
-                min="0"
                 @input="beforeUpdatePage"
             />
-            <v-spacer />
+            <v-spacer/>
           </v-toolbar>
-          <v-divider />
+          <v-divider/>
         </template>
         <template #[`header.fullName`]="{ header }">
           {{ header.text }}
-          <v-spacer />
+          <v-spacer/>
           <template>
             <v-text-field
-                outlined
-                color="#6A76AB"
                 v-model="filterValues.fullName"
-                label="По ФИО"
-                clearable
                 class="filter-input"
+                clearable
+                color="#6A76AB"
                 dense
+                label="По ФИО"
+                outlined
                 style="font-size: 0.9rem;"
-                @input="beforeUpdatePage" />
+                @input="beforeUpdatePage"
+            />
           </template>
         </template>
         <template #[`header.login`]="{ header }">
           {{ header.text }}
-          <v-spacer />
+          <v-spacer/>
           <template>
             <v-text-field
-                outlined
-                color="#6A76AB"
                 v-model="filterValues.login"
-                label="По логину"
-                clearable
                 class="filter-input"
+                clearable
+                color="#6A76AB"
                 dense
+                label="По логину"
+                outlined
                 style="font-size: 0.9rem;"
-                @input="beforeUpdatePage" />
+                @input="beforeUpdatePage"
+            />
           </template>
         </template>
         <template #[`item.isAdmin`]="{ item }">
           <v-simple-checkbox
               v-model="item.isAdmin"
               disabled
-          ></v-simple-checkbox>
+          />
         </template>
         <template #[`item.actions`]="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item);" style="color: #6A76AB">
-            mdi-pencil</v-icon>
-          <v-icon small text @click.stop="deleteItem(item)" large style="color: darkred">
-            mdi-delete</v-icon>
+          <v-icon class="mr-2" small style="color: #6A76AB" @click="editItem(item);">
+            mdi-pencil
+          </v-icon>
+          <v-icon large small style="color: darkred" text @click.stop="deleteItem(item)">
+            mdi-delete
+          </v-icon>
         </template>
       </v-data-table>
       <template v-if="users.length > 0">
         <div>
           <v-pagination
-              color="#6A76AB"
               v-model="page"
               :length="totalPages"
-              @input="updatePage" >
-          </v-pagination>
+              color="#6A76AB"
+              @input="updatePage"
+          />
         </div>
       </template>
       <v-dialog v-model="dialog">
@@ -99,68 +99,69 @@
               <v-container>
                 <v-card-title>Редактировать пользователя</v-card-title>
                 <v-row>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="12" md="4" sm="6">
                     <v-text-field
-                        color="#6A76AB"
-                        clearable
-                        outlined
                         v-model="editedUser.fullName"
+                        :rules="[rules.required, rules.stringLen]"
+                        clearable
+                        color="#6A76AB"
                         label="ФИО"
                         name="name"
+                        outlined
+                        required
                         style="text-decoration-color: #303234; text-align: start"
                         type="input"
-                        :rules="[rules.required]"
-                        required
                     />
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="12" md="4" sm="6">
                     <v-text-field
-                        color="#6A76AB"
-                        clearable
-                        outlined
                         v-model="editedUser.login"
-                        :rules="[rules.required, rules.minLength]"
-                        required
+                        :rules="[rules.required, rules.stringLen, rules.minLength]"
+                        clearable
+                        color="#6A76AB"
                         label="Имя пользователя"
+                        outlined
+                        required
                     />
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="12" md="4" sm="6">
                     <v-text-field
-                        color="#6A76AB"
-                        clearable
-                        outlined
                         v-model="editedUser.terminationDate"
                         v-mask="'##.##.####'"
-                        placeholder="ДД.ММ.ГГГГ"
                         :rules="[rules.date]"
-                        label="Дата прекращения действия"
-                  />
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                      v-model="editedUser.newPassword"
-                      label="Сменить пароль"
-                      @click:append="() => (isPasswordShown = !isPasswordShown)"
-                      :type="isPasswordShown ? 'password' : 'text'"
-                      :append-icon="isPasswordShown ? 'mdi-eye-off' : 'mdi-eye'"
-                      color="#6A76AB"
-                      clearable
-                      outlined
-                      :rules="[rules.password, rules.stringLen]"
-                      placeholder="Новый пароль"
-                  />
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-checkbox
-                        color="#6A76AB"
                         clearable
+                        color="#6A76AB"
+                        label="Дата прекращения действия"
                         outlined
+                        placeholder="ДД.ММ.ГГГГ"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4" sm="6">
+                    <v-text-field
+                        v-model="editedUser.newPassword"
+                        :append-icon="isPasswordShown ? 'mdi-eye-off' : 'mdi-eye'"
+                        :rules="[rules.password, rules.stringLen]"
+                        :type="isPasswordShown ? 'password' : 'text'"
+                        clearable
+                        color="#6A76AB"
+                        label="Сменить пароль"
+                        outlined
+                        placeholder="Новый пароль"
+                        @click:append="() => (isPasswordShown = !isPasswordShown)"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4" sm="6">
+                    <v-checkbox
                         v-model="editedUser.isAdmin"
-                        label="Назначить администратором"></v-checkbox>
+                        clearable
+                        color="#6A76AB"
+                        label="Назначить администратором"
+                        outlined
+                    />
                   </v-col>
                 </v-row>
                 <v-card-actions>
-                  <v-btn  color="#6A76AB" dark @click="save">Сохранить</v-btn>
+                  <v-btn color="#6A76AB" dark @click="save">Сохранить</v-btn>
                   <v-btn color="red" dark @click.stop="close">Отменить</v-btn>
                 </v-card-actions>
               </v-container>
@@ -203,7 +204,7 @@ export default defineComponent({
         newPassword: "",
         isAdmin: false
       } as User,
-      user_headers: headers.userHeaders,
+      userHeaders: headers.userHeaders,
       page: 1,
       itemsPerPage: 10,
       filterValues: {
@@ -218,7 +219,7 @@ export default defineComponent({
   },
   computed: {
     users() {
-      return this.$store.state.users.all
+      return this.$store.state.users.all;
     },
     totalPages() {
       return this.$store.state.users.totalPages;
@@ -229,36 +230,39 @@ export default defineComponent({
   },
   methods: {
     editItem(item: any) {
-      this.editedIndex = this.users.indexOf(item)
-      this.editedUser = Object.assign({}, item)
-      this.dialog = true
+      this.editedIndex = this.users.indexOf(item);
+      this.editedUser = Object.assign({}, item);
+      this.dialog = true;
     },
     deleteItem(item: any) {
       this.editedUser = Object.assign({}, item);
       if (this.editedUser.isAdmin) {
-        this.$alert(messages.DELETE_ADMIN, '', 'error')
+        this.$alert(messages.DELETE_ADMIN, '', 'error');
       } else {
-        this.$confirm(messages.DELETE_USER_CONFIRM, '', 'warning').then(() =>
-            this.$store.dispatch('users/deleteUser', this.editedUser.id).then(() => {
-              this.close();
-              if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
-                this.page--
-              }
-              if (this.page < 1) this.beforeUpdatePage()
-              else this.updatePage()
-            }).catch(() => this.$alert(messages.FAILED_DELETE_USER, '', 'error'))).catch(() => {
-        })
+        this.$confirm(messages.DELETE_USER_CONFIRM, '', 'warning')
+            .then(() => this.$store.dispatch('users/deleteUser', this.editedUser.id)
+                .then(() => {
+                  this.close();
+                  if (this.page == this.totalPages && this.totalElements == (this.page - 1) * this.itemsPerPage + 1) {
+                    this.page--;
+                  }
+                  if (this.page < 1) this.beforeUpdatePage();
+                  else this.updatePage();
+                })
+                .catch(() => this.$alert(messages.FAILED_DELETE_USER, '', 'error'))
+            )
+            .catch(() => {})
       }
     },
     close() {
-      this.dialog = false
+      this.dialog = false;
       this.$nextTick(() => {
-        this.editedUser = Object.assign({}, this.user)
-        this.editedIndex = -1
+        this.editedUser = Object.assign({}, this.user);
+        this.editedIndex = -1;
       })
     },
     save() {
-      let form: VForm = this.$refs.form as VForm
+      let form: VForm = this.$refs.form as VForm;
       if (form.validate()) {
         const oldValue = this.users[this.editedIndex];
         const newValue = this.editedUser;
@@ -275,7 +279,7 @@ export default defineComponent({
               id: newValue.id,
               isAdmin: newValue.isAdmin,
               newPassword: newValue.newPassword
-            }
+            };
           } else {
             data = {
               fullName: newValue.fullName,
@@ -283,13 +287,17 @@ export default defineComponent({
               terminationDate: newValue.terminationDate,
               id: newValue.id,
               isAdmin: newValue.isAdmin
-            }
+            };
           }
-          this.$store.dispatch('users/putUser', data).then(() => {
-            this.$alert(messages.SAVED_CHANGES, '', 'success')
-            this.beforeUpdatePage()
-            this.close()
-          }).catch(() => this.$alert(messages.FAILED_CHANGES, '', 'error'))
+          this.$store.dispatch('users/putUser', data)
+              .then(() => {
+                this.$alert(messages.SAVED_CHANGES, '', 'success');
+                this.beforeUpdatePage();
+                this.close();
+              })
+              .catch(() =>
+                  this.$alert(messages.FAILED_CHANGES, '', 'error')
+              );
         }
       }
     },
@@ -298,37 +306,25 @@ export default defineComponent({
       this.updatePage();
     },
     updatePage() {
-      const page = this.page - 1;
+      let currentPage = this.page - 1;
       const size = this.itemsPerPage;
-      if ((this.filterValues.fullName == null || this.filterValues.fullName === "") &&
-          (this.filterValues.login == null || this.filterValues.login === "")) {
-        const data = {
-          page: page,
-          size: size
-        }
-        if (size > 0) {
-          this.$store.dispatch('users/allUsers', data)
-        }
-      } else {
-        const arr = setUsersFilters(this.filterValues);
-        let page1 = this.page - 1
-        if (this.totalPages == 1) {
-          page1 = 0
-          this.page = 1;
-        }
-        const data = {
-          filters: arr,
-          page: page1,
-          size: size
-        }
-        if (size > 0) {
-          this.$store.dispatch('users/allUsers', data)
-        }
+      const filtersList = setUsersFilters(this.filterValues);
+      if (this.totalPages == 1) {
+        currentPage = 0;
+        this.page = 1;
+      }
+      const data = {
+        filters: filtersList,
+        page: currentPage,
+        size: size
+      };
+      if (size > 0 && size <= 2147483647) {
+        this.$store.dispatch('users/allUsers', data);
       }
     }
   },
   beforeCreate() {
-    this.$store.dispatch('users/allUsers', {})
+    this.$store.dispatch('users/allUsers', {});
   }
 });
 </script>

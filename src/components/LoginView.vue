@@ -1,17 +1,17 @@
 <template>
   <v-app>
     <v-main>
-      <v-container fluid fill-height>
+      <v-container fill-height fluid>
         <v-layout align-center justify-center>
-          <v-flex xs12 sm8 md4>
+          <v-flex md4 sm8 xs12>
             <v-card class="elevation-12">
-              <v-toolbar dark color="#6A76AB">
+              <v-toolbar color="#6A76AB" dark>
                 <v-toolbar-title>
                   {{ currentMode === "RegisterForm" ? "Регистрация" : "Вход" }}
                 </v-toolbar-title>
               </v-toolbar>
               <v-card-text>
-                <component :is="currentMode" @switch-mode="switchMode" />
+                <component :is="currentMode" @switch-mode="switchMode"/>
               </v-card-text>
             </v-card>
           </v-flex>
@@ -25,7 +25,8 @@
 import AuthForm from '@/components/AuthForm.vue'
 import RegisterForm from '@/components/RegisterForm.vue'
 import {defineComponent} from "vue";
-export default defineComponent( {
+
+export default defineComponent({
   name: "LoginRegistration",
   components: {
     AuthForm,

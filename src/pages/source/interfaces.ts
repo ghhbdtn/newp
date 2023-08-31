@@ -8,12 +8,13 @@ interface Contract {
     user?: User
 }
 
-interface Organization{
+interface Organization {
     id?: number,
     name: string,
     address: string,
     inn: string
 }
+
 interface User {
     id?: number,
     fullName: string,
@@ -23,6 +24,7 @@ interface User {
     newPassword?: string,
     isAdmin: boolean
 }
+
 interface Stage {
     id?: number,
     name: string,

@@ -1,8 +1,7 @@
 <template>
   <v-app>
     <div>
-      <v-app-bar color="#6A76AB"
-           dark>
+      <v-app-bar color="#6A76AB" dark>
         <v-toolbar-title style="font-size: x-large">Меню</v-toolbar-title>
         <v-spacer/>
         <template #extension>
@@ -10,14 +9,15 @@
             <v-tab :to="{ name: 'contracts' }">Договоры</v-tab>
             <v-tab :to="{ name: 'organizations' }">Организации-Контрагенты</v-tab>
             <v-tab :to="{ name: 'reports' }">Отчеты</v-tab>
-            <v-menu open-on-hover offset-y transition="slide-x-transition" bottom right v-if="isAdmin">
+            <v-menu v-if="isAdmin" bottom offset-y open-on-hover right transition="slide-x-transition">
               <template #activator="{ on, attrs }">
                 <v-btn
-                    text
                     height="100%"
-                    variant="plain"
+                    text
                     v-bind="attrs"
-                    v-on="on">
+                    variant="plain"
+                    v-on="on"
+                >
                   Администрирование
                   <v-icon end>
                     mdi-menu-down
@@ -28,7 +28,8 @@
                 <v-list-item
                     v-for="(item) in items"
                     :key="item.id"
-                    router :to="item.path">
+                    :to="item.path" router
+                >
                   <v-list-item-action>
                     <v-list-item-title>{{ item.title }}</v-list-item-title>
                   </v-list-item-action>
@@ -41,7 +42,7 @@
           <v-icon>mdi-exit-to-app</v-icon>
         </v-btn>
       </v-app-bar>
-      <router-view />
+      <router-view/>
     </div>
   </v-app>
 </template>
@@ -55,42 +56,41 @@ export default defineComponent({
   data() {
     return {
       items: [
-        { id: 0, title: 'Список всех договоров', path: '/menu/admin-root/all-contracts'},
-        { id: 1, title: 'Список всех пользователей', path: '/menu/admin-root/users' }
+        {id: 0, title: 'Список всех договоров', path: '/menu/admin-root/all-contracts'},
+        {id: 1, title: 'Список всех пользователей', path: '/menu/admin-root/users'}
       ],
     }
   },
-methods:
-    {
-      reports: function () {
-        this.$router.push('/menu/reports').catch(() => {})
-      },
-      contracts1: function () {
-        const data = {};
-        this.$store.dispatch('contractsStore/getAll', data).then(() => {
-            this.$router.push('/menu/contracts').catch(()=>{})});
-      },
-      logout: function () {
-        this.$confirm(messages.LOG_OUT_CONFIRM)
-            .then(() => {this.$store.dispatch('users/logOut')
-                .then(() =>{
-                  if(this.$router.currentRoute.path === '/menu/contracts'){
-                    this.$router.replace('/menu').catch(()=>{})
-                    location.replace("/")
-                  }
-                  else location.replace("/")
-                }).catch()
-            }).catch(()=>{});
-        },
-   },
+  methods: {
+    contracts1: function () {
+      const data = {};
+      this.$store.dispatch('contractsStore/getAll', data)
+          .then(() => {
+            this.$router.push('/menu/contracts').catch(() => {});
+          });
+    },
+    logout: function () {
+      this.$confirm(messages.LOG_OUT_CONFIRM)
+          .then(() => {
+            this.$store.dispatch('users/logOut')
+                .then(() => {
+                  if (this.$router.currentRoute.path === '/menu/contracts') {
+                    this.$router.replace('/menu').catch(() => {});
+                    location.replace("/");
+                  } else location.replace("/");
+                })
+                .catch()})
+          .catch(() => {});
+    },
+  },
   computed: {
     isAdmin() {
-      return  this.$store.getters["users/getUserRole"];
+      return this.$store.getters["users/getUserRole"];
     }
   },
   created() {
-    if(this.$router.currentRoute.name == 'menu' || this.$router.currentRoute.name == 'contracts')
-      this.contracts1()
+    if (this.$router.currentRoute.name == 'menu' || this.$router.currentRoute.name == 'contracts')
+      this.contracts1();
   }
 })
 

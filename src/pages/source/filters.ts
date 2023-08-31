@@ -1,7 +1,16 @@
 import {User} from "@/pages/source/interfaces";
 
-function setFilters (filterValues: { user?: User; name: string; type: string; plannedStartDate: string; plannedEndDate: string; actualStartDate: string; actualEndDate: string; maxAmount: number; minAmount: number }): {}[]
-    {
+function setFilters (filterValues: {
+    user?: User;
+    name: string;
+    type: string;
+    plannedStartDate: string;
+    plannedEndDate: string;
+    actualStartDate: string;
+    actualEndDate: string;
+    maxAmount: number;
+    minAmount: number }): {}[]
+{
     const arr = [] as {}[];
     for(const filter in filterValues) {
         switch (filter) {

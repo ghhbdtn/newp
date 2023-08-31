@@ -2,25 +2,25 @@
   <v-form ref="form" class="fields">
     <v-text-field
         v-model="username"
-        label="Имя пользователя"
-        type="text"
         :rules="[rules.required]"
-        required
         color="#6A76AB"
+        label="Имя пользователя"
+        required
+        type="text"
     />
     <v-text-field
         v-model="password"
-        label="Пароль"
-        :type="isPasswordShown ? 'password' : 'text'"
-        @click:append="togglePasswordVisibility"
         :append-icon="isPasswordShown ? 'mdi-eye-off' : 'mdi-eye'"
         :rules="[rules.required]"
-        required
+        :type="isPasswordShown ? 'password' : 'text'"
         color="#6A76AB"
+        label="Пароль"
+        required
+        @click:append="togglePasswordVisibility"
     />
     <div class="red--text">{{ errorMessage }}</div>
     <v-card-actions style="justify-content: center">
-      <v-btn @click="login" class="mt-4" color="#6A76AB">Вход</v-btn>
+      <v-btn class="mt-4" color="#6A76AB" @click="login">Вход</v-btn>
     </v-card-actions>
     <div class="grey--text mt-4" @click="switchToRegistration">
       Еще не зарегистрированы? Регистрация
@@ -46,22 +46,24 @@ export default defineComponent({
     };
   },
   methods: {
-    login: function() {
-      let form: VForm = this.$refs.form as VForm
-      const valid = form.validate()
+    login: function () {
+      let form: VForm = this.$refs.form as VForm;
+      const valid = form.validate();
       if (valid) {
         let data = {
           login: this.username,
           password: this.password
-        }
-        this.$store.dispatch('users/signIn', data).then(() => {
-          this.$alert(messages.SUCCESS_LOGIN, '', 'success')
-        })
-            .catch(() => {
-              if (this.errStatus === 401) {
-                this.errorMessage = messages.INVALID_DATA
-              } else this.errorMessage = messages.FAILED_LOGIN
+        };
+        this.$store.dispatch('users/signIn', data)
+            .then(() => {
+              this.$alert(messages.SUCCESS_LOGIN, '', 'success');
             })
+            .catch(() => {
+              if (this.errStatus === 401)
+                this.errorMessage = messages.INVALID_DATA;
+              else
+                this.errorMessage = messages.FAILED_LOGIN;
+            });
       }
     },
     togglePasswordVisibility() {
@@ -73,7 +75,7 @@ export default defineComponent({
   },
   computed: {
     errStatus() {
-      return this.$store.state.users.status
+      return this.$store.state.users.status;
     },
   },
 });

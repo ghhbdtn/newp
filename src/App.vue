@@ -1,10 +1,10 @@
 <template>
   <div id="app">
     <template v-if="!userIsAuthenticated">
-      <LoginView />
+      <LoginView/>
     </template>
     <template v-else>
-      <router-view />
+      <router-view/>
     </template>
   </div>
 </template>
@@ -27,7 +27,8 @@ export default {
   mounted() {
     const router = useRouter();
     const redirectToRoute = (routeName) => {
-      router.push({ name: routeName }).catch(() => {});
+      router.push({name: routeName}).catch(() => {
+      });
     };
     this.$nextTick(() => {
       let userIsAuthenticated = store.state.users.isAuthenticated;
