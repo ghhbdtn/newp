@@ -13,6 +13,7 @@
     <v-data-table v-if="countercontracts.length > 0"
                   :headers="headers"
                   :items="countercontracts"
+                  :items-per-page="!itemsPerPage ? 10 : parseInt(itemsPerPage)"
                   class="elevation-3"
                   hide-default-footer
                   no-data-text="Ничего не найдено"
@@ -434,7 +435,10 @@ export default defineComponent({
         size: this.itemsPerPage
       };
       if (this.itemsPerPage > 0 && this.itemsPerPage <= 2147483647) {
-        this.$store.dispatch('counterContracts/allCounterpartyContracts', data);
+        if (this.isAdmin)
+          this.$store.dispatch('counterContracts/allAdminCounterpartyContracts', data);
+        else
+          this.$store.dispatch('counterContracts/allCounterpartyContracts', data);
       }
     }
   }

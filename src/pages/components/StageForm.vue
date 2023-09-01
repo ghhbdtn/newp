@@ -14,6 +14,7 @@
     <v-data-table v-if="contractStages.length> 0"
                   :headers="headers"
                   :items="contractStages"
+                  :items-per-page="!itemsPerPage ? 10 : parseInt(itemsPerPage)"
                   class="elevation-3"
                   hide-default-footer
                   no-data-text='Ничего не найдено'
@@ -445,7 +446,10 @@ export default defineComponent({
         size: this.itemsPerPage
       };
       if (this.index !== -1 && this.itemsPerPage > 0 && this.itemsPerPage <= 2147483647) {
-        this.$store.dispatch('stages/allStages', data);
+        if (this.isAdmin)
+          this.$store.dispatch('stages/allStagesAdmin', data);
+        else
+          this.$store.dispatch('stages/allStages', data);
       }
     }
   },
