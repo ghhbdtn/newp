@@ -1,27 +1,30 @@
 import axios from 'axios';
-import {serverUrl} from "@/store/hostNameVar";
 
 interface State {
     err: string
 }
 
-export const  reports = {
+export const reports = {
     namespaced: true,
     state: {
         err: ""
-    }as State,
-    getters: {
-    },
+    } as State,
+
+    getters: {},
+
     mutations: {
         ERR(state: State, err: string) {
-            state.err = err
+            state.err = err;
         },
     },
+
     actions: {
         downloadReport({commit}: any, data: {}) {
             return new Promise((resolve, reject) => {
-                axios( {url: serverUrl + '/api/user/downland-contract-report/dates', params: data,  responseType: 'blob',
-                    withCredentials: true, method: "GET" })
+                axios({
+                    url: '/api/user/downland-contract-report/dates', params: data, responseType: 'blob',
+                    withCredentials: true, method: "GET"
+                })
                     .then(resp => {
                         const href = URL.createObjectURL(resp.data);
                         const link = document.createElement('a');
@@ -33,15 +36,20 @@ export const  reports = {
                         URL.revokeObjectURL(href);
                     })
                     .catch(err => {
-                        commit('ERR', err.response.message)
-                        reject(err)
+                        commit('ERR', err.response.message);
+                        reject(err);
                     })
             })
         },
         downloadStageReport({commit}: any, data: number) {
             return new Promise((resolve, reject) => {
-                axios( {url:  serverUrl + '/api/user/downland-contract-stage-report/'+ data, params: {},  responseType: 'blob',
-                    withCredentials: true, method: "GET" })
+                axios({
+                    url: '/api/user/downland-contract-stage-report/' + data,
+                    params: {},
+                    responseType: 'blob',
+                    withCredentials: true,
+                    method: "GET"
+                })
                     .then(resp => {
                         const href = URL.createObjectURL(resp.data);
                         const link = document.createElement('a');
@@ -53,11 +61,10 @@ export const  reports = {
                         URL.revokeObjectURL(href);
                     })
                     .catch(err => {
-                        commit('ERR', err.response.message)
-                        reject(err)
+                        commit('ERR', err.response.message);
+                        reject(err);
                     })
             })
         },
     },
-
 }

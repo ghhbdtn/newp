@@ -1,4 +1,4 @@
-import { Store } from 'vuex';
+import {Store} from 'vuex';
 
 export const plug = (store: Store<any>) => {
     // подписываемся на мутации Vuex store
@@ -14,7 +14,6 @@ export const plug = (store: Store<any>) => {
         store.replaceState(state);
     }
 };
-
 
 
 

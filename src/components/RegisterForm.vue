@@ -2,41 +2,41 @@
   <v-form ref="form">
     <v-text-field
         v-model="fullName"
-        label="ФИО"
-        type="text"
         :rules="[rules.required, rules.stringLen]"
-        required
         color="#6A76AB"
+        label="ФИО"
+        required
+        type="text"
     />
     <v-text-field
         v-model="username"
-        label="Имя пользователя"
-        type="text"
         :rules="[rules.minLength, rules.required, rules.stringLen]"
-        required
         color="#6A76AB"
+        label="Имя пользователя"
+        required
+        type="text"
     />
     <v-text-field
         v-model="password"
-        label="Пароль"
-        :type="isPasswordShown ? 'password' : 'text'"
-        @click:append="togglePasswordVisibility"
         :append-icon="isPasswordShown ? 'mdi-eye-off' : 'mdi-eye'"
-        :rules= "[rules.password, rules.required, rules.stringLen]"
-        required
+        :rules="[rules.password, rules.required, rules.stringLen]"
+        :type="isPasswordShown ? 'password' : 'text'"
         color="#6A76AB"
+        label="Пароль"
+        required
+        @click:append="togglePasswordVisibility"
     />
     <v-text-field
         v-model="confirmPassword"
-        label="Повторите пароль"
-        type="password"
         :rules="[rules.required]"
-        required
         color="#6A76AB"
+        label="Повторите пароль"
+        required
+        type="password"
     />
     <div class="red--text">{{ errorMessage }}</div>
     <v-card-actions style="justify-content: center">
-      <v-btn @click="register" class="mt-4" color="#6A76AB">Регистрация</v-btn>
+      <v-btn class="mt-4" color="#6A76AB" @click="register">Регистрация</v-btn>
     </v-card-actions>
     <div class="grey--text mt-4" @click="switchToLogin">
       Уже зарегистрированы? Вход
@@ -64,9 +64,9 @@ export default defineComponent({
     };
   },
   methods: {
-    register: function() {
-      let form: VForm = this.$refs.form as VForm
-      const valid = form.validate()
+    register: function () {
+      let form: VForm = this.$refs.form as VForm;
+      const valid = form.validate();
       if (valid) {
         if (this.password === this.confirmPassword) {
           this.errorMessage = "";
@@ -74,23 +74,29 @@ export default defineComponent({
             fullName: this.fullName,
             login: this.username,
             password: this.password
-          }
+          };
           const loginData = {
             login: this.username,
             password: this.password
-          }
-          this.$store.dispatch('users/signUp', registerData).then(() => {
-            this.$alert(messages.SUCCESS_REGISTRATION, '', 'success')
-            this.$nextTick(() => {this.$store.dispatch('users/signIn', loginData).catch(() => {
-              this.errorMessage = messages.FAILED_LOGIN
-            })})
-          }).catch(() => {
-            if (this.errStatus === 409) {
-              this.errorMessage = messages.EXISTING_USER
-            } else this.errorMessage = messages.FAILED_REGISTRATION
-          })
+          };
+          this.$store.dispatch('users/signUp', registerData)
+              .then(() => {
+                this.$alert(messages.SUCCESS_REGISTRATION, '', 'success');
+                this.$nextTick(() => {
+                  this.$store.dispatch('users/signIn', loginData)
+                      .catch(() => {
+                        this.errorMessage = messages.FAILED_LOGIN;
+                      });
+                });
+              })
+              .catch(() => {
+                if (this.errStatus === 409)
+                  this.errorMessage = messages.EXISTING_USER;
+                else
+                  this.errorMessage = messages.FAILED_REGISTRATION;
+              });
         } else {
-          this.errorMessage = messages.DIFFERENT_PASSWORDS
+          this.errorMessage = messages.DIFFERENT_PASSWORDS;
         }
       }
     },
@@ -103,9 +109,8 @@ export default defineComponent({
   },
   computed: {
     errStatus() {
-      return this.$store.state.users.status
+      return this.$store.state.users.status;
     },
   },
 });
 </script>
-
